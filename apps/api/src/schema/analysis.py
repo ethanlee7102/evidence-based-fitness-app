@@ -1,0 +1,36 @@
+from pydantic import BaseModel
+
+from .common import ExerciseType, IssueSeverity
+
+
+class AnalyzeRequest(BaseModel):
+    video_url: str
+    exercise_type: ExerciseType
+
+
+class IssueResponse(BaseModel):
+    issue: str
+    severity: IssueSeverity
+    description: str
+    frames: list[int] | None = None
+
+
+class LandmarkPoint(BaseModel):
+    x: float
+    y: float
+    visibility: float
+
+
+class FrameLandmarks(BaseModel):
+    frame: int
+    points: dict[int, LandmarkPoint]
+
+
+class AnalysisResponse(BaseModel):
+    id: str
+    techniqueScore: int
+    issues: list[IssueResponse]
+    barPath: list[dict] | None = None
+    videoUrl: str | None = None
+    landmarks: list[FrameLandmarks] | None = None
+    fps: float | None = None

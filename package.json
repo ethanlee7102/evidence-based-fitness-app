@@ -1,0 +1,20 @@
+{
+  "name": "flame-fitness",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "dev:web": "pnpm --filter @flame-fitness/web dev",
+    "dev:api": "pnpm --filter @flame-fitness/api dev",
+    "build": "pnpm -r run build",
+    "build:web": "pnpm --filter @flame-fitness/web build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "clean": "pnpm -r run clean"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
