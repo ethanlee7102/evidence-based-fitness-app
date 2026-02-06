@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from .base import BaseAnalyzer
 from src.core.pose_estimator import PoseEstimator
@@ -21,7 +21,11 @@ class DeadliftAnalyzer(BaseAnalyzer):
     4. Lockout position - full hip extension at top
     """
 
-    def analyze(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def analyze(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        camera_side: Literal["left", "right"],
+    ) -> dict:
         issues = []
         scores = {
             "bar_path": 100,
@@ -30,10 +34,11 @@ class DeadliftAnalyzer(BaseAnalyzer):
             "lockout": 100,
         }
 
+        side = self.get_side_indices(camera_side)
         bar_path = self.track_bar_path(landmarks_per_frame)
         back_angles = self._analyze_back_position(landmarks_per_frame)
-        hip_angles = self._analyze_hip_hinge(landmarks_per_frame)
-        lockout_ok, lockout_issue = self._analyze_lockout(landmarks_per_frame)
+        hip_angles = self._analyze_hip_hinge(landmarks_per_frame, side)
+        lockout_ok, lockout_issue = self._analyze_lockout(landmarks_per_frame, side)
 
         if bar_path:
             drift = calculate_horizontal_drift(bar_path)
@@ -154,6 +159,7 @@ class DeadliftAnalyzer(BaseAnalyzer):
     def _analyze_hip_hinge(
         self,
         landmarks_per_frame: list[Optional[dict[int, dict]]],
+        side: dict[str, int],
     ) -> list[float]:
         hip_angles = []
 
@@ -161,16 +167,16 @@ class DeadliftAnalyzer(BaseAnalyzer):
             if frame is None:
                 continue
 
-            left_shoulder = PoseEstimator.get_landmark(frame, self.LEFT_SHOULDER)
-            left_hip = PoseEstimator.get_landmark(frame, self.LEFT_HIP)
-            left_knee = PoseEstimator.get_landmark(frame, self.LEFT_KNEE)
+            shoulder = PoseEstimator.get_landmark(frame, side["shoulder"])
+            hip = PoseEstimator.get_landmark(frame, side["hip"])
+            knee = PoseEstimator.get_landmark(frame, side["knee"])
 
             if all([
-                PoseEstimator.is_visible(left_shoulder),
-                PoseEstimator.is_visible(left_hip),
-                PoseEstimator.is_visible(left_knee),
+                PoseEstimator.is_visible(shoulder),
+                PoseEstimator.is_visible(hip),
+                PoseEstimator.is_visible(knee),
             ]):
-                angle = calculate_angle(left_shoulder, left_hip, left_knee)
+                angle = calculate_angle(shoulder, hip, knee)
                 hip_angles.append(angle)
 
         return hip_angles
@@ -178,6 +184,7 @@ class DeadliftAnalyzer(BaseAnalyzer):
     def _analyze_lockout(
         self,
         landmarks_per_frame: list[Optional[dict[int, dict]]],
+        side: dict[str, int],
     ) -> tuple[bool, str]:
         if not landmarks_per_frame:
             return True, ""
@@ -188,18 +195,18 @@ class DeadliftAnalyzer(BaseAnalyzer):
             if frame is None:
                 continue
 
-            left_shoulder = PoseEstimator.get_landmark(frame, self.LEFT_SHOULDER)
-            left_hip = PoseEstimator.get_landmark(frame, self.LEFT_HIP)
-            left_knee = PoseEstimator.get_landmark(frame, self.LEFT_KNEE)
+            shoulder = PoseEstimator.get_landmark(frame, side["shoulder"])
+            hip = PoseEstimator.get_landmark(frame, side["hip"])
+            knee = PoseEstimator.get_landmark(frame, side["knee"])
 
             if not all([
-                PoseEstimator.is_visible(left_shoulder),
-                PoseEstimator.is_visible(left_hip),
-                PoseEstimator.is_visible(left_knee),
+                PoseEstimator.is_visible(shoulder),
+                PoseEstimator.is_visible(hip),
+                PoseEstimator.is_visible(knee),
             ]):
                 continue
 
-            hip_angle = calculate_angle(left_shoulder, left_hip, left_knee)
+            hip_angle = calculate_angle(shoulder, hip, knee)
 
             if hip_angle < 160:
                 return False, f"Hips not fully extended at lockout ({hip_angle:.0f}°)."

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from .base import BaseAnalyzer
 from src.core.pose_estimator import PoseEstimator
@@ -8,7 +8,15 @@ from src.core.angle_calculator import calculate_angle
 class BenchAnalyzer(BaseAnalyzer):
     """Analyze bench press form from pose landmarks."""
 
-    def analyze(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def analyze(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        camera_side: Literal["left", "right"],
+    ) -> dict:
+        # Bench press is typically filmed from front or above, so we use both sides
+        # for symmetry checks. camera_side is accepted for interface compatibility.
+        _ = camera_side  # Bench uses both sides for symmetry analysis
+
         issues = []
         scores = {
             "bar_path": 100,

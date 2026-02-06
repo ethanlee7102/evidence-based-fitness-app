@@ -7,7 +7,7 @@ class TestDeadliftAnalyzer:
         analyzer = DeadliftAnalyzer()
         frames = [sample_landmarks] * 30
 
-        result = analyzer.analyze(frames)
+        result = analyzer.analyze(frames, "left")
 
         assert "technique_score" in result
         assert "issues" in result
@@ -18,14 +18,14 @@ class TestDeadliftAnalyzer:
         analyzer = DeadliftAnalyzer()
         frames = [sample_landmarks] * 30
 
-        result = analyzer.analyze(frames)
+        result = analyzer.analyze(frames, "left")
 
         assert 0 <= result["technique_score"] <= 100
 
     def test_handles_empty_frames(self):
         analyzer = DeadliftAnalyzer()
 
-        result = analyzer.analyze([])
+        result = analyzer.analyze([], "left")
 
         assert result["technique_score"] >= 0
 
@@ -33,7 +33,7 @@ class TestDeadliftAnalyzer:
         analyzer = DeadliftAnalyzer()
         frames = [None] * 10
 
-        result = analyzer.analyze(frames)
+        result = analyzer.analyze(frames, "left")
 
         assert result["technique_score"] >= 0
 
@@ -41,7 +41,7 @@ class TestDeadliftAnalyzer:
         analyzer = DeadliftAnalyzer()
         frames = [sample_landmarks] * 30
 
-        result = analyzer.analyze(frames)
+        result = analyzer.analyze(frames, "left")
 
         assert len(result["bar_path"]) > 0
         assert "x" in result["bar_path"][0]

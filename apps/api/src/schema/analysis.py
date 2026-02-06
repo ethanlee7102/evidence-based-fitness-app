@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 
-from .common import ExerciseType, IssueSeverity
+from .common import ExerciseType, CameraSide, IssueSeverity
 
 
 class AnalyzeRequest(BaseModel):
     video_url: str
     exercise_type: ExerciseType
+    camera_side: CameraSide
 
 
 class IssueResponse(BaseModel):

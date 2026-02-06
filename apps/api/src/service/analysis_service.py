@@ -9,8 +9,9 @@ from src.core.analyzers import DeadliftAnalyzer, SquatAnalyzer, BenchAnalyzer
 class AnalysisService:
     """Orchestrates the video analysis flow."""
 
-    # Key landmark indices to include (body parts relevant for lifting)
-    KEY_LANDMARKS = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
+    # Key landmark indices by side (body parts relevant for lifting)
+    LEFT_LANDMARKS = [11, 13, 15, 23, 25, 27]  # shoulder, elbow, wrist, hip, knee, ankle
+    RIGHT_LANDMARKS = [12, 14, 16, 24, 26, 28]
 
     def __init__(self):
         self.video_processor = VideoProcessor()
@@ -21,6 +22,7 @@ class AnalysisService:
         self,
         video_url: str,
         exercise_type: Literal["squat", "bench", "deadlift"],
+        camera_side: Literal["left", "right"],
     ) -> dict:
         """
         Main analysis pipeline: download video, extract landmarks, run analysis.
@@ -52,10 +54,12 @@ class AnalysisService:
                 }
 
             analyzer = self._get_analyzer(exercise_type)
-            result = analyzer.analyze(landmarks_per_frame)
+            result = analyzer.analyze(landmarks_per_frame, camera_side)
 
             # Convert landmarks to serializable format (sample every 2nd frame)
-            result["landmarks"] = self._format_landmarks(landmarks_per_frame, sample_rate=2)
+            result["landmarks"] = self._format_landmarks(
+                landmarks_per_frame, camera_side, sample_rate=2
+            )
             result["fps"] = fps
 
             return result
@@ -66,9 +70,13 @@ class AnalysisService:
     def _format_landmarks(
         self,
         landmarks_per_frame: list,
+        camera_side: Literal["left", "right"],
         sample_rate: int = 1,
     ) -> list[dict]:
         """Convert landmarks to frontend-friendly format, sampling frames."""
+        key_landmarks = (
+            self.LEFT_LANDMARKS if camera_side == "left" else self.RIGHT_LANDMARKS
+        )
         formatted = []
 
         for i, frame in enumerate(landmarks_per_frame):
@@ -78,7 +86,7 @@ class AnalysisService:
                 continue
 
             points = {}
-            for idx in self.KEY_LANDMARKS:
+            for idx in key_landmarks:
                 if idx in frame:
                     lm = frame[idx]
                     points[idx] = {

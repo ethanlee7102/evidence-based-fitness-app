@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Literal, Optional
 
 from src.core.pose_estimator import PoseEstimator
 
@@ -20,8 +20,33 @@ class BaseAnalyzer(ABC):
     LEFT_ANKLE = 27
     RIGHT_ANKLE = 28
 
+    def get_side_indices(self, camera_side: Literal["left", "right"]) -> dict[str, int]:
+        """Get keypoint indices for the side facing the camera."""
+        if camera_side == "left":
+            return {
+                "shoulder": self.LEFT_SHOULDER,
+                "elbow": self.LEFT_ELBOW,
+                "wrist": self.LEFT_WRIST,
+                "hip": self.LEFT_HIP,
+                "knee": self.LEFT_KNEE,
+                "ankle": self.LEFT_ANKLE,
+            }
+        else:
+            return {
+                "shoulder": self.RIGHT_SHOULDER,
+                "elbow": self.RIGHT_ELBOW,
+                "wrist": self.RIGHT_WRIST,
+                "hip": self.RIGHT_HIP,
+                "knee": self.RIGHT_KNEE,
+                "ankle": self.RIGHT_ANKLE,
+            }
+
     @abstractmethod
-    def analyze(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def analyze(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        camera_side: Literal["left", "right"],
+    ) -> dict:
         """
         Analyze pose landmarks and return results.
 

@@ -1,6 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { apiRequest } from '../../../lib/api'
-import type { ExerciseType } from '../types'
+import type { ExerciseType, CameraSide } from '../types'
 import type { AnalysisResult } from '../../analysis/types'
 
 export interface UploadResult {
@@ -36,6 +36,7 @@ export const uploadService = {
   async analyzeVideo(
     videoUrl: string,
     exerciseType: ExerciseType,
+    cameraSide: CameraSide,
     token: string
   ): Promise<AnalysisResult> {
     return apiRequest<AnalysisResult>('/analysis/analyze', {
@@ -44,6 +45,7 @@ export const uploadService = {
       body: JSON.stringify({
         video_url: videoUrl,
         exercise_type: exerciseType,
+        camera_side: cameraSide,
       }),
     })
   },
