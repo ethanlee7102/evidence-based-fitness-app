@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from .base import BaseAnalyzer
 from src.core.pose_estimator import PoseEstimator
@@ -11,7 +11,11 @@ from src.core.angle_calculator import (
 class SquatAnalyzer(BaseAnalyzer):
     """Analyze squat form from pose landmarks."""
 
-    def analyze(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def analyze(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        camera_side: Literal["left", "right"],
+    ) -> dict:
         issues = []
         scores = {
             "depth": 100,
@@ -20,9 +24,10 @@ class SquatAnalyzer(BaseAnalyzer):
             "bar_path": 100,
         }
 
-        depth_info = self._analyze_depth(landmarks_per_frame)
+        side = self.get_side_indices(camera_side)
+        depth_info = self._analyze_depth(landmarks_per_frame, side)
         knee_info = self._analyze_knee_tracking(landmarks_per_frame)
-        back_info = self._analyze_back_angle(landmarks_per_frame)
+        back_info = self._analyze_back_angle(landmarks_per_frame, side)
         bar_path = self.track_bar_path(landmarks_per_frame)
 
         if depth_info["achieved"]:
@@ -94,18 +99,22 @@ class SquatAnalyzer(BaseAnalyzer):
             "component_scores": scores,
         }
 
-    def _analyze_depth(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def _analyze_depth(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        side: dict[str, int],
+    ) -> dict:
         min_hip_to_knee_diff = float("inf")
 
         for frame in landmarks_per_frame:
             if frame is None:
                 continue
 
-            left_hip = PoseEstimator.get_landmark(frame, self.LEFT_HIP)
-            left_knee = PoseEstimator.get_landmark(frame, self.LEFT_KNEE)
+            hip = PoseEstimator.get_landmark(frame, side["hip"])
+            knee = PoseEstimator.get_landmark(frame, side["knee"])
 
-            if PoseEstimator.is_visible(left_hip) and PoseEstimator.is_visible(left_knee):
-                diff = left_hip["y"] - left_knee["y"]
+            if PoseEstimator.is_visible(hip) and PoseEstimator.is_visible(knee):
+                diff = hip["y"] - knee["y"]
                 min_hip_to_knee_diff = min(min_hip_to_knee_diff, diff)
 
         if min_hip_to_knee_diff == float("inf"):
@@ -159,18 +168,22 @@ class SquatAnalyzer(BaseAnalyzer):
             "frames": caving_frames[:5],
         }
 
-    def _analyze_back_angle(self, landmarks_per_frame: list[Optional[dict[int, dict]]]) -> dict:
+    def _analyze_back_angle(
+        self,
+        landmarks_per_frame: list[Optional[dict[int, dict]]],
+        side: dict[str, int],
+    ) -> dict:
         back_angles = []
 
         for frame in landmarks_per_frame:
             if frame is None:
                 continue
 
-            left_shoulder = PoseEstimator.get_landmark(frame, self.LEFT_SHOULDER)
-            left_hip = PoseEstimator.get_landmark(frame, self.LEFT_HIP)
+            shoulder = PoseEstimator.get_landmark(frame, side["shoulder"])
+            hip = PoseEstimator.get_landmark(frame, side["hip"])
 
-            if PoseEstimator.is_visible(left_shoulder) and PoseEstimator.is_visible(left_hip):
-                angle = calculate_vertical_angle(left_shoulder, left_hip)
+            if PoseEstimator.is_visible(shoulder) and PoseEstimator.is_visible(hip):
+                angle = calculate_vertical_angle(shoulder, hip)
                 back_angles.append(angle)
 
         if not back_angles:

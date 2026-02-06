@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { VideoUploader, ExerciseSelector, UploadProgress } from '../components'
+import { VideoUploader, ExerciseSelector, CameraSideSelector, UploadProgress } from '../components'
 import { useVideoUpload } from '../hooks'
 
 export function UploadScreen() {
@@ -8,12 +8,14 @@ export function UploadScreen() {
     file,
     preview,
     exerciseType,
+    cameraSide,
     uploading,
     analyzing,
     progress,
     error,
     setFile,
     setExerciseType,
+    setCameraSide,
     upload,
     reset,
   } = useVideoUpload()
@@ -40,6 +42,10 @@ export function UploadScreen() {
 
       <div className="mb-6">
         <ExerciseSelector value={exerciseType} onChange={setExerciseType} />
+      </div>
+
+      <div className="mb-6">
+        <CameraSideSelector value={cameraSide} onChange={setCameraSide} />
       </div>
 
       <VideoUploader

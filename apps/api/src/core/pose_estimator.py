@@ -67,7 +67,7 @@ class OneEuroFilter:
     Reduces jitter while maintaining responsiveness to fast movements.
     """
 
-    def __init__(self, min_cutoff: float = 0.5, beta: float = 0.007, d_cutoff: float = 1.0):
+    def __init__(self, min_cutoff: float = 1.0, beta: float = 0.3, d_cutoff: float = 1.0):
         """
         Initialize the filter.
 

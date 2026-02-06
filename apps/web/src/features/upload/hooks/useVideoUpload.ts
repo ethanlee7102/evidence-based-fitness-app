@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { uploadService } from '../services'
 import { useAuth } from '../../auth/hooks'
-import type { ExerciseType, UploadState } from '../types'
+import type { ExerciseType, CameraSide, UploadState } from '../types'
 
 export function useVideoUpload() {
   const { session } = useAuth()
@@ -9,6 +9,7 @@ export function useVideoUpload() {
     file: null,
     preview: null,
     exerciseType: 'deadlift',
+    cameraSide: 'left',
     uploading: false,
     analyzing: false,
     progress: 0,
@@ -44,6 +45,10 @@ export function useVideoUpload() {
     setState((prev) => ({ ...prev, exerciseType }))
   }, [])
 
+  const setCameraSide = useCallback((cameraSide: CameraSide) => {
+    setState((prev) => ({ ...prev, cameraSide }))
+  }, [])
+
   const reset = useCallback(() => {
     if (state.preview) {
       URL.revokeObjectURL(state.preview)
@@ -52,6 +57,7 @@ export function useVideoUpload() {
       file: null,
       preview: null,
       exerciseType: 'deadlift',
+      cameraSide: 'left',
       uploading: false,
       analyzing: false,
       progress: 0,
@@ -74,6 +80,7 @@ export function useVideoUpload() {
       const result = await uploadService.analyzeVideo(
         publicUrl,
         state.exerciseType,
+        state.cameraSide,
         session.access_token
       )
 
@@ -88,12 +95,13 @@ export function useVideoUpload() {
       }))
       return null
     }
-  }, [state.file, state.exerciseType, session])
+  }, [state.file, state.exerciseType, state.cameraSide, session])
 
   return {
     ...state,
     setFile,
     setExerciseType,
+    setCameraSide,
     upload,
     reset,
   }

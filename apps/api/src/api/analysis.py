@@ -41,6 +41,7 @@ async def analyze_video(request: AnalyzeRequest, user_id: str = Depends(get_curr
         result = await analysis_service.analyze(
             video_url=request.video_url,
             exercise_type=request.exercise_type,
+            camera_side=request.camera_side,
         )
 
         analysis_id = str(uuid4())
