@@ -20,6 +20,7 @@ class DBService:
         bar_path: list[dict] | None = None,
         landmarks_data: list[dict] | None = None,
         fps: float | None = None,
+        phase_boundaries: list[dict] | None = None,
     ) -> dict:
         """Save analysis result to database."""
         video_data = {
@@ -38,6 +39,7 @@ class DBService:
             "issues": issues,
             "landmarks_data": landmarks_data,
             "bar_path_data": bar_path,
+            "phase_boundaries": phase_boundaries,
         }
         result = self.supabase.table("analyses").insert(analysis_data).execute()
 

@@ -59,8 +59,9 @@ flame-fitness/
 - **Auth**: JWT verification via `get_current_user` dependency
 - **Analysis flow**:
   1. Download video → `VideoProcessor.download_video()`
-  2. Extract landmarks → `PoseEstimator.extract_landmarks()`
-  3. Analyze → `DeadliftAnalyzer/SquatAnalyzer/BenchAnalyzer.analyze()`
+  2. Extract landmarks → `PoseEstimator.extract_landmarks(video_path, exercise_type)`
+  3. Post-process → `LandmarkPostProcessor.process()` (anchor corrections)
+  4. Analyze → `DeadliftAnalyzer/SquatAnalyzer/BenchAnalyzer.analyze()`
 - **Analyzers inherit from BaseAnalyzer** with shared `track_bar_path()` method
 
 ### Database Tables
@@ -135,9 +136,14 @@ RTMPose outputs COCO 17-keypoint format, mapped internally:
 
 ### Temporal Smoothing (OneEuro Filter)
 - Enabled by default to reduce jitter
-- Parameters: `min_cutoff=0.5`, `beta=0.007`
-- Tradeoff: More smoothing = less jitter but more lag
+- Default parameters: `min_cutoff=2.0`, `beta=0.7` (responsive tracking)
+- Exercise-specific overrides in `SMOOTHING_OVERRIDES` dict:
+  - Deadlift knees (COCO 13, 14): `min_cutoff=0.3`, `beta=0.007` (heavy smoothing for plate occlusion)
+- Parameter effects:
+  - `min_cutoff`: Lower = more smoothing at rest
+  - `beta`: Lower = more lag but smoother tracking
 - Can be disabled: `PoseEstimator(use_temporal_smoothing=False)`
+- `extract_landmarks(video_path, exercise_type)` accepts exercise type for conditional smoothing
 
 ### Model
 - **RTMPose-m** (medium): 256x192 input, ~25MB

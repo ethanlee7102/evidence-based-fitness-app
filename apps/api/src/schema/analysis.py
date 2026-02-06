@@ -27,6 +27,11 @@ class FrameLandmarks(BaseModel):
     points: dict[int, LandmarkPoint]
 
 
+class PhaseBoundary(BaseModel):
+    y: float
+    between_phases: list[int]
+
+
 class AnalysisResponse(BaseModel):
     id: str
     techniqueScore: int
@@ -35,3 +40,4 @@ class AnalysisResponse(BaseModel):
     videoUrl: str | None = None
     landmarks: list[FrameLandmarks] | None = None
     fps: float | None = None
+    phaseBoundaries: list[PhaseBoundary] | None = None

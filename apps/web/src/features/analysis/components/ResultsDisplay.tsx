@@ -8,7 +8,9 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
+  console.log('=== ANALYSIS DATA ===', JSON.stringify(analysis, null, 2))
   const hasVideoData = analysis.videoUrl && analysis.landmarks && analysis.fps
+  console.log('hasVideoData:', hasVideoData, 'phaseBoundaries:', analysis.phaseBoundaries)
 
   return (
     <div className="space-y-8">
@@ -20,6 +22,7 @@ export function ResultsDisplay({ analysis }: ResultsDisplayProps) {
             videoUrl={analysis.videoUrl!}
             landmarks={analysis.landmarks!}
             fps={analysis.fps!}
+            phaseBoundaries={analysis.phaseBoundaries}
           />
         </div>
       )}
