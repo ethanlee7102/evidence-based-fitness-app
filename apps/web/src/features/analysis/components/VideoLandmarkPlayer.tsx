@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import type { FrameLandmarks } from '../types'
+import type { FrameLandmarks, PhaseBoundary } from '../types'
 
 interface VideoLandmarkPlayerProps {
   videoUrl: string
   landmarks: FrameLandmarks[]
   fps: number
+  phaseBoundaries?: PhaseBoundary[]
 }
 
 // Skeleton connections between landmarks
@@ -44,12 +45,19 @@ const LANDMARK_COLORS: Record<number, string> = {
   28: '#EF4444', // right ankle - red
 }
 
-export function VideoLandmarkPlayer({ videoUrl, landmarks, fps }: VideoLandmarkPlayerProps) {
+// Phase boundary colors
+const PHASE_COLORS = ['#22C55E', '#EAB308', '#F97316'] // green, yellow, orange
+
+export function VideoLandmarkPlayer({ videoUrl, landmarks, fps, phaseBoundaries }: VideoLandmarkPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [showPhaseBoundaries, setShowPhaseBoundaries] = useState(true)
+
+  // Debug: log phase boundaries
+  console.log('Phase boundaries:', phaseBoundaries)
 
   // Find the closest frame landmarks for the current time
   const getCurrentLandmarks = useCallback(
@@ -92,6 +100,31 @@ export function VideoLandmarkPlayer({ videoUrl, landmarks, fps }: VideoLandmarkP
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Draw phase boundary lines
+      if (showPhaseBoundaries && phaseBoundaries && phaseBoundaries.length > 0) {
+        for (let i = 0; i < phaseBoundaries.length; i++) {
+          const boundary = phaseBoundaries[i]
+          const y = boundary.y * canvas.height
+          const color = PHASE_COLORS[i] || '#FFFFFF'
+
+          // Draw dashed line
+          ctx.beginPath()
+          ctx.setLineDash([8, 4])
+          ctx.strokeStyle = color
+          ctx.lineWidth = 2
+          ctx.moveTo(0, y)
+          ctx.lineTo(canvas.width, y)
+          ctx.stroke()
+          ctx.setLineDash([])
+
+          // Draw phase label on left side
+          ctx.font = 'bold 12px sans-serif'
+          ctx.fillStyle = color
+          ctx.textAlign = 'left'
+          ctx.fillText(`P${boundary.between_phases[0]}/P${boundary.between_phases[1]}`, 8, y - 4)
+        }
+      }
 
       if (!frameLandmarks) return
 
@@ -136,14 +169,14 @@ export function VideoLandmarkPlayer({ videoUrl, landmarks, fps }: VideoLandmarkP
         ctx.fill()
       }
     },
-    []
+    [showPhaseBoundaries, phaseBoundaries]
   )
 
-  // Update canvas on time change
+  // Update canvas on time change or when phase boundaries toggle
   useEffect(() => {
     const frameLandmarks = getCurrentLandmarks(currentTime)
     drawLandmarks(frameLandmarks)
-  }, [currentTime, getCurrentLandmarks, drawLandmarks])
+  }, [currentTime, getCurrentLandmarks, drawLandmarks, showPhaseBoundaries])
 
   // Handle video time updates
   const handleTimeUpdate = () => {
@@ -268,10 +301,24 @@ export function VideoLandmarkPlayer({ videoUrl, landmarks, fps }: VideoLandmarkP
             </button>
           </div>
 
-          {/* Right: Frame info */}
-          <span className="text-sm text-gray-400">
-            Frame {Math.floor(currentTime * fps)}
-          </span>
+          {/* Right: Frame info + Phase toggle */}
+          <div className="flex items-center gap-3">
+            {phaseBoundaries && phaseBoundaries.length > 0 && (
+              <button
+                onClick={() => setShowPhaseBoundaries(!showPhaseBoundaries)}
+                className={`px-2 py-1 text-xs rounded transition-colors ${
+                  showPhaseBoundaries
+                    ? 'bg-flame-600 text-white'
+                    : 'bg-gray-700 text-gray-400'
+                }`}
+              >
+                Phases
+              </button>
+            )}
+            <span className="text-sm text-gray-400">
+              Frame {Math.floor(currentTime * fps)}
+            </span>
+          </div>
         </div>
 
         {/* Legend */}
@@ -291,6 +338,11 @@ export function VideoLandmarkPlayer({ videoUrl, landmarks, fps }: VideoLandmarkP
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-red-500" /> Ankles
           </span>
+          {showPhaseBoundaries && phaseBoundaries && phaseBoundaries.length > 0 && (
+            <span className="flex items-center gap-1">
+              <span className="w-4 h-0.5 bg-green-500" style={{ borderTop: '2px dashed' }} /> Phase Lines
+            </span>
+          )}
         </div>
       </div>
     </div>

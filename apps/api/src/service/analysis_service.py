@@ -30,7 +30,9 @@ class AnalysisService:
         video_path, fps = await self.video_processor.download_video(video_url)
 
         try:
-            landmarks_per_frame = self.pose_estimator.extract_landmarks(video_path)
+            landmarks_per_frame = self.pose_estimator.extract_landmarks(
+                video_path, exercise_type
+            )
 
             # Post-process landmarks to fix occlusion issues (e.g., ankles hidden by plates)
             # Lower threshold (0.5) since ankle visibility is often poor during deadlifts
@@ -55,6 +57,10 @@ class AnalysisService:
 
             analyzer = self._get_analyzer(exercise_type)
             result = analyzer.analyze(landmarks_per_frame, camera_side)
+
+            # Debug: log what the analyzer returned
+            print(f"Analyzer result keys: {result.keys()}")
+            print(f"phase_boundaries: {result.get('phase_boundaries')}")
 
             # Convert landmarks to serializable format (sample every 2nd frame)
             result["landmarks"] = self._format_landmarks(

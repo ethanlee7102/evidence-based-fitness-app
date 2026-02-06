@@ -24,6 +24,11 @@ export interface FrameLandmarks {
   points: Record<number, LandmarkPoint>
 }
 
+export interface PhaseBoundary {
+  y: number
+  between_phases: [number, number]
+}
+
 export interface AnalysisResult {
   id: string
   techniqueScore: number
@@ -32,4 +37,5 @@ export interface AnalysisResult {
   videoUrl?: string
   landmarks?: FrameLandmarks[]
   fps?: number
+  phaseBoundaries?: PhaseBoundary[]
 }

@@ -8,6 +8,7 @@ from src.schema.analysis import (
     IssueResponse,
     FrameLandmarks,
     LandmarkPoint,
+    PhaseBoundary,
 )
 from src.service.analysis_service import AnalysisService
 from src.service.db_service import DBService
@@ -57,7 +58,18 @@ async def analyze_video(request: AnalyzeRequest, user_id: str = Depends(get_curr
             bar_path=result.get("bar_path"),
             landmarks_data=result.get("landmarks"),
             fps=result.get("fps"),
+            phase_boundaries=result.get("phase_boundaries"),
         )
+
+        # Format phase boundaries for response
+        logger.info(f"Result keys: {result.keys()}")
+        logger.info(f"phase_boundaries in result: {result.get('phase_boundaries')}")
+        phase_boundaries = None
+        if result.get("phase_boundaries"):
+            phase_boundaries = [
+                PhaseBoundary(y=pb["y"], between_phases=pb["between_phases"])
+                for pb in result["phase_boundaries"]
+            ]
 
         return AnalysisResponse(
             id=analysis_id,
@@ -75,6 +87,7 @@ async def analyze_video(request: AnalyzeRequest, user_id: str = Depends(get_curr
             videoUrl=request.video_url,
             landmarks=_format_landmarks_response(result.get("landmarks")),
             fps=result.get("fps"),
+            phaseBoundaries=phase_boundaries,
         )
 
     except ValueError as e:
@@ -101,6 +114,14 @@ async def get_analysis(analysis_id: str, user_id: str = Depends(get_current_user
             video_url = result["videos"].get("storage_path")
             fps = result["videos"].get("fps")
 
+        # Format phase boundaries for response
+        phase_boundaries = None
+        if result.get("phase_boundaries"):
+            phase_boundaries = [
+                PhaseBoundary(y=pb["y"], between_phases=pb["between_phases"])
+                for pb in result["phase_boundaries"]
+            ]
+
         return AnalysisResponse(
             id=result["id"],
             techniqueScore=result["technique_score"],
@@ -117,6 +138,7 @@ async def get_analysis(analysis_id: str, user_id: str = Depends(get_current_user
             videoUrl=video_url,
             landmarks=_format_landmarks_response(result.get("landmarks_data")),
             fps=fps,
+            phaseBoundaries=phase_boundaries,
         )
     except HTTPException:
         raise

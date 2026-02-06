@@ -35,6 +35,15 @@ COCO_TO_MEDIAPIPE = {
 # Required MediaPipe indices that analyzers use
 REQUIRED_MEDIAPIPE_INDICES = {11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28}
 
+# Exercise-specific smoothing overrides for keypoints that need different filtering
+# Key: (exercise_type, coco_keypoint_index) -> (min_cutoff, beta)
+# Lower min_cutoff = more smoothing, lower beta = less responsive but smoother
+SMOOTHING_OVERRIDES: dict[tuple[str, int], tuple[float, float]] = {
+    # Deadlift knees get heavy smoothing due to plate occlusion
+    ("deadlift", 13): (0.3, 0.007),  # left knee
+    ("deadlift", 14): (0.3, 0.007),  # right knee
+}
+
 
 def ensure_model_downloaded():
     """Download the RTMPose model if not present."""
@@ -67,7 +76,7 @@ class OneEuroFilter:
     Reduces jitter while maintaining responsiveness to fast movements.
     """
 
-    def __init__(self, min_cutoff: float = 1.0, beta: float = 0.3, d_cutoff: float = 1.0):
+    def __init__(self, min_cutoff: float = 2.0, beta: float = 0.7, d_cutoff: float = 1.0):
         """
         Initialize the filter.
 
@@ -254,7 +263,10 @@ class PoseEstimator:
         return keypoints
 
     def _apply_temporal_smoothing(
-        self, keypoints: list[tuple[float, float, float]], timestamp: float
+        self,
+        keypoints: list[tuple[float, float, float]],
+        timestamp: float,
+        exercise_type: Optional[str] = None,
     ) -> list[tuple[float, float, float]]:
         """Apply One Euro filtering to smooth keypoints over time."""
         smoothed = []
@@ -264,8 +276,15 @@ class PoseEstimator:
             filter_key_y = (i, "y")
 
             if filter_key_x not in self._filters:
-                self._filters[filter_key_x] = OneEuroFilter()
-                self._filters[filter_key_y] = OneEuroFilter()
+                # Check for exercise-specific smoothing overrides
+                override_key = (exercise_type, i) if exercise_type else None
+                if override_key and override_key in SMOOTHING_OVERRIDES:
+                    min_cutoff, beta = SMOOTHING_OVERRIDES[override_key]
+                    self._filters[filter_key_x] = OneEuroFilter(min_cutoff=min_cutoff, beta=beta)
+                    self._filters[filter_key_y] = OneEuroFilter(min_cutoff=min_cutoff, beta=beta)
+                else:
+                    self._filters[filter_key_x] = OneEuroFilter()
+                    self._filters[filter_key_y] = OneEuroFilter()
 
             # Apply smoothing
             x_smooth = self._filters[filter_key_x](x, timestamp)
@@ -297,7 +316,9 @@ class PoseEstimator:
 
         return frame_landmarks
 
-    def extract_landmarks(self, video_path: str) -> list[Optional[dict[int, dict]]]:
+    def extract_landmarks(
+        self, video_path: str, exercise_type: Optional[str] = None
+    ) -> list[Optional[dict[int, dict]]]:
         """
         Extract pose landmarks from each frame of a video.
 
@@ -351,7 +372,9 @@ class PoseEstimator:
                     # Apply temporal smoothing if enabled
                     if self.use_temporal_smoothing:
                         timestamp = frame_idx / fps
-                        keypoints = self._apply_temporal_smoothing(keypoints, timestamp)
+                        keypoints = self._apply_temporal_smoothing(
+                            keypoints, timestamp, exercise_type
+                        )
 
                     # Convert to MediaPipe format
                     frame_landmarks = self._convert_to_mediapipe_format(keypoints)
