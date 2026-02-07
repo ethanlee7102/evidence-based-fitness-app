@@ -19,10 +19,10 @@ export function Layout() {
             {loading ? null : user ? (
               <>
                 <Link
-                  to="/upload"
+                  to="/dashboard"
                   className="px-4 py-2 bg-flame-600 hover:bg-flame-500 rounded-lg font-medium transition-colors"
                 >
-                  Analyze Lift
+                  Log Workout
                 </Link>
                 <button
                   onClick={() => signOut()}
@@ -54,7 +54,7 @@ export function Layout() {
 
       <footer className="border-t border-gray-800 py-6">
         <div className="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
-          Flame Fitness - Track your improvement across Technique, Consistency, Progress, and Knowledge
+          Flame Fitness - Log workouts, track progress, get AI insights
         </div>
       </footer>
     </div>

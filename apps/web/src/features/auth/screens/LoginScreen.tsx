@@ -5,7 +5,7 @@ export function LoginScreen() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
 
   const handleSuccess = () => {
     navigate(from, { replace: true })

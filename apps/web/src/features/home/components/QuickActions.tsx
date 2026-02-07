@@ -7,10 +7,10 @@ export function QuickActions() {
   return (
     <div className="text-center">
       <Link
-        to={user ? '/upload' : '/signup'}
+        to={user ? '/dashboard' : '/signup'}
         className="inline-flex items-center gap-2 px-6 py-3 bg-flame-600 hover:bg-flame-500 rounded-lg font-medium transition-colors"
       >
-        {user ? 'Analyze Your Lift' : 'Get Started'}
+        {user ? 'Log Workout' : 'Get Started'}
         <span>→</span>
       </Link>
     </div>

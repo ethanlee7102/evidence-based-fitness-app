@@ -1,4 +1,4 @@
 export * from './auth'
-export * from './analysis'
-export * from './upload'
+export * from './dashboard'
 export * from './home'
+export * from './onboarding'
