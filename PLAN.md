@@ -2,20 +2,19 @@
 
 ## Overview
 
-A fitness application centered around a "Flame" visualization that evolves based on user improvement across four pillars: Consistency, Technique, Progress, and Knowledge. Each pillar contributes to a Composite Improvement Score that drives the Flame's visual state.
-
-**MVP Focus:** Technique pillar (form video analyzer) starting with Deadlift, then Squat, then Bench Press.
+A workout logging app with AI-powered trend analysis. Users log workouts, track progress, and receive insights to optimize their training. The "Flame" visualization evolves based on consistency and progress.
 
 ---
 
-## The Four Pillars
+## Core Features
 
-| Pillar | Description | Data Sources | Status |
-|--------|-------------|--------------|--------|
-| **Technique** | CV-based form analysis from uploaded videos | MMPose/RTMPose pose estimation | ✅ MVP |
-| **Consistency** | Workout frequency, streaks, adherence | Logged workouts, wearables | ⏳ Later |
-| **Progress** | Strength improvements over time | Workout logs, strength standards | ⏳ Later |
-| **Knowledge** | RAG-powered fitness education | EXRX, NSCA, ACSM sources | ⏳ Later |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **User Onboarding** | Multi-step profile setup | ✅ Done |
+| **Workout Logging** | Log exercises, sets, reps, weight | ⏳ Next |
+| **Progress Tracking** | Visualize strength improvements | ⏳ Planned |
+| **AI Insights** | Trend analysis and recommendations | ⏳ Planned |
+| **Consistency** | Workout frequency, streaks | ⏳ Planned |
 
 ---
 
@@ -35,14 +34,11 @@ A fitness application centered around a "Flame" visualization that evolves based
 │              Deployed on Railway/Render                 │
 └─────────────────────────┬───────────────────────────────┘
                           │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-┌─────────────────────┐    ┌─────────────────────────────┐
-│      Supabase       │    │      ML Processing          │
-│  - PostgreSQL       │    │  - MMPose/RTMPose (ONNX)    │
-│  - Auth             │    │  - OpenCV                   │
-│  - Storage          │    │  - Custom analysis logic    │
-└─────────────────────┘    └─────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                      Supabase                           │
+│         PostgreSQL + Auth + Storage                     │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -60,7 +56,6 @@ flame-fitness/
 ├── packages/
 │   └── shared/                   # Shared TypeScript types
 │       ├── types/
-│       │   ├── analysis.ts
 │       │   ├── user.ts
 │       │   └── index.ts
 │       └── package.json
@@ -71,6 +66,7 @@ flame-fitness/
 ├── .gitignore
 ├── package.json                  # Root pnpm workspace config
 ├── pnpm-workspace.yaml
+├── CLAUDE.md
 ├── PLAN.md
 └── README.md
 ```
@@ -81,111 +77,68 @@ flame-fitness/
 apps/web/
 ├── src/
 │   ├── features/
-│   │   ├── auth/
+│   │   ├── auth/                 # Authentication
 │   │   │   ├── components/
-│   │   │   │   ├── LoginForm.tsx
-│   │   │   │   ├── SignupForm.tsx
-│   │   │   │   └── index.ts
 │   │   │   ├── hooks/
-│   │   │   │   ├── useAuth.ts
-│   │   │   │   └── index.ts
 │   │   │   ├── screens/
-│   │   │   │   ├── LoginScreen.tsx
-│   │   │   │   ├── SignupScreen.tsx
-│   │   │   │   └── index.ts
 │   │   │   ├── services/
-│   │   │   │   ├── authService.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── types/
-│   │   │   │   └── index.ts
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── analysis/
-│   │   │   ├── components/
-│   │   │   │   ├── ResultsDisplay.tsx
-│   │   │   │   ├── ScoreCard.tsx
-│   │   │   │   ├── IssuesList.tsx
-│   │   │   │   ├── PoseOverlay.tsx
-│   │   │   │   └── index.ts
-│   │   │   ├── hooks/
-│   │   │   │   ├── useAnalysis.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── screens/
-│   │   │   │   ├── AnalysisResultScreen.tsx
-│   │   │   │   ├── HistoryScreen.tsx
-│   │   │   │   └── index.ts
-│   │   │   ├── services/
-│   │   │   │   ├── analysisService.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── types/
-│   │   │   │   └── index.ts
-│   │   │   └── index.ts
+│   │   ├── dashboard/            # Main app dashboard
+│   │   │   └── screens/
+│   │   │       └── DashboardScreen.tsx
 │   │   │
-│   │   ├── upload/
+│   │   ├── home/                 # Landing page
 │   │   │   ├── components/
-│   │   │   │   ├── VideoUploader.tsx
-│   │   │   │   ├── VideoPreview.tsx
-│   │   │   │   ├── ExerciseSelector.tsx
-│   │   │   │   ├── UploadProgress.tsx
-│   │   │   │   └── index.ts
-│   │   │   ├── hooks/
-│   │   │   │   ├── useVideoUpload.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── screens/
-│   │   │   │   ├── UploadScreen.tsx
-│   │   │   │   └── index.ts
-│   │   │   ├── services/
-│   │   │   │   ├── uploadService.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── types/
-│   │   │   │   └── index.ts
-│   │   │   └── index.ts
-│   │   │
-│   │   ├── home/
-│   │   │   ├── components/
-│   │   │   │   ├── FlameVisualization.tsx   # The Flame!
+│   │   │   │   ├── FlameVisualization.tsx
 │   │   │   │   ├── QuickActions.tsx
 │   │   │   │   └── index.ts
 │   │   │   ├── screens/
-│   │   │   │   ├── HomeScreen.tsx
-│   │   │   │   └── index.ts
+│   │   │   │   └── HomeScreen.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── onboarding/           # User onboarding flow
+│   │   │   ├── components/
+│   │   │   │   ├── OnboardingLayout.tsx
+│   │   │   │   ├── StepBasicInfo.tsx
+│   │   │   │   ├── StepPhysicalStats.tsx
+│   │   │   │   ├── StepFitnessProfile.tsx
+│   │   │   │   └── StepSchedule.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useOnboarding.ts
+│   │   │   │   └── useProfile.ts
+│   │   │   ├── screens/
+│   │   │   │   └── OnboardingScreen.tsx
+│   │   │   ├── services/
+│   │   │   │   └── profileService.ts
+│   │   │   └── utils/
+│   │   │       └── unitConversion.ts
+│   │   │
+│   │   ├── workouts/             # TODO: Workout logging
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── screens/
 │   │   │   └── index.ts
 │   │   │
 │   │   └── index.ts
 │   │
 │   ├── shared/
-│   │   ├── components/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Loading.tsx
-│   │   │   ├── Layout.tsx
-│   │   │   └── index.ts
-│   │   ├── hooks/
-│   │   │   ├── useSupabase.ts
-│   │   │   └── index.ts
-│   │   └── utils/
-│   │       ├── formatters.ts
-│   │       └── index.ts
+│   │   ├── components/           # Button, Card, Loading, Layout
+│   │   └── hooks/
 │   │
 │   ├── navigation/
 │   │   ├── AppRouter.tsx
-│   │   ├── ProtectedRoute.tsx
+│   │   ├── OnboardingRoute.tsx   # Ensures onboarding complete
+│   │   ├── ProtectedRoute.tsx    # Ensures authenticated
 │   │   └── index.ts
 │   │
-│   ├── lib/
-│   │   ├── supabase.ts            # Supabase client init
-│   │   └── api.ts                 # API client for backend
-│   │
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
+│   └── lib/
+│       ├── supabase.ts
+│       └── api.ts
 │
 ├── public/
 ├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── tailwind.config.js
-└── postcss.config.js
+└── vite.config.ts
 ```
 
 ### Backend (`apps/api/`)
@@ -194,185 +147,148 @@ apps/web/
 apps/api/
 ├── src/
 │   ├── api/                       # Route handlers
-│   │   ├── __init__.py
-│   │   ├── analysis.py            # POST /analyze, GET /analysis/{id}
-│   │   ├── videos.py              # Video-related endpoints
 │   │   ├── health.py              # Health check endpoint
 │   │   └── router.py              # Combines all routers
 │   │
-│   ├── core/                      # Business logic
-│   │   ├── __init__.py
-│   │   ├── pose_estimator.py      # MMPose/RTMPose wrapper (ONNX)
-│   │   ├── video_processor.py     # Frame extraction
-│   │   ├── angle_calculator.py    # Joint angle math
-│   │   └── analyzers/
-│   │       ├── __init__.py
-│   │       ├── base.py            # Base analyzer class
-│   │       ├── deadlift.py        # Deadlift-specific logic
-│   │       ├── squat.py           # Squat-specific logic (later)
-│   │       └── bench.py           # Bench-specific logic (later)
+│   ├── core/                      # Business logic (empty, ready)
 │   │
 │   ├── schema/                    # Pydantic models
-│   │   ├── __init__.py
-│   │   ├── analysis.py            # AnalysisRequest, AnalysisResponse
-│   │   ├── video.py               # VideoMetadata
-│   │   └── common.py              # Shared schemas
 │   │
-│   ├── service/                   # Service layer
-│   │   ├── __init__.py
-│   │   ├── analysis_service.py    # Orchestrates analysis flow
-│   │   ├── storage_service.py     # Supabase storage interactions
-│   │   └── db_service.py          # Database operations
+│   ├── service/
+│   │   ├── db_service.py          # Database operations
+│   │   └── storage_service.py     # Supabase storage
 │   │
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── config.py              # Environment config
-│   │   └── logging.py             # Logging setup
-│   │
-│   └── __init__.py
+│   └── utils/
+│       ├── config.py
+│       ├── auth.py
+│       └── logging.py
 │
-├── tests/                         # Test files (co-located pattern)
-│   ├── __init__.py
-│   ├── test_deadlift_analyzer.py
-│   ├── test_pose_estimator.py
+├── tests/
 │   └── conftest.py
 │
-├── app.py                         # FastAPI app entry point
+├── app.py                         # FastAPI entry point
 ├── db.py                          # Database connection
-├── requirements.txt
-├── requirements-dev.txt
-└── Dockerfile
+└── requirements.txt
 ```
 
 ---
 
 ## Database Schema
 
+### Current (Active)
+
 ```sql
 -- Users (extends Supabase Auth)
 create table profiles (
   id uuid references auth.users primary key,
   username text unique,
+  -- Onboarding fields
+  display_name text,
+  birthday date,
+  gender text,                    -- male, female, other, prefer_not_to_say
+  height_cm numeric(5,1),
+  weight_kg numeric(5,1),
+  units_preference text,          -- metric, imperial
+  experience_level text,          -- beginner, intermediate, advanced
+  goal text,                      -- strength, build_muscle, lose_weight, etc.
+  workout_days_per_week integer,
+  preferred_days text[],
+  injuries_limitations text,
+  onboarding_completed boolean default false,
+  onboarding_completed_at timestamptz,
+  created_at timestamp with time zone default now()
+);
+```
+
+### Planned (Workout Logger)
+
+```sql
+-- Exercises library
+create table exercises (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  muscle_group text,
   created_at timestamp with time zone default now()
 );
 
--- Uploaded videos
-create table videos (
+-- Workout sessions
+create table workouts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references profiles(id) on delete cascade,
-  storage_path text not null,
-  exercise_type text not null check (exercise_type in ('deadlift', 'squat', 'bench')),
-  duration_seconds integer,
-  status text default 'uploaded' check (status in ('uploaded', 'processing', 'completed', 'failed')),
-  uploaded_at timestamp with time zone default now()
+  date date not null default current_date,
+  notes text,
+  created_at timestamp with time zone default now()
 );
 
--- Analysis results
-create table analyses (
+-- Individual sets within a workout
+create table workout_sets (
   id uuid primary key default gen_random_uuid(),
-  video_id uuid references videos(id) on delete cascade,
-  technique_score integer check (technique_score >= 0 and technique_score <= 100),
-  issues jsonb default '[]',
-  bar_path_data jsonb,
-  landmarks_data jsonb,
-  processed_at timestamp with time zone default now()
+  workout_id uuid references workouts(id) on delete cascade,
+  exercise_id uuid references exercises(id),
+  set_number integer not null,
+  reps integer,
+  weight numeric,
+  created_at timestamp with time zone default now()
 );
 
 -- Row Level Security
-alter table profiles enable row level security;
-alter table videos enable row level security;
-alter table analyses enable row level security;
+alter table workouts enable row level security;
+alter table workout_sets enable row level security;
 
--- Users can only see their own data
-create policy "Users can view own profile" on profiles for select using (auth.uid() = id);
-create policy "Users can view own videos" on videos for select using (auth.uid() = user_id);
-create policy "Users can insert own videos" on videos for insert with check (auth.uid() = user_id);
-create policy "Users can view own analyses" on analyses for select
-  using (video_id in (select id from videos where user_id = auth.uid()));
+create policy "Users can manage own workouts" on workouts
+  for all using (auth.uid() = user_id);
+create policy "Users can manage own sets" on workout_sets
+  for all using (workout_id in (select id from workouts where user_id = auth.uid()));
 ```
 
 ---
 
 ## Development Phases
 
-### Phase 0: Learning & Exploration ✅
-- [x] Understand pose estimation (switched from MediaPipe to MMPose/RTMPose)
-- [x] Understand landmark coordinates and angles
-- [x] Learn bar path tracking via wrist positions
+### Phase 1: Project Setup ✅
+- [x] Initialize monorepo with pnpm workspaces
+- [x] Set up React frontend (Vite + TypeScript + Tailwind)
+- [x] Set up Python backend (FastAPI)
+- [x] Create Supabase project
+- [x] Configure environment variables
+- [x] Implement Supabase auth
 
-### Phase 1: Project Setup
-- [ ] Initialize monorepo with pnpm workspaces
-- [ ] Set up React frontend (Vite + TypeScript + Tailwind)
-- [ ] Set up Python backend (FastAPI)
-- [ ] Create Supabase project
-- [ ] Configure environment variables
-- [ ] Set up basic CI (lint, type check)
+### Phase 2: CV Analyzer (REMOVED) ~~✅~~
+- ~~Pose estimation with MMPose/RTMPose~~
+- ~~Deadlift, Squat, Bench analyzers~~
+- **Removed** - Pivoted to workout logger
 
-### Phase 2: Auth & Upload
-- [ ] Implement Supabase auth in frontend
-- [ ] Build auth screens (login, signup)
-- [ ] Build video upload flow
-- [ ] Store videos in Supabase Storage
+### Phase 3: User Onboarding ✅
+- [x] Create database migration for profile fields
+- [x] Build profile API endpoints (`GET /profile/me`, `POST /profile/onboarding`)
+- [x] Create multi-step onboarding UI
+- [x] Add OnboardingRoute guard
+- [x] Create Dashboard placeholder
 
-### Phase 3: Deadlift Analyzer
-- [x] Integrate MMPose/RTMPose in backend (replaced MediaPipe)
-- [ ] Build video processing pipeline
-- [ ] Implement deadlift form analysis:
-  - Bar path tracking
-  - Back angle analysis
-  - Hip hinge pattern
-  - Lockout detection
-- [ ] Build results display UI
-- [ ] Test with real deadlift videos
+### Phase 4: Workout Logging ⏳ CURRENT
+- [ ] Create database schema (exercises, workouts, workout_sets)
+- [ ] Build workout logging API endpoints
+- [ ] Build workout logging UI
+- [ ] Add exercise selection
+- [ ] Log sets with reps/weight
 
-### Phase 4: Squat & Bench
-- [ ] Add squat analyzer (depth, knee tracking)
-- [ ] Add bench analyzer (bar path J-curve)
-- [ ] Unified results UI for all lifts
+### Phase 5: Progress Tracking
+- [ ] Historical workout view
+- [ ] Exercise-specific progress charts
+- [ ] Personal records tracking
+- [ ] Volume over time
 
-### Phase 5: Polish
-- [ ] Analysis history view
-- [ ] Score trending over time
-- [ ] Basic Flame visualization
+### Phase 6: AI Insights
+- [ ] Integrate AI for trend analysis
+- [ ] Training recommendations
+- [ ] Recovery insights
+- [ ] Consistency scoring
+
+### Phase 7: Polish
+- [ ] Flame visualization based on consistency
+- [ ] Streak tracking
+- [ ] Mobile-responsive improvements
 - [ ] Error handling & edge cases
-
----
-
-## Key Technical Details
-
-### Pose Landmarks for Deadlift (MediaPipe-compatible indices)
-Uses MMPose/RTMPose with COCO→MediaPipe index mapping:
-- Shoulders (11, 12) - back angle
-- Hips (23, 24) - hip hinge tracking
-- Knees (25, 26) - knee angle
-- Ankles (27, 28) - leg angle
-- Wrists (15, 16) - **bar path tracking**
-
-### Bar Path Tracking
-Track wrist midpoint across frames as proxy for bar position:
-```python
-bar_x = (left_wrist.x + right_wrist.x) / 2
-bar_y = (left_wrist.y + right_wrist.y) / 2
-```
-
-### Angle Calculation
-```python
-def calculate_angle(a, b, c):
-    """Angle at point B given points A, B, C."""
-    ba = (a['x'] - b['x'], a['y'] - b['y'])
-    bc = (c['x'] - b['x'], c['y'] - b['y'])
-    dot = ba[0]*bc[0] + ba[1]*bc[1]
-    mag_ba = math.sqrt(ba[0]**2 + ba[1]**2)
-    mag_bc = math.sqrt(bc[0]**2 + bc[1]**2)
-    cos_angle = max(-1, min(1, dot / (mag_ba * mag_bc)))
-    return math.degrees(math.acos(cos_angle))
-```
-
-### Video Requirements
-- Format: MP4, MOV
-- Max duration: 30 seconds
-- Max size: 100MB
-- **Camera angle: Side view (sagittal plane)**
 
 ---
 
@@ -381,15 +297,14 @@ def calculate_angle(a, b, c):
 | Service | Platform | Notes |
 |---------|----------|-------|
 | Frontend | Vercel | Auto-deploy from main branch |
-| Backend | Railway or Render | Python + long-running processes |
+| Backend | Railway or Render | Python FastAPI |
 | Database | Supabase | PostgreSQL + Auth + Storage |
 
 ---
 
 ## Next Steps
 
-1. **Initialize the monorepo structure**
-2. **Set up pnpm workspaces**
-3. **Scaffold React frontend with Vite**
-4. **Scaffold FastAPI backend**
-5. **Create Supabase project and run migrations**
+1. **Run onboarding migration** in Supabase SQL Editor (`004_onboarding_profile.sql`)
+2. **Create workout database migration** (exercises, workouts, workout_sets)
+3. **Build workout logging API endpoints**
+4. **Implement workout logging UI on Dashboard**

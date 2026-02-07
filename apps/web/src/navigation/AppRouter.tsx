@@ -2,9 +2,10 @@ import { Routes, Route } from 'react-router-dom'
 import { Layout } from '../shared/components'
 import { HomeScreen } from '../features/home'
 import { LoginScreen, SignupScreen } from '../features/auth'
-import { UploadScreen } from '../features/upload'
-import { AnalysisResultScreen } from '../features/analysis'
+import { OnboardingScreen } from '../features/onboarding'
+import { DashboardScreen } from '../features/dashboard'
 import { ProtectedRoute } from './ProtectedRoute'
+import { OnboardingRoute } from './OnboardingRoute'
 
 export function AppRouter() {
   return (
@@ -14,19 +15,19 @@ export function AppRouter() {
         <Route path="login" element={<LoginScreen />} />
         <Route path="signup" element={<SignupScreen />} />
         <Route
-          path="upload"
+          path="onboarding"
           element={
             <ProtectedRoute>
-              <UploadScreen />
+              <OnboardingScreen />
             </ProtectedRoute>
           }
         />
         <Route
-          path="analysis/:id"
+          path="dashboard"
           element={
-            <ProtectedRoute>
-              <AnalysisResultScreen />
-            </ProtectedRoute>
+            <OnboardingRoute>
+              <DashboardScreen />
+            </OnboardingRoute>
           }
         />
       </Route>

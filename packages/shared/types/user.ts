@@ -1,8 +1,5 @@
-export interface UserProfile {
-  id: string
-  username?: string
-  createdAt: string
-}
+// UserProfile is now exported from profile.ts with full onboarding fields
+export { UserProfile } from './profile'
 
 export interface Video {
   id: string
