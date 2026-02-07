@@ -10,12 +10,10 @@ A workout logging app with AI-powered trend analysis. Users log workouts, track 
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **User Onboarding** | Multi-step profile setup | ✅ Done |
 | **Workout Logging** | Log exercises, sets, reps, weight | ⏳ Next |
 | **Progress Tracking** | Visualize strength improvements | ⏳ Planned |
 | **AI Insights** | Trend analysis and recommendations | ⏳ Planned |
 | **Consistency** | Workout frequency, streaks | ⏳ Planned |
-
 ---
 
 ## Technical Stack
@@ -84,10 +82,6 @@ apps/web/
 │   │   │   ├── services/
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── dashboard/            # Main app dashboard
-│   │   │   └── screens/
-│   │   │       └── DashboardScreen.tsx
-│   │   │
 │   │   ├── home/                 # Landing page
 │   │   │   ├── components/
 │   │   │   │   ├── FlameVisualization.tsx
@@ -96,23 +90,6 @@ apps/web/
 │   │   │   ├── screens/
 │   │   │   │   └── HomeScreen.tsx
 │   │   │   └── index.ts
-│   │   │
-│   │   ├── onboarding/           # User onboarding flow
-│   │   │   ├── components/
-│   │   │   │   ├── OnboardingLayout.tsx
-│   │   │   │   ├── StepBasicInfo.tsx
-│   │   │   │   ├── StepPhysicalStats.tsx
-│   │   │   │   ├── StepFitnessProfile.tsx
-│   │   │   │   └── StepSchedule.tsx
-│   │   │   ├── hooks/
-│   │   │   │   ├── useOnboarding.ts
-│   │   │   │   └── useProfile.ts
-│   │   │   ├── screens/
-│   │   │   │   └── OnboardingScreen.tsx
-│   │   │   ├── services/
-│   │   │   │   └── profileService.ts
-│   │   │   └── utils/
-│   │   │       └── unitConversion.ts
 │   │   │
 │   │   ├── workouts/             # TODO: Workout logging
 │   │   │   ├── components/
@@ -128,8 +105,7 @@ apps/web/
 │   │
 │   ├── navigation/
 │   │   ├── AppRouter.tsx
-│   │   ├── OnboardingRoute.tsx   # Ensures onboarding complete
-│   │   ├── ProtectedRoute.tsx    # Ensures authenticated
+│   │   ├── ProtectedRoute.tsx
 │   │   └── index.ts
 │   │
 │   └── lib/
@@ -182,20 +158,6 @@ apps/api/
 create table profiles (
   id uuid references auth.users primary key,
   username text unique,
-  -- Onboarding fields
-  display_name text,
-  birthday date,
-  gender text,                    -- male, female, other, prefer_not_to_say
-  height_cm numeric(5,1),
-  weight_kg numeric(5,1),
-  units_preference text,          -- metric, imperial
-  experience_level text,          -- beginner, intermediate, advanced
-  goal text,                      -- strength, build_muscle, lose_weight, etc.
-  workout_days_per_week integer,
-  preferred_days text[],
-  injuries_limitations text,
-  onboarding_completed boolean default false,
-  onboarding_completed_at timestamptz,
   created_at timestamp with time zone default now()
 );
 ```
@@ -258,33 +220,27 @@ create policy "Users can manage own sets" on workout_sets
 - ~~Deadlift, Squat, Bench analyzers~~
 - **Removed** - Pivoted to workout logger
 
-### Phase 3: User Onboarding ✅
-- [x] Create database migration for profile fields
-- [x] Build profile API endpoints (`GET /profile/me`, `POST /profile/onboarding`)
-- [x] Create multi-step onboarding UI
-- [x] Add OnboardingRoute guard
-- [x] Create Dashboard placeholder
-
-### Phase 4: Workout Logging ⏳ CURRENT
+### Phase 3: Workout Logging ⏳ CURRENT
 - [ ] Create database schema (exercises, workouts, workout_sets)
 - [ ] Build workout logging API endpoints
+- [ ] Create Dashboard screen (`/dashboard`)
 - [ ] Build workout logging UI
 - [ ] Add exercise selection
 - [ ] Log sets with reps/weight
 
-### Phase 5: Progress Tracking
+### Phase 4: Progress Tracking
 - [ ] Historical workout view
 - [ ] Exercise-specific progress charts
 - [ ] Personal records tracking
 - [ ] Volume over time
 
-### Phase 6: AI Insights
+### Phase 5: AI Insights
 - [ ] Integrate AI for trend analysis
 - [ ] Training recommendations
 - [ ] Recovery insights
 - [ ] Consistency scoring
 
-### Phase 7: Polish
+### Phase 6: Polish
 - [ ] Flame visualization based on consistency
 - [ ] Streak tracking
 - [ ] Mobile-responsive improvements
@@ -304,7 +260,7 @@ create policy "Users can manage own sets" on workout_sets
 
 ## Next Steps
 
-1. **Run onboarding migration** in Supabase SQL Editor (`004_onboarding_profile.sql`)
-2. **Create workout database migration** (exercises, workouts, workout_sets)
-3. **Build workout logging API endpoints**
-4. **Implement workout logging UI on Dashboard**
+1. **Create workout database migration**
+2. **Build workout logging API endpoints**
+3. **Create Dashboard screen with workout form**
+4. **Implement workout history view**
