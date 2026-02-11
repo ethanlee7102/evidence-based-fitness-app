@@ -1,9 +1,28 @@
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { UserProfile } from '@flame-fitness/shared'
 import { useAuth } from '../../auth/hooks'
 import { getProfile } from '../services/profileService'
 
+interface ProfileContextType {
+  profile: UserProfile | null
+  loading: boolean
+  error: string | null
+  needsOnboarding: boolean
+  setProfile: (profile: UserProfile | null) => void
+  refetch: () => Promise<void>
+}
+
+export const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
+
 export function useProfile() {
+  const context = useContext(ProfileContext)
+  if (context === undefined) {
+    throw new Error('useProfile must be used within a ProfileProvider')
+  }
+  return context
+}
+
+export function useProfileProvider() {
   const { session } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -11,6 +30,7 @@ export function useProfile() {
 
   const fetchProfile = useCallback(async () => {
     if (!session?.access_token) {
+      setProfile(null)
       setLoading(false)
       return
     }
@@ -38,6 +58,7 @@ export function useProfile() {
     loading,
     error,
     needsOnboarding,
+    setProfile,
     refetch: fetchProfile,
   }
 }

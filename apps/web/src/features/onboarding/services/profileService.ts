@@ -1,8 +1,49 @@
 import type { OnboardingData, UserProfile } from '@flame-fitness/shared'
 import { apiRequest } from '../../../lib/api'
 
+interface ProfileApiResponse {
+  id: string
+  username?: string
+  display_name?: string
+  birthday?: string
+  gender?: string
+  height_cm?: number
+  weight_kg?: number
+  units_preference: string
+  experience_level?: string
+  goal?: string
+  workout_days_per_week?: number
+  preferred_days?: string[]
+  injuries_limitations?: string
+  onboarding_completed: boolean
+  onboarding_completed_at?: string
+  created_at: string
+}
+
+function mapProfileResponse(data: ProfileApiResponse): UserProfile {
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    birthday: data.birthday,
+    gender: data.gender as UserProfile['gender'],
+    heightCm: data.height_cm,
+    weightKg: data.weight_kg,
+    unitsPreference: (data.units_preference || 'metric') as UserProfile['unitsPreference'],
+    experienceLevel: data.experience_level as UserProfile['experienceLevel'],
+    goal: data.goal as UserProfile['goal'],
+    workoutDaysPerWeek: data.workout_days_per_week,
+    preferredDays: data.preferred_days as UserProfile['preferredDays'],
+    injuriesLimitations: data.injuries_limitations,
+    onboardingCompleted: data.onboarding_completed,
+    onboardingCompletedAt: data.onboarding_completed_at,
+    createdAt: data.created_at,
+  }
+}
+
 export async function getProfile(token: string): Promise<UserProfile> {
-  return apiRequest<UserProfile>('/profile/me', { token })
+  const data = await apiRequest<ProfileApiResponse>('/profile/me', { token })
+  return mapProfileResponse(data)
 }
 
 export async function completeOnboarding(
@@ -24,9 +65,10 @@ export async function completeOnboarding(
     injuries_limitations: data.injuriesLimitations,
   }
 
-  return apiRequest<UserProfile>('/profile/onboarding', {
+  const response = await apiRequest<ProfileApiResponse>('/profile/onboarding', {
     method: 'POST',
     body: JSON.stringify(payload),
     token,
   })
+  return mapProfileResponse(response)
 }

@@ -4,9 +4,11 @@ import { useAuth } from '../../auth/hooks'
 import { completeOnboarding } from '../services/profileService'
 import type { OnboardingFormData, OnboardingStep } from '../types'
 import { INITIAL_FORM_DATA, ONBOARDING_STEPS } from '../types'
+import { useProfile } from './useProfile'
 
 export function useOnboarding() {
   const { session } = useAuth()
+  const { setProfile } = useProfile()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(0)
   const [formData, setFormData] = useState<OnboardingFormData>(INITIAL_FORM_DATA)
   const [submitting, setSubmitting] = useState(false)
@@ -83,7 +85,8 @@ export function useOnboarding() {
         injuriesLimitations: formData.injuriesLimitations || undefined,
       }
 
-      await completeOnboarding(session.access_token, data)
+      const updatedProfile = await completeOnboarding(session.access_token, data)
+      setProfile(updatedProfile)
       return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete onboarding')
