@@ -82,19 +82,47 @@ apps/web/
 │   │   │   ├── services/
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── home/                 # Landing page
+│   │   ├── home/                 # Landing page + Dashboard home
 │   │   │   ├── components/
 │   │   │   │   ├── FlameVisualization.tsx
 │   │   │   │   ├── QuickActions.tsx
 │   │   │   │   └── index.ts
 │   │   │   ├── screens/
-│   │   │   │   └── HomeScreen.tsx
+│   │   │   │   ├── HomeScreen.tsx        # Landing page (/)
+│   │   │   │   └── HomeDashboardScreen.tsx # Dashboard home (/dashboard/home)
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── workouts/             # TODO: Workout logging
+│   │   ├── dashboard/            # Layout shell for dashboard
 │   │   │   ├── components/
-│   │   │   ├── hooks/
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   ├── DashboardLayout.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── types/
+│   │   │   │   └── index.ts      # NAV_ITEMS definition
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── workouts/             # Workout logging + history
+│   │   │   ├── components/
 │   │   │   ├── screens/
+│   │   │   │   └── WorkoutsScreen.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── analysis/             # AI trends, charts
+│   │   │   ├── components/
+│   │   │   ├── screens/
+│   │   │   │   └── AnalysisScreen.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── chat/                 # AI assistant
+│   │   │   ├── components/
+│   │   │   ├── screens/
+│   │   │   │   └── ChatScreen.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── profile/              # User settings
+│   │   │   ├── components/
+│   │   │   ├── screens/
+│   │   │   │   └── ProfileScreen.tsx
 │   │   │   └── index.ts
 │   │   │
 │   │   └── index.ts
@@ -104,8 +132,9 @@ apps/web/
 │   │   └── hooks/
 │   │
 │   ├── navigation/
-│   │   ├── AppRouter.tsx
+│   │   ├── AppRouter.tsx         # Nested routes for dashboard
 │   │   ├── ProtectedRoute.tsx
+│   │   ├── OnboardingRoute.tsx
 │   │   └── index.ts
 │   │
 │   └── lib/
@@ -220,11 +249,12 @@ create policy "Users can manage own sets" on workout_sets
 - ~~Deadlift, Squat, Bench analyzers~~
 - **Removed** - Pivoted to workout logger
 
-### Phase 3: Workout Logging ⏳ CURRENT
+### Phase 3: Dashboard & Workout Logging ⏳ CURRENT
+- [x] Create Dashboard with 5-tab sidebar navigation
+- [x] Create feature folders (workouts, analysis, chat, profile)
 - [ ] Create database schema (exercises, workouts, workout_sets)
 - [ ] Build workout logging API endpoints
-- [ ] Create Dashboard screen (`/dashboard`)
-- [ ] Build workout logging UI
+- [ ] Build workout logging UI in WorkoutsScreen
 - [ ] Add exercise selection
 - [ ] Log sets with reps/weight
 
@@ -258,9 +288,26 @@ create policy "Users can manage own sets" on workout_sets
 
 ---
 
+## Dashboard Navigation
+
+```
+/dashboard                → redirects to /dashboard/home
+/dashboard/home           → HomeDashboardScreen (welcome, quick stats)
+/dashboard/workouts       → WorkoutsScreen (logging + history)
+/dashboard/analysis       → AnalysisScreen (AI trends, charts)
+/dashboard/chat           → ChatScreen (AI assistant)
+/dashboard/profile        → ProfileScreen (user settings)
+```
+
+**Sidebar navigation** with lucide-react icons:
+- Home, Workouts, Analysis, Chat, Profile
+- Sign out button at bottom
+
+---
+
 ## Next Steps
 
 1. **Create workout database migration**
 2. **Build workout logging API endpoints**
-3. **Create Dashboard screen with workout form**
+3. **Build workout logging UI in WorkoutsScreen**
 4. **Implement workout history view**
