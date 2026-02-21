@@ -133,16 +133,15 @@ Database tables needed:
 - `workout_sets` - individual sets (workout_id, exercise_id, reps, weight)
 
 
-## AI Chatbot (Exercise Science RAG)
+## AI Chatbot (Exercise Science RAG)   
                                                                                                                                                                                                                    
   ### Claude Instructions for AI Features
   - Act as a teacher, explain concepts at beginner level
   - Point out weaknesses and anti-patterns
-  - Connect concepts back to this specific project
-  - Reference the Kruiz codebase (pet travel chatbot at ~/Desktop/kruiz/data:ai/) as a learning example when relevant
+  - Prefers to learn properly as a skill, not just follow recipes
 
   ### Goal
-  The `/dashboard/chat` route will be an AI chatbot that:
+  The `features/chat` route will be an AI chatbot that:
   - v1: Answers exercise science questions with cited research literature (Simple RAG)
   - v2: Also analyzes user workout data from this app (volume, PRs, trends) using Agentic RAG with a router
 
@@ -155,34 +154,144 @@ Database tables needed:
   ### Learning Progress
   - [x] Big picture overview of RAG
   - [x] Ingestion pipeline walkthrough (with code snippets from Kruiz)
-  - [x] Weaknesses in Kruiz codebase identified (9 major ones)
+  - [x] Weaknesses in reference codebase identified (9 major ones)
   - [x] Simple RAG vs Agentic RAG distinction
-  - [ ] Video study plan provided (9 videos) — watching videos 1-3 first
-  - [ ] Embeddings & vector search deep dive
-  - [ ] Chunking strategies advanced
-  - [ ] Retrieval & re-ranking
-  - [ ] Prompt engineering for citations
-  - [ ] RAG evaluation
-  - [ ] Agents & routing
-
-  ### Video Study Plan
-  1. Text embeddings explained visually (15-30m)
-  2. Cosine similarity & vector search (15-25m)
-  3. RAG end-to-end overview (20-40m)
-  4. Chunking strategies compared (15-30m)
-  5. Vector databases comparison (15-25m)
-  6. Retrieval & re-ranking / hybrid search (15-30m)
-  7. Prompt engineering for RAG citations (20-30m)
-  8. RAG evaluation with RAGAS (20-30m)
-  9. LangGraph agents tutorial (30-45m)
+  - [x] Video: RAG end-to-end (ingestion pipeline, retrieval, agentic RAG)
+  - [x] Embeddings & vector search deep dive
+  - [x] Chunking strategies advanced
+  - [x] Vector databases comparison
+  - [x] Retrieval & re-ranking
+  - [ ] Prompt engineering for citations — learn by doing
+  - [x] RAG evaluation (DeepEval/RAGAS metrics)
+  - [ ] Agents & routing — deferred to v2
 
   ### Key Kruiz Weaknesses to Avoid
-  1. No chunking strategy — need RecursiveCharacterTextSplitter with overlap
+  1. No chunking strategy — need section-aware chunking (RecursiveCharacterTextSplitter within sections, with overlap)
   2. Missing embedding pipeline — build end-to-end: chunk → embed → store
   3. Metadata discarded at retrieval — keep full metadata for citations
   4. No re-ranking — add cross-encoder for v2
   5. Silent error handling — raise errors, don't return empty strings
-  6. Raw SQL everywhere — use ORM or vector DB like ChromaDB
+  6. Raw SQL everywhere — use pgvector in Supabase with RPC functions
   7. Synchronous embedding calls — use async
   8. No embedding versioning — track model version
   9. Delete-and-reinsert pattern — use upserts
+  10. Without systematic evaluation, you have no way to know:
+    - Did changing your chunk size make retrieval better or worse?
+    - Is your embedding model good enough for scientific text?
+    - What's your hallucination rate?
+
+  ## RAG Chatbot Implementation Context
+
+  ### What We're Building
+
+  An exercise science chatbot that lives at `/features/chat` in the Flame Fitness app.                                                                                                                            
+  Users ask questions like "What rep range is best for hypertrophy?" and get answers                                                                                                                               
+  with cited research papers (author, year, journal).
+
+  ### v1 Architecture (Simple RAG — build this first)
+
+  PDF papers → Load → Chunk (with overlap) → Embed → Store in vector DB (with metadata)
+
+  User question → Embed → Vector search → Top-k chunks returned
+  → Stuff into prompt with citation instructions → LLM generates cited answer
+
+  #### Ingestion Pipeline (offline, run once per paper)
+  1. Load PDFs using pymupdf (fitz) with font analysis to detect section headers
+  2. Section-aware chunking — RecursiveCharacterTextSplitter within sections (never across), with fixed-size fallback if no headers detected
+  3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, section, chunk_index
+  4. Embed each chunk using OpenAI `text-embedding-3-large` (3072-dim)
+  5. Store chunk text + embedding + metadata in pgvector (Supabase)
+  6. SHA-256 content hash for deduplication (skip re-processing unchanged papers)
+
+  #### Retrieval Pipeline (online, every user query)
+  1. Embed the user's question with the SAME embedding model used for ingestion
+  2. Vector similarity search (cosine distance) to find top-k most relevant chunks
+  3. Return chunks WITH full metadata (needed for citations)
+  4. Format into prompt: "Answer using ONLY these sources. Cite as [Author, Year]."
+  5. LLM generates answer with citations
+  6. Handle "I don't know" — if no relevant chunks found, say so instead of hallucinating
+
+  #### Key Decisions
+  - ONE vector database (pgvector in Supabase), not separate DBs per category
+  - Categories (nutrition, hypertrophy, strength) = metadata tags, not separate collections
+  - Vector search naturally handles topic matching across categories
+  - Direct API calls via httpx — no LangChain orchestration (only `langchain_text_splitters` standalone for chunking)
+  - Use async for embedding calls
+  - LLM provider swappable via env var (Gemini 2.0 Flash default, OpenAI as alternative)
+
+  #### Metadata Schema Per Chunk
+  ```python
+  {
+      "text": "the actual chunk text...",
+      "metadata": {
+          "title": "Hypertrophic Effects of Rep Ranges",
+          "authors": "Schoenfeld et al.",
+          "year": 2017,
+          "journal": "Journal of Strength & Conditioning",
+          "doi": "10.1234/example",
+          "category": "hypertrophy",  # or "nutrition", "strength", etc.
+          "study_type": "meta-analysis",  # or "RCT", "review", etc.
+          "section": "Results",
+          "chunk_index": 3,
+          "total_chunks": 12
+      }
+  }
+
+  Prompt Template Pattern
+
+  Answer the following question using ONLY the provided sources.
+  For every claim, cite the source as [Author, Year].
+  If the sources don't contain enough information, say
+  "I don't have enough research to answer this confidently."
+  Do NOT make up information.
+
+  Sources:
+  [1] Schoenfeld et al., 2017 (Journal of Strength & Conditioning):
+  "8-12 reps per set at 60-80% 1RM maximizes hypertrophic response..."
+
+  [2] Krieger, 2010 (Journal of Sports Medicine):
+  "Multiple sets produced 40% greater hypertrophy than single sets..."
+
+  Question: {user_question}
+
+  v2 Architecture (Agentic RAG — build after v1 works)
+
+  User question
+        │
+        ▼
+     Router (LLM classifies intent)
+        │
+        ├── "literature question"  →  RAG Pipeline (from v1)
+        │
+        ├── "workout data question" →  SQL query against workout tables
+        │                              (workouts, exercises, workout_sets)
+        │
+        └── "both" →  Run both, combine
+                       ("Research says 10-20 sets/week. You're doing 14.")
+
+  - Literature = unstructured text → vector search (same as v1)
+  - Workout data = structured numbers → SQL queries (different retrieval method)
+  - This is why a router is justified — fundamentally different data types
+
+  RAG Evaluation (How to Know It's Working)
+
+  5 core metrics to measure:
+  - Contextual Relevancy: Are retrieved chunks relevant to the question?
+  - Contextual Recall: Do retrieved chunks contain all needed info?
+  - Contextual Precision: Are more relevant chunks ranked higher?
+  - Answer Relevancy: Does the answer address the actual question?
+  - Faithfulness: Does the answer only use info from retrieved chunks (no hallucination)?
+
+  Custom eval pipeline with LLM-as-judge (no DeepEval/RAGAS dependency — fully custom for learning).
+
+  Tech Stack (Finalized)
+
+  - Backend: FastAPI (already in Flame Fitness)
+  - Vector DB: pgvector in Supabase (already using PostgreSQL)
+  - Embedding model: OpenAI `text-embedding-3-large` (3072 dims)
+  - LLM: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
+  - PDF loading: pymupdf (fitz)
+  - Chunking: `langchain_text_splitters` (standalone, no LangChain orchestration)
+  - Observability: Custom TraceLogger → Supabase `rag_traces` table
+  - Streaming: SSE from FastAPI
+  - No LangChain orchestration, no LangSmith — fully custom for learning
