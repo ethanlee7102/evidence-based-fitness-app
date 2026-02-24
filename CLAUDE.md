@@ -1,3 +1,19 @@
+### Implementation Plan
+Refer to `PLAN.md` for the full implementation plan, phase statuses, and file manifest. Update phase statuses in PLAN.md as work is completed.
+
+### Teaching Mode
+After completing each implementation task, pause and explain:
+
+First give a summary of what was built (the what).
+
+1. **The "why"** — What problem does this design decision solve? What alternatives were rejected and why?
+2. **The bigger picture** — How does this piece connect to the overall architecture?
+3. **The trap** — What's the most common mistake developers make here, and how does this implementation avoid it?
+4. **The pattern** — What named design principle or industry pattern does this reflect (e.g. dependency injection, idempotency, single responsibility)?
+
+Give thorough explanations by default. If an explanation will be very long, 
+summarize it first, then ask if I want to go deeper on any part. If I ask "just do it," skip teaching mode for that task.
+
 # Flame Fitness - Project Context
 
 ## Overview
@@ -56,6 +72,9 @@ flame-fitness/
 ### Backend
 - **Entry point**: `app.py` (run with `uvicorn app:app`)
 - **Auth**: JWT verification via `get_current_user` dependency
+- **HTTP clients**: Shared module-level `httpx.AsyncClient` per provider (connection pooling). Cleaned up via FastAPI `lifespan` hook in `app.py`.
+- **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI
+- **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini. Both accept `temperature` and `max_tokens` params.
 
 ### Database Tables
 - `profiles` - extends Supabase auth.users with onboarding fields:
@@ -97,12 +116,17 @@ cd apps/api && pytest tests/ -v
 **Backend (`apps/api/.env`):**
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
+- `VOYAGE_API_KEY` — required for RAG embedding (Voyage AI)
+- `GOOGLE_API_KEY` — required for RAG generation (Gemini)
+- Optional with defaults: `EMBEDDING_MODEL` (voyage-4-large), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_BATCH_SIZE` (200), `LLM_PROVIDER` (google), `LLM_MODEL` (gemini-2.0-flash), `CHUNK_SIZE` (800), `CHUNK_OVERLAP` (200), `RAG_TOP_K` (5), `RAG_SIMILARITY_THRESHOLD` (0.3)
 
 ## Current Status
 - Auth flow working with Supabase
 - Onboarding flow implemented (4-step profile setup)
 - Dashboard with 5-tab sidebar navigation (Home, Workouts, Analysis, Chat, Profile)
 - Core infrastructure in place
+- RAG Phase 1 (database schema) complete — pgvector tables + RPC running in Supabase
+- RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
@@ -199,12 +223,12 @@ Database tables needed:
   1. Load PDFs using pymupdf (fitz) with font analysis to detect section headers
   2. Section-aware chunking — RecursiveCharacterTextSplitter within sections (never across), with fixed-size fallback if no headers detected
   3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, section, chunk_index
-  4. Embed each chunk using OpenAI `text-embedding-3-large` (3072-dim)
+  4. Embed each chunk using Voyage AI `voyage-4-large` (1024-dim), `input_type: "document"`, batched in groups of ~200
   5. Store chunk text + embedding + metadata in pgvector (Supabase)
   6. SHA-256 content hash for deduplication (skip re-processing unchanged papers)
 
   #### Retrieval Pipeline (online, every user query)
-  1. Embed the user's question with the SAME embedding model used for ingestion
+  1. Embed the user's question with the SAME embedding model used for ingestion, `input_type: "query"`
   2. Vector similarity search (cosine distance) to find top-k most relevant chunks
   3. Return chunks WITH full metadata (needed for citations)
   4. Format into prompt: "Answer using ONLY these sources. Cite as [Author, Year]."
@@ -217,7 +241,14 @@ Database tables needed:
   - Vector search naturally handles topic matching across categories
   - Direct API calls via httpx — no LangChain orchestration (only `langchain_text_splitters` standalone for chunking)
   - Use async for embedding calls
+  - Voyage AI `input_type` param: `"document"` for ingestion, `"query"` for retrieval (improves retrieval quality)
+  - Batch embedding limit: ~200 chunks per call (120K token limit for voyage-4-large)
   - LLM provider swappable via env var (Gemini 2.0 Flash default, OpenAI as alternative)
+  - Gemini auth: API key as query param (not Bearer header). Endpoint: `generativelanguage.googleapis.com/v1beta/models/{model}`
+  - System prompt via `system_instruction` field (separate from `contents` array)
+  - Two SSE hops for streaming: Gemini → backend (Gemini SSE) → browser (our SSE endpoint)
+  - `generate()` for eval (non-streaming, full response), `generate_stream()` for chat UI (streaming, real-time typing)
+  - Shared httpx AsyncClient per provider (module-level, cleaned up via FastAPI `lifespan` hook)
 
   #### Metadata Schema Per Chunk
   ```python
@@ -288,7 +319,7 @@ Database tables needed:
 
   - Backend: FastAPI (already in Flame Fitness)
   - Vector DB: pgvector in Supabase (already using PostgreSQL)
-  - Embedding model: OpenAI `text-embedding-3-large` (3072 dims)
+  - Embedding model: Voyage AI `voyage-4-large` (1024 dims)
   - LLM: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
   - PDF loading: pymupdf (fitz)
   - Chunking: `langchain_text_splitters` (standalone, no LangChain orchestration)

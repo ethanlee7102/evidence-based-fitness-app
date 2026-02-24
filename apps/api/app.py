@@ -1,16 +1,28 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import api_router
+from src.core import embedding_provider, llm_provider
 
 # Enable debug logging
 logging.basicConfig(level=logging.DEBUG)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    # Clean up shared httpx clients on shutdown
+    await embedding_provider.client.aclose()
+    await llm_provider.client.aclose()
+
+
 app = FastAPI(
     title="Flame Fitness API",
-    description="AI-powered form analysis for the Big 3 lifts",
+    description="AI-powered workout logging with RAG chatbot",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
