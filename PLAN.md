@@ -322,7 +322,7 @@ Building an exercise science RAG chatbot for Flame Fitness at `/dashboard/chat`.
 
 ### Tech Stack Decisions
 - **Vector DB**: pgvector in Supabase (already using PostgreSQL)
-- **Embedding**: OpenAI `text-embedding-3-large` (3072 dims)
+- **Embedding**: Voyage AI `voyage-4-large` (1024 dims)
 - **LLM**: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
 - **Chunking**: Section-aware with fixed-size fallback (standalone `langchain_text_splitters`)
 - **Observability**: Custom TraceLogger (stores traces in Supabase)
@@ -335,43 +335,46 @@ Building an exercise science RAG chatbot for Flame Fitness at `/dashboard/chat`.
 ---
 
 ### Phase 1: Database Schema
-**Status**: ⏳ Next
+**Status**: ✅ Complete
 
-Create `supabase/migrations/005_rag_tables.sql`:
+Created `supabase/migrations/005_rag_tables.sql`:
 - Enable pgvector extension
-- `papers` table — title, authors, year, journal, doi, url, category, study_type, content_hash (unique, for dedup), total_chunks, embedding_model, ingested_at
-- `chunks` table — paper_id (FK), chunk_index, text, section, embedding VECTOR(3072), chunking_method
+- `papers` table — title, authors, year, journal, doi, url, category, study_type, abstract, content_hash (unique, for dedup), total_chunks, embedding_model, ingested_at
+- `chunks` table — paper_id (FK), chunk_index, text, section, page_start, page_end, token_count, embedding VECTOR(1024), chunking_method
 - HNSW index on chunks.embedding for cosine similarity
 - `chat_sessions` table — user_id (FK), title, created_at, updated_at
 - `chat_messages` table — session_id (FK), role, content, citations (JSONB), created_at
 - `rag_traces` table — session_id, message_id, user_id, query, retrieved_chunks (JSONB), prompt_sent, llm_response, timing data, error
 - RLS policies: users own their sessions/messages/traces; papers/chunks are public-read
-- `match_chunks` RPC function — takes query embedding, returns top-k chunks with paper metadata
+- `match_chunks` RPC function — takes query embedding VECTOR(1024), returns top-k chunks with paper metadata
 
 **Verify**: Run migration, confirm tables + vector extension exist.
 
 ---
 
 ### Phase 2: Backend Infrastructure
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-**2A. Config** — Add RAG env vars to `apps/api/src/utils/config.py`
-- OPENAI_API_KEY, GOOGLE_API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSIONS, LLM_PROVIDER, LLM_MODEL, CHUNK_SIZE, CHUNK_OVERLAP, RAG_TOP_K, RAG_SIMILARITY_THRESHOLD
+**2A. Config** — `apps/api/src/utils/config.py`
+- Added: VOYAGE_API_KEY, GOOGLE_API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSIONS, EMBEDDING_BATCH_SIZE, LLM_PROVIDER, LLM_MODEL, CHUNK_SIZE, CHUNK_OVERLAP, RAG_TOP_K, RAG_SIMILARITY_THRESHOLD
+- Lazy validation — RAG keys only checked when providers are called
 
 **2B. Embedding Provider** — `apps/api/src/core/embedding_provider.py`
-- `embed_texts(texts)` — batch embedding via OpenAI REST API (httpx, async)
-- `embed_query(query)` — single query embedding
-- Direct HTTP calls, no SDK
+- `embed_texts(texts)` — batch embedding, `input_type: "document"`, auto-batches ~200/call
+- `embed_query(query)` — single query embedding, `input_type: "query"`
+- Shared httpx AsyncClient with connection pooling
 
 **2C. LLM Provider** — `apps/api/src/core/llm_provider.py`
-- `generate(prompt, system)` — full response (for eval)
-- `generate_stream(prompt, system)` — streaming (for chat)
-- Provider switch via env var (google/openai)
-- Direct HTTP calls via httpx
+- `generate(prompt, system, temperature=0.7, max_tokens=2048)` — non-streaming via `generateContent`
+- `generate_stream(prompt, system, temperature=0.7, max_tokens=2048)` — SSE streaming via `streamGenerateContent`
+- SSE parsing with debug logging on malformed lines
+- Shared httpx AsyncClient with connection pooling
 
-**2D. Dependencies** — Add `pymupdf>=1.24.0`, `langchain-text-splitters>=0.2.0` to requirements.txt
+**2D. Dependencies** — Added `pymupdf>=1.24.0`, `langchain-text-splitters>=0.2.0`
 
-**Verify**: `embed_query("test")` returns 3072-dim vector.
+**2E. Lifespan** — `app.py` updated with `lifespan` hook to clean up shared httpx clients on shutdown
+
+**Verified**: `embed_query("test")` returns 1024-dim float vector ✅
 
 ---
 
@@ -385,6 +388,7 @@ Create `supabase/migrations/005_rag_tables.sql`:
 - `extract_sections(pdf_path)` — pymupdf font analysis to detect section headers
 - `chunk_with_sections(sections)` — RecursiveCharacterTextSplitter within sections
 - `ingest_paper(pdf_path, metadata)` — full pipeline: load → hash → dedup check → chunk → embed → store
+- Add retry with exponential backoff to `embed_texts()` calls (2-3 retries on 429/500/503, delays: 1s→2s→4s)
 
 **3C. CLI Scripts** — `apps/api/scripts/ingest_paper.py` + `ingest_batch.py`
 
