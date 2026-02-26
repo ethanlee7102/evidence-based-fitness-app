@@ -48,11 +48,18 @@ flame-fitness/
 │   └── api/                      # Python backend (port 8000)
 │       ├── src/
 │       │   ├── api/              # Route handlers (health, profile)
-│       │   ├── core/             # Business logic (empty, ready for workout features)
-│       │   ├── schema/           # Pydantic models (profile.py)
+│       │   ├── core/             # Business logic
+│       │   │   ├── embedding_provider.py  # Voyage AI embed_texts/embed_query
+│       │   │   ├── llm_provider.py        # Gemini generate/generate_stream
+│       │   │   └── ingestion.py           # PDF extraction, chunking, ingestion pipeline
+│       │   ├── schema/           # Pydantic models (profile.py, rag.py)
 │       │   ├── service/          # db_service, storage_service
 │       │   ├── utils/            # config, auth, logging
 │       │   └── db.py             # Supabase client
+│       ├── scripts/
+│       │   ├── ingest_paper.py   # Single paper CLI ingestion
+│       │   └── ingest_batch.py   # Batch ingestion from manifest.json
+│       ├── papers/               # PDF storage (gitignored) + manifest.json
 │       ├── tests/
 │       └── app.py                # FastAPI entry point
 │
@@ -73,8 +80,9 @@ flame-fitness/
 - **Entry point**: `app.py` (run with `uvicorn app:app`)
 - **Auth**: JWT verification via `get_current_user` dependency
 - **HTTP clients**: Shared module-level `httpx.AsyncClient` per provider (connection pooling). Cleaned up via FastAPI `lifespan` hook in `app.py`.
-- **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI
+- **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI. `embed_texts()` has retry logic (3 attempts, exponential backoff on 429/500/503).
 - **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini. Both accept `temperature` and `max_tokens` params.
+- **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Section detection via font size, bold+keyword, bold+numbered patterns. Inline Abstract detection.
 
 ### Database Tables
 - `profiles` - extends Supabase auth.users with onboarding fields:
@@ -104,6 +112,12 @@ pip install -r requirements.txt
 
 # Run tests
 cd apps/api && pytest tests/ -v
+
+# Ingest a single paper
+cd apps/api && python -m scripts.ingest_paper --pdf papers/example.pdf --title "..." --authors "..." --year 2021 --category nutrition --license CC-BY
+
+# Batch ingest from manifest
+cd apps/api && python -m scripts.ingest_batch
 ```
 
 ## Environment Variables
@@ -118,7 +132,7 @@ cd apps/api && pytest tests/ -v
 - `SUPABASE_SECRET_KEY`
 - `VOYAGE_API_KEY` — required for RAG embedding (Voyage AI)
 - `GOOGLE_API_KEY` — required for RAG generation (Gemini)
-- Optional with defaults: `EMBEDDING_MODEL` (voyage-4-large), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_BATCH_SIZE` (200), `LLM_PROVIDER` (google), `LLM_MODEL` (gemini-2.0-flash), `CHUNK_SIZE` (800), `CHUNK_OVERLAP` (200), `RAG_TOP_K` (5), `RAG_SIMILARITY_THRESHOLD` (0.3)
+- Optional with defaults: `EMBEDDING_MODEL` (voyage-4-large), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_BATCH_SIZE` (200), `LLM_PROVIDER` (google), `LLM_MODEL` (gemini-2.0-flash), `CHUNK_SIZE` (800 tokens — passed as ~3200 chars to splitter), `CHUNK_OVERLAP` (200 chars), `RAG_TOP_K` (5), `RAG_SIMILARITY_THRESHOLD` (0.3)
 
 ## Current Status
 - Auth flow working with Supabase
@@ -127,6 +141,8 @@ cd apps/api && pytest tests/ -v
 - Core infrastructure in place
 - RAG Phase 1 (database schema) complete — pgvector tables + RPC running in Supabase
 - RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
+- RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 2 papers ingested (138 chunks)
+- Migration 006: Added `license` field to `papers` table for tracking content usage rights
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
@@ -222,7 +238,7 @@ Database tables needed:
   #### Ingestion Pipeline (offline, run once per paper)
   1. Load PDFs using pymupdf (fitz) with font analysis to detect section headers
   2. Section-aware chunking — RecursiveCharacterTextSplitter within sections (never across), with fixed-size fallback if no headers detected
-  3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, section, chunk_index
+  3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, license, section, chunk_index
   4. Embed each chunk using Voyage AI `voyage-4-large` (1024-dim), `input_type: "document"`, batched in groups of ~200
   5. Store chunk text + embedding + metadata in pgvector (Supabase)
   6. SHA-256 content hash for deduplication (skip re-processing unchanged papers)
@@ -236,6 +252,7 @@ Database tables needed:
   6. Handle "I don't know" — if no relevant chunks found, say so instead of hallucinating
 
   #### Key Decisions
+  - **License-aware corpus**: Each paper tracks its CC license. For commercial use, filter to CC-BY/CC0 only. LLM synthesizes answers in its own words (never displays verbatim chunks) — most defensible RAG architecture for copyright.
   - ONE vector database (pgvector in Supabase), not separate DBs per category
   - Categories (nutrition, hypertrophy, strength) = metadata tags, not separate collections
   - Vector search naturally handles topic matching across categories
@@ -262,6 +279,7 @@ Database tables needed:
           "doi": "10.1234/example",
           "category": "hypertrophy",  # or "nutrition", "strength", etc.
           "study_type": "meta-analysis",  # or "RCT", "review", etc.
+          "license": "CC-BY",  # CC0, CC-BY, CC-BY-NC, unknown, etc.
           "section": "Results",
           "chunk_index": 3,
           "total_chunks": 12

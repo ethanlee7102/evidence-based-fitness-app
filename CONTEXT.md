@@ -1,4 +1,4 @@
-# Phase 2: Backend Infrastructure — Context
+# RAG Chatbot — Implementation Context
 
 ## Embedding Decision (Resolved)
 
@@ -198,10 +198,94 @@ These columns were added during Phase 1 implementation after discussion:
 - `chunks.page_start` / `chunks.page_end` — for page-level citations (e.g. "Schoenfeld et al., 2017, p. 12"). Most chunks will be single-page since chunk size (~500-1000 tokens) fits within one PDF page (~500-800 words).
 - `chunks.token_count` — for prompt assembly budget. When stuffing top-k chunks into LLM context, sum token_count to know if you can fit 5 chunks or only 3 before hitting the limit. Stored at ingestion time to avoid re-tokenizing at query time.
 
+## License & Copyright Strategy
+
+### Decision
+Track the Creative Commons license of every ingested paper. This enables filtering the corpus to commercially-usable papers (CC-BY, CC0) if the app is ever monetized.
+
+### License field
+Added via migration `006_add_paper_license.sql`. Column on `papers` table with CHECK constraint: CC0, CC-BY, CC-BY-SA, CC-BY-ND, CC-BY-NC, CC-BY-NC-SA, CC-BY-NC-ND, other, unknown. Defaults to `'unknown'`.
+
+### Paper sourcing strategy
+- **Primary source**: PMC Open Access Subset (pmc.ncbi.nlm.nih.gov/tools/openftlist/) — millions of papers tagged by license
+- **Search filter**: Append `AND cc by license[filter]` to PMC searches for commercial-safe papers
+- **For v1 learning**: Use whatever papers help build/test the pipeline; license tracking is for future-proofing
+- **For commercial use**: Filter corpus to `WHERE license IN ('CC0', 'CC-BY', 'CC-BY-SA', 'CC-BY-ND')`
+
+### Copyright-safe RAG design
+- LLM synthesizes answers in its own words — verbatim chunks are **never** displayed to users
+- Chunks are an internal retrieval mechanism, not a display mechanism
+- Prompt instructs LLM to explain in its own words, not quote directly
+- Citations give attribution ([Author, Year] with DOI/URL links)
+- This is the most defensible RAG architecture: transformative output, no market substitution, factual content (thin copyright), proper attribution
+
+### Legal context (as of Feb 2026)
+- No definitive court ruling on RAG + copyrighted content yet (Perplexity cases pending)
+- Google Books precedent (intermediate copying for search = fair use) most analogous to our design
+- Thomson Reuters v. ROSS (2025) rejected fair use but involved a direct market competitor — not analogous
+- Scientific facts get less copyright protection than creative works
+- CC-BY papers = zero legal risk (explicit permission with attribution only)
+
+---
+
+---
+
+## Phase 3: Ingestion Pipeline — ✅ Complete
+
+### What Was Built
+- **Schemas** (`src/schema/rag.py`) — PaperMetadata, PaperResponse, ChunkResponse with Literal types matching DB CHECK constraints
+- **Ingestion core** (`src/core/ingestion.py`) — compute_content_hash, extract_sections, chunk_sections, ingest_paper
+- **Retry logic** — added to embed_texts() in embedding_provider.py: 3 attempts, 1s→2s→4s backoff, on 429/500/503
+- **CLI scripts** — `scripts/ingest_paper.py` (single) + `scripts/ingest_batch.py` (batch from manifest.json)
+- **Papers directory** — `papers/` for PDFs (gitignored), `papers/manifest.json` checked in
+
+### Section Detection (3 paths + Abstract handling)
+Header detection evolved through testing with real papers:
+
+1. **Large font** (>= 1.2x median body font) + short text (<100 chars) → header
+2. **Bold + known keyword** — handles papers where headers are same font size but bold. Keywords: abstract, introduction, methods, results, discussion, conclusion(s), references, etc.
+3. **Bold + top-level numbered** — regex `^\d+\.\s+\S` catches "3. Exercise and Sports Performance" but not "3.1 Subtopic". Needed because many section titles aren't in the keyword list.
+4. **Inline Abstract** — some journals (MDPI/Nutrients) format as `"Abstract: full text..."` in one block. Detects bold "Abstract" first span, splits into header + body.
+
+Normalization strips leading numbers before keyword matching: `"1. Introduction"` → `"introduction"`, `"3.2 Results"` → `"results"`
+
+Fallback: if <= 1 header detected → entire document as one section with `section=None`
+
+### Per-Chunk Page Tracking
+Each section carries a `page_map: list[tuple[int, int]]` mapping char offsets to page numbers. After chunking, `_find_page_range()` maps each chunk's text position back to specific pages for accurate citations.
+
+### Supabase Insert Pattern
+```python
+result = supabase.table("papers").insert(paper_data).execute()
+paper_id = result.data[0]["id"]  # auto-generated UUID returned by default
+```
+supabase-py sends `Prefer: return=representation` by default. Don't include `"id"` in the insert dict — let PostgreSQL generate it via `gen_random_uuid()`.
+
+### Test Results
+- **Wax et al. 2021** (creatine review) — 70 chunks, 9 sections detected including Abstract
+- **Kazeminasab et al. 2025** (creatine meta-analysis) — 68 chunks, 7 sections detected including Abstract
+- Dedup confirmed — re-run skips with "Paper already ingested"
+- Retry logic confirmed — triggered on Voyage 429 before payment method was added
+- Voyage free tier without payment: 3 RPM / 10K TPM (very restrictive). Adding payment method unlocks normal limits, free tokens still apply.
+
+### Async/Sync Pattern
+`ingest_paper()` is async (to await embed_texts) but uses sync Supabase client for DB calls. Fine for CLI scripts — sync calls block event loop briefly but nothing else is waiting. Comment in code notes to wrap in `asyncio.to_thread()` if ever called from web handlers.
+
+---
+
+## Phase 5 Ideas (noted for later)
+- **Abstract-augmented retrieval**: Always include abstract of cited papers in prompt context, even if abstract chunk didn't make top-k. Gives LLM full-picture grounding for better answers.
+- **Two-stage retrieval (v2)**: Search abstracts first to find relevant papers, then search chunks within those papers for specific evidence.
+
+---
+
 ## Session Notes
 - **Phase 1 migration** has been run in Supabase — tables and pgvector extension confirmed working.
 - **Phase 2 implementation** complete and verified — embedding provider, LLM provider, config, dependencies all working.
+- **Migration 006** — `license` column added to papers table and applied in Supabase.
+- **Phase 3 implementation** complete and verified — 2 papers ingested, section detection working, dedup working.
 - **PLAN.md** exists at project root — keep phase statuses updated there as work completes.
 - **CLAUDE.md** has a reference to PLAN.md at the top.
-- **Stale `__pycache__`** in `src/core/` from old CV analyzer — cleaned up.
+- **Corpus**: 2 papers ingested (138 chunks total). Both from Nutrients journal, CC-BY licensed. PDFs in `apps/api/papers/` (gitignored).
+- **Next**: Phase 4 (Retrieval Pipeline) — wire embed_query() to match_chunks RPC.
 
