@@ -1,7 +1,12 @@
+import asyncio
 import httpx
 import logging
 
 from src.utils.config import config
+
+RETRYABLE_STATUSES = {429, 500, 503}
+MAX_RETRIES = 3
+BACKOFF_DELAYS = [1, 2, 4]  # seconds
 
 logger = logging.getLogger(__name__)
 
@@ -30,21 +35,35 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
 
     for i in range(0, len(texts), batch_size):
         batch = texts[i : i + batch_size]
+        batch_num = i // batch_size + 1
 
-        response = await client.post(
-            VOYAGE_API_URL,
-            headers={
-                "Authorization": f"Bearer {config.VOYAGE_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "input": batch,
-                "model": config.EMBEDDING_MODEL,
-                "input_type": "document",
-            },
-        )
+        # Retry loop with exponential backoff for transient errors
+        for attempt in range(MAX_RETRIES):
+            response = await client.post(
+                VOYAGE_API_URL,
+                headers={
+                    "Authorization": f"Bearer {config.VOYAGE_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "input": batch,
+                    "model": config.EMBEDDING_MODEL,
+                    "input_type": "document",
+                },
+            )
 
-        if response.status_code != 200:
+            if response.status_code == 200:
+                break
+
+            if response.status_code in RETRYABLE_STATUSES and attempt < MAX_RETRIES - 1:
+                delay = BACKOFF_DELAYS[attempt]
+                logger.warning(
+                    f"Voyage API {response.status_code} on batch {batch_num}, "
+                    f"retrying {attempt + 1}/{MAX_RETRIES} in {delay}s..."
+                )
+                await asyncio.sleep(delay)
+                continue
+
             raise RuntimeError(
                 f"Voyage API error {response.status_code}: {response.text}"
             )
@@ -52,7 +71,7 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
         data = response.json()
         total_tokens = data.get("usage", {}).get("total_tokens", 0)
         logger.info(
-            f"Embedded batch {i // batch_size + 1} "
+            f"Embedded batch {batch_num} "
             f"({len(batch)} texts, {total_tokens} tokens)"
         )
 

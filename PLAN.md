@@ -330,7 +330,8 @@ Building an exercise science RAG chatbot for Flame Fitness at `/dashboard/chat`.
 - **Streaming**: SSE from FastAPI
 - **Memory**: Last N messages per session
 - **Citations**: Inline `[Author, Year]` with paper DOI/URL links
-- **Corpus**: 50-100 papers for v1 (manual collection)
+- **Corpus**: 50-100 papers for v1 (manual collection). Prefer CC-BY/CC0 from PMC Open Access Subset for commercial viability. Track license per paper.
+- **Copyright strategy**: LLM synthesizes answers in own words, never displays verbatim chunks. Papers sourced from PMC Open Access (CC-BY preferred). License field enables filtering to commercially-safe corpus if needed.
 
 ---
 
@@ -339,7 +340,7 @@ Building an exercise science RAG chatbot for Flame Fitness at `/dashboard/chat`.
 
 Created `supabase/migrations/005_rag_tables.sql`:
 - Enable pgvector extension
-- `papers` table — title, authors, year, journal, doi, url, category, study_type, abstract, content_hash (unique, for dedup), total_chunks, embedding_model, ingested_at
+- `papers` table — title, authors, year, journal, doi, url, category, study_type, abstract, content_hash (unique, for dedup), total_chunks, embedding_model, license (CC license tracking for commercial filtering), ingested_at
 - `chunks` table — paper_id (FK), chunk_index, text, section, page_start, page_end, token_count, embedding VECTOR(1024), chunking_method
 - HNSW index on chunks.embedding for cosine similarity
 - `chat_sessions` table — user_id (FK), title, created_at, updated_at
@@ -347,6 +348,8 @@ Created `supabase/migrations/005_rag_tables.sql`:
 - `rag_traces` table — session_id, message_id, user_id, query, retrieved_chunks (JSONB), prompt_sent, llm_response, timing data, error
 - RLS policies: users own their sessions/messages/traces; papers/chunks are public-read
 - `match_chunks` RPC function — takes query embedding VECTOR(1024), returns top-k chunks with paper metadata
+
+Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-SA, CC-BY-ND, CC-BY-NC, CC-BY-NC-SA, CC-BY-NC-ND, other, unknown) with default `'unknown'`. Enables filtering corpus to commercially-usable papers only.
 
 **Verify**: Run migration, confirm tables + vector extension exist.
 
@@ -379,22 +382,40 @@ Created `supabase/migrations/005_rag_tables.sql`:
 ---
 
 ### Phase 3: Ingestion Pipeline
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
 **3A. Schemas** — `apps/api/src/schema/rag.py`
-- PaperMetadata, PaperResponse, ChunkResponse, ChatMessageRequest, ChatMessageResponse, ChatSessionResponse
+- PaperMetadata (includes `license` field), PaperResponse, ChunkResponse
+- Literal types for Category, License, StudyType matching DB CHECK constraints
 
 **3B. Ingestion Core** — `apps/api/src/core/ingestion.py`
-- `extract_sections(pdf_path)` — pymupdf font analysis to detect section headers
-- `chunk_with_sections(sections)` — RecursiveCharacterTextSplitter within sections
-- `ingest_paper(pdf_path, metadata)` — full pipeline: load → hash → dedup check → chunk → embed → store
-- Add retry with exponential backoff to `embed_texts()` calls (2-3 retries on 429/500/503, delays: 1s→2s→4s)
+- `extract_sections(pdf_path)` — section header detection via 3 paths:
+  1. Large font (>= 1.2x median body font) + short text
+  2. Bold + known section keyword (Abstract, Introduction, Methods, Results, etc.)
+  3. Bold + top-level numbered pattern (e.g. "3. Topic Name" but not "3.1 Subtopic")
+- Inline "Abstract:" detection — splits bold "Abstract:" label from body text when they're in one block
+- Per-chunk page tracking via char-offset-to-page mapping
+- Fallback: if <= 1 header detected → single section with `section=None`
+- `chunk_sections(sections)` — RecursiveCharacterTextSplitter within sections, chunk_size=3200 chars (~800 tokens), overlap=200 chars
+- `compute_content_hash(pdf_path)` — SHA-256 of PDF bytes for dedup
+- `ingest_paper(pdf_path, metadata)` — full pipeline: hash → dedup check → extract → chunk → embed → store. Delete paper row on error (try/except cleanup).
+- Token counting: `len(text) / 4` stored in `chunks.token_count`
 
-**3C. CLI Scripts** — `apps/api/scripts/ingest_paper.py` + `ingest_batch.py`
+**3C. Retry Logic** — `apps/api/src/core/embedding_provider.py`
+- Added retry to `embed_texts()`: 3 attempts on 429/500/503, exponential backoff 1s→2s→4s
+- `embed_query()` unchanged (user-facing, fail fast)
 
-**3D. Papers Directory** — `apps/api/papers/` + `manifest.json`
+**3D. CLI Scripts** — `apps/api/scripts/ingest_paper.py` + `ingest_batch.py`
+- Run as modules: `cd apps/api && python -m scripts.ingest_paper`
+- argparse for metadata, `asyncio.run()` for async ingestion
 
-**Verify**: Ingest one test PDF. Re-run = skipped (dedup).
+**3E. Papers Directory** — `apps/api/papers/` (PDFs gitignored) + `manifest.json` (checked in)
+
+**Verified**:
+- Ingested 2 papers: Wax et al. 2021 (70 chunks, 9 sections), Kazeminasab et al. 2025 (68 chunks, 7 sections)
+- Dedup working — re-run skips with "Paper already ingested"
+- Abstract detected as proper section in both papers
+- Retry logic triggered and worked on Voyage 429 (before adding payment method)
 
 ---
 

@@ -55,3 +55,6 @@ tmp/
 
 # Uploaded videos (local development)
 uploads/
+
+# Research paper PDFs (large binary files)
+apps/api/papers/*.pdf
