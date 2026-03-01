@@ -420,12 +420,24 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 ---
 
 ### Phase 4: Retrieval Pipeline
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-Create `apps/api/src/core/retrieval.py`:
-- `retrieve_chunks(query, top_k, category, threshold)` — embed query → call `match_chunks` RPC → return chunks with paper metadata and similarity scores
+**4A. Migration** — `supabase/migrations/007_match_chunks_add_token_count.sql`
+- `DROP FUNCTION` + `CREATE FUNCTION match_chunks(...)` — adds `token_count INTEGER` to RETURNS TABLE
+- DROP required because PostgreSQL can't `CREATE OR REPLACE` when RETURNS TABLE columns change
+- No table changes, no data loss — just replaces the function signature
 
-**Verify**: `retrieve_chunks("What rep range is best for hypertrophy?")` returns relevant chunks.
+**4B. Schema** — `apps/api/src/schema/rag.py`
+- Added `token_count: Optional[int] = None` to `ChunkResponse`
+- Added `RetrievalResult` dataclass (internal data carrier: chunks + query + timing)
+
+**4C. Retrieval** — `apps/api/src/core/retrieval.py`
+- `retrieve_chunks(query, top_k, category, similarity_threshold)` — async function
+- Embeds query via `embed_query()`, calls `match_chunks` RPC, parses into `list[ChunkResponse]`
+- Logs: query (truncated 80 chars), chunk count, similarity range, timing
+- Returns `RetrievalResult` with chunks, query text, and elapsed time in ms
+
+**Verified**: Run migration in Supabase SQL Editor, then test with Python REPL.
 
 ---
 

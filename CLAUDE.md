@@ -51,7 +51,8 @@ flame-fitness/
 │       │   ├── core/             # Business logic
 │       │   │   ├── embedding_provider.py  # Voyage AI embed_texts/embed_query
 │       │   │   ├── llm_provider.py        # Gemini generate/generate_stream
-│       │   │   └── ingestion.py           # PDF extraction, chunking, ingestion pipeline
+│       │   │   ├── ingestion.py           # PDF extraction, chunking, ingestion pipeline
+│       │   │   └── retrieval.py           # retrieve_chunks() → vector search → RetrievalResult
 │       │   ├── schema/           # Pydantic models (profile.py, rag.py)
 │       │   ├── service/          # db_service, storage_service
 │       │   ├── utils/            # config, auth, logging
@@ -83,6 +84,7 @@ flame-fitness/
 - **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI. `embed_texts()` has retry logic (3 attempts, exponential backoff on 429/500/503).
 - **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini. Both accept `temperature` and `max_tokens` params.
 - **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Section detection via font size, bold+keyword, bold+numbered patterns. Inline Abstract detection.
+- **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing). Logs query, chunk count, similarity range, timing at INFO level.
 
 ### Database Tables
 - `profiles` - extends Supabase auth.users with onboarding fields:
@@ -142,7 +144,9 @@ cd apps/api && python -m scripts.ingest_batch
 - RAG Phase 1 (database schema) complete — pgvector tables + RPC running in Supabase
 - RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
 - RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 2 papers ingested (138 chunks)
+- RAG Phase 4 (retrieval pipeline) complete — `retrieve_chunks()` function, `RetrievalResult` dataclass, migration 007 adds `token_count` to `match_chunks` RPC
 - Migration 006: Added `license` field to `papers` table for tracking content usage rights
+- Migration 007: DROP + CREATE `match_chunks` RPC to include `token_count` in return (PostgreSQL requires DROP when RETURNS TABLE columns change)
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
