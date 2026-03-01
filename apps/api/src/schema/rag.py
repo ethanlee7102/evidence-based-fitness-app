@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -69,6 +70,7 @@ class ChunkResponse(BaseModel):
     chunk_index: int
     page_start: Optional[int] = None
     page_end: Optional[int] = None
+    token_count: Optional[int] = None
     similarity: float
     # Flattened paper metadata for citations
     title: str
@@ -79,3 +81,12 @@ class ChunkResponse(BaseModel):
     url: Optional[str] = None
     category: Category
     study_type: Optional[StudyType] = None
+
+
+@dataclass
+class RetrievalResult:
+    """Result from retrieve_chunks() — bundles chunks with query metadata."""
+
+    chunks: list[ChunkResponse] = field(default_factory=list)
+    query: str = ""
+    retrieval_time_ms: float = 0.0

@@ -279,13 +279,47 @@ supabase-py sends `Prefer: return=representation` by default. Don't include `"id
 
 ---
 
+## Phase 4: Retrieval Pipeline — ✅ Complete
+
+### What Was Built
+- **Migration 007** (`007_match_chunks_add_token_count.sql`) — Updates `match_chunks` RPC to return `token_count` alongside existing columns
+- **Schema update** (`src/schema/rag.py`) — Added `token_count: Optional[int] = None` to `ChunkResponse`, added `RetrievalResult` dataclass
+- **Retrieval module** (`src/core/retrieval.py`) — `retrieve_chunks()` async function
+
+### `retrieve_chunks()` Flow
+1. Start perf timer
+2. `await embed_query(query)` — reuses Voyage AI provider with `input_type="query"`
+3. `get_supabase().rpc("match_chunks", params).execute()` — vector similarity search via pgvector
+4. Parse rows into `list[ChunkResponse]` via Pydantic
+5. Log: query (truncated 80 chars), chunk count, similarity range (min-max), timing
+6. Return `RetrievalResult(chunks, query, retrieval_time_ms)`
+
+### `RetrievalResult` — Why Dataclass, Not Pydantic
+Internal data carrier passed between `retrieval.py` → `rag_pipeline.py` → `trace_logger.py`. Never serialized to/from JSON over the wire. Dataclass is lighter — no validation overhead for trusted internal data.
+
+### PostgreSQL Gotcha: DROP Before CREATE When Return Type Changes
+`CREATE OR REPLACE FUNCTION` can only change the function **body**, not the `RETURNS TABLE` columns. Adding `token_count` to the return type is a signature change, so PostgreSQL requires `DROP FUNCTION` first, then `CREATE FUNCTION`. This is safe — no data loss, just replaces the function.
+
+### `token_count` Purpose
+Phase 5 needs token counts to budget how many chunks fit in the LLM's context window. Without it, you'd re-count tokens on every query (wasteful) or blindly stuff chunks and risk truncation.
+
+### Decisions
+- **No query reformulation here** — retrieval stays "dumb." Phase 5 handles history-aware query rewriting before calling `retrieve_chunks()`
+- **No re-ranking** — deferred to v2. pgvector cosine similarity ordering is the final ranking for v1
+- **Defaults from config** — `top_k` falls back to `config.RAG_TOP_K` (5), threshold to `config.RAG_SIMILARITY_THRESHOLD` (0.3)
+- **Optional category filter** — `None` = search all categories. Vector search handles topic matching naturally
+
+---
+
 ## Session Notes
 - **Phase 1 migration** has been run in Supabase — tables and pgvector extension confirmed working.
 - **Phase 2 implementation** complete and verified — embedding provider, LLM provider, config, dependencies all working.
 - **Migration 006** — `license` column added to papers table and applied in Supabase.
 - **Phase 3 implementation** complete and verified — 2 papers ingested, section detection working, dedup working.
+- **Migration 007** — `match_chunks` RPC updated to return `token_count`. Requires DROP+CREATE (not CREATE OR REPLACE) due to return type change.
+- **Phase 4 implementation** complete — retrieval module, schema updates, migration all in place.
 - **PLAN.md** exists at project root — keep phase statuses updated there as work completes.
 - **CLAUDE.md** has a reference to PLAN.md at the top.
 - **Corpus**: 2 papers ingested (138 chunks total). Both from Nutrients journal, CC-BY licensed. PDFs in `apps/api/papers/` (gitignored).
-- **Next**: Phase 4 (Retrieval Pipeline) — wire embed_query() to match_chunks RPC.
+- **Next**: Phase 5 (RAG Generation Pipeline) — build_rag_prompt, rag_query, rag_query_stream.
 
