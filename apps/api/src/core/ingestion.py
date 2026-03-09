@@ -3,6 +3,14 @@
 Takes PDF research papers, extracts text with section awareness,
 chunks them, embeds via Voyage AI, and stores in Supabase.
 
+Uses IBM Docling for PDF parsing — ML-based layout analysis (DocLayNet model)
+handles double-column layouts, section headers, and tables automatically.
+Header hierarchy is determined by a layered approach:
+  1a. Bounding box matching: Docling header bbox → pymupdf span → font size grouping
+  1b. Bold tiebreaker: within a same-size group, bold = major, non-bold = minor
+  1c. ALL_CAPS tiebreaker: within a same-size group, ALL_CAPS = major, mixed-case = minor
+  2. ALL_CAPS / numbered prefix fallback (when font sizes are uniform)
+
 Note: uses sync Supabase client inside async functions. Fine for CLI scripts.
 Wrap DB calls in asyncio.to_thread() if ever called from web request handlers.
 """
@@ -10,9 +18,12 @@ Wrap DB calls in asyncio.to_thread() if ever called from web request handlers.
 import hashlib
 import logging
 import re
-from statistics import median
 
-import fitz  # pymupdf
+import fitz  # pymupdf — used only for font size lookups on Docling-detected headers
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
+from docling_core.types.doc.labels import DocItemLabel
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.core.embedding_provider import embed_texts
@@ -22,16 +33,217 @@ from src.utils.config import config
 
 logger = logging.getLogger(__name__)
 
-# Known academic section headers (case-insensitive matching)
-KNOWN_SECTIONS = {
-    "abstract", "introduction", "background", "methods", "methodology",
-    "materials and methods", "results", "discussion", "conclusion",
-    "conclusions", "references", "acknowledgements", "acknowledgments",
-    "limitations", "future work", "related work", "literature review",
-    "experimental design", "study design", "statistical analysis",
-    "data analysis", "findings", "implications", "supplementary",
-    "appendix",
-}
+# Lazy singleton — loads ML models once on first use, reuses for batch ingestion
+_converter: DocumentConverter | None = None
+
+# Font size tolerance for grouping (sizes within this range are considered the same)
+_FONT_SIZE_TOLERANCE = 0.5
+
+# Bounding box overlap tolerance in points (handles sub-point coord rounding)
+_BBOX_TOLERANCE = 2.0
+
+
+def _get_converter() -> DocumentConverter:
+    """Get or create the Docling document converter (lazy singleton)."""
+    global _converter
+    if _converter is None:
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.generate_picture_images = False
+        pipeline_options.generate_page_images = False
+        _converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            }
+        )
+    return _converter
+
+
+def _bbox_overlap(a: tuple, b: tuple, tolerance: float = _BBOX_TOLERANCE) -> bool:
+    """Check if two (x0, y0, x1, y1) rects overlap, with tolerance in points."""
+    return not (
+        a[0] > b[2] + tolerance
+        or a[2] < b[0] - tolerance
+        or a[1] > b[3] + tolerance
+        or a[3] < b[1] - tolerance
+    )
+
+
+def _find_font_info_by_bbox(
+    pymupdf_page, docling_bbox, page_height: float,
+) -> tuple[float | None, bool]:
+    """Find a Docling header's font size and bold status by spatial lookup.
+
+    Converts Docling's BOTTOMLEFT bbox to pymupdf's TOPLEFT coordinates,
+    then finds overlapping spans. Returns (max_font_size, is_bold) where
+    is_bold comes from the largest overlapping span.
+
+    pymupdf span flags: bit 4 = bold.
+    """
+    target = (
+        docling_bbox.l,
+        page_height - docling_bbox.t,
+        docling_bbox.r,
+        page_height - docling_bbox.b,
+    )
+
+    max_size: float = 0
+    is_bold = False
+    for block in pymupdf_page.get_text("dict")["blocks"]:
+        if block["type"] != 0:
+            continue
+        for line in block["lines"]:
+            for span in line["spans"]:
+                if _bbox_overlap(target, span["bbox"]) and span["size"] > max_size:
+                    max_size = span["size"]
+                    is_bold = bool(span["flags"] & (1 << 4))
+
+    return (max_size if max_size > 0 else None, is_bold)
+
+
+def _group_by_font_size(
+    sizes: list[float], tolerance: float = _FONT_SIZE_TOLERANCE,
+) -> list[list[int]]:
+    """Group indices by font size, with tolerance for rounding.
+
+    Returns groups sorted by font size descending (largest first).
+    Each group is a list of indices into the input list.
+    """
+    if not sizes:
+        return []
+
+    # Sort indices by font size descending
+    indexed = sorted(enumerate(sizes), key=lambda x: x[1], reverse=True)
+
+    groups: list[list[int]] = []
+    current_group: list[int] = [indexed[0][0]]
+    current_size = indexed[0][1]
+
+    for idx, size in indexed[1:]:
+        if current_size - size <= tolerance:
+            current_group.append(idx)
+        else:
+            groups.append(current_group)
+            current_group = [idx]
+            current_size = size
+
+    groups.append(current_group)
+    return groups
+
+
+def _is_all_caps(text: str) -> bool:
+    """Check if text is ALL_CAPS (at least 3 alpha chars, all uppercase)."""
+    alpha_chars = [c for c in text if c.isalpha()]
+    return len(alpha_chars) >= 3 and all(c.isupper() for c in alpha_chars)
+
+
+def _classify_major_headers(
+    headers: list[tuple[str, int, object | None]],
+    pdf_path: str,
+) -> set[int]:
+    """Classify which Docling-detected headers are major section breaks.
+
+    Uses a layered approach:
+      1a. Bounding box matching — Docling bbox → pymupdf span → font size → grouping
+      1b. Bold tiebreaker — if the font-size group has a bold/non-bold mix,
+          use only the bold headers as major
+      1c. ALL_CAPS tiebreaker — if the font-size group has an ALL_CAPS/mixed-case mix,
+          use only the ALL_CAPS headers as major
+      2. Fallback (uniform font size) — ALL_CAPS or numbered prefix = major headers
+      3. Final fallback — all headers are major (no hierarchy detected)
+
+    Args:
+        headers: List of (header_text, page_num, docling_bbox) for each header.
+            docling_bbox may be None if provenance was missing.
+        pdf_path: Path to the PDF for font size lookups.
+
+    Returns set of indices into `headers` that are major section breaks.
+    """
+    if len(headers) <= 1:
+        return set(range(len(headers)))
+
+    # --- Layer 1a: Bounding box matching for font sizes and bold flags ---
+    pdf_doc = fitz.open(pdf_path)
+    font_sizes: list[float | None] = []
+    bold_flags: list[bool] = []
+    for _text, page_num, bbox in headers:
+        if bbox is not None:
+            page = pdf_doc[page_num - 1]
+            size, bold = _find_font_info_by_bbox(page, bbox, page.rect.height)
+            font_sizes.append(size)
+            bold_flags.append(bold)
+        else:
+            font_sizes.append(None)
+            bold_flags.append(False)
+    pdf_doc.close()
+
+    # Filter to headers where we found a font size
+    valid = [(i, size) for i, size in enumerate(font_sizes) if size is not None]
+
+    if valid:
+        valid_indices, valid_sizes = zip(*valid)
+        groups = _group_by_font_size(list(valid_sizes))
+
+        if len(groups) >= 2:
+            # Multiple font size groups — find the largest font group with >= 2 members
+            # (single-member groups are likely titles or outliers)
+            for group in groups:
+                if len(group) >= 2:
+                    major_indices = set(valid_indices[i] for i in group)
+
+                    # --- Layer 1b: Bold tiebreaker ---
+                    # If the font-size group has a mix of bold and non-bold,
+                    # use only bold headers as major (common in MDPI journals)
+                    bold_in_major = {i for i in major_indices if bold_flags[i]}
+                    if bold_in_major and len(bold_in_major) < len(major_indices) and len(bold_in_major) >= 2:
+                        logger.info(
+                            f"Header hierarchy: {len(groups)} font size groups, "
+                            f"bold tiebreaker {len(major_indices)} → "
+                            f"{len(bold_in_major)} major headers"
+                        )
+                        return bold_in_major
+
+                    # --- Layer 1c: ALL_CAPS tiebreaker ---
+                    # If the font-size group has a mix of ALL_CAPS and mixed-case,
+                    # use only ALL_CAPS as major (common in Frontiers journals).
+                    # Only activate when font size didn't make a meaningful split
+                    # (major group is >70% of all valid headers), to avoid
+                    # demoting legitimate major headers in well-split papers.
+                    caps_in_major = {i for i in major_indices if _is_all_caps(headers[i][0])}
+                    major_is_most = len(major_indices) > 0.7 * len(valid)
+                    if (caps_in_major and len(caps_in_major) < len(major_indices)
+                            and len(caps_in_major) >= 2 and major_is_most):
+                        logger.info(
+                            f"Header hierarchy: {len(groups)} font size groups, "
+                            f"ALL_CAPS tiebreaker {len(major_indices)} → "
+                            f"{len(caps_in_major)} major headers"
+                        )
+                        return caps_in_major
+
+                    logger.info(
+                        f"Header hierarchy: {len(groups)} font size groups, "
+                        f"{len(major_indices)} major headers (layer 1: bbox font size)"
+                    )
+                    return major_indices
+
+    # --- Layer 2: Fallback — ALL_CAPS or numbered prefix ---
+    major_indices: set[int] = set()
+    for i, (text, _page, _bbox) in enumerate(headers):
+        stripped = text.strip()
+        is_numbered = bool(re.match(r"^\d+\.\s+\S", stripped))
+
+        if _is_all_caps(stripped) or is_numbered:
+            major_indices.add(i)
+
+    if major_indices:
+        logger.info(
+            f"Header hierarchy: uniform font size, "
+            f"{len(major_indices)} major headers (layer 2: caps/numbering)"
+        )
+        return major_indices
+
+    # --- Layer 3: Final fallback — all headers are major ---
+    logger.info("Header hierarchy: no hierarchy detected, keeping all headers")
+    return set(range(len(headers)))
 
 
 def compute_content_hash(pdf_path: str) -> str:
@@ -43,9 +255,19 @@ def compute_content_hash(pdf_path: str) -> str:
 def extract_sections(pdf_path: str) -> list[dict]:
     """Extract text from PDF with section awareness and page tracking.
 
-    Uses pymupdf font analysis to detect section headers (font size > 1.2x
-    median body font). Known section keywords boost detection confidence.
-    Falls back to a single section if no headers are detected.
+    Uses Docling's ML-based layout analysis (DocLayNet model) to detect
+    section headers, handle double-column layouts, exclude headers/footers,
+    and extract tables as markdown.
+
+    Header hierarchy is determined by a layered approach:
+      1. Bounding box matching: Docling bbox → pymupdf span → font size → grouping
+      2. ALL_CAPS / numbered prefix fallback (when font sizes are uniform)
+      3. Keep all headers (no hierarchy detected)
+
+    Only major headers trigger section breaks. Minor headers (subsections)
+    are folded into the body text of their parent section.
+
+    Falls back to a single section if <= 1 major headers are detected.
 
     Returns list of:
         {
@@ -55,128 +277,95 @@ def extract_sections(pdf_path: str) -> list[dict]:
         }
     where page_map tracks which page each character came from,
     enabling accurate per-chunk page numbers after splitting.
+    Page numbers are 1-based.
     """
-    doc = fitz.open(pdf_path)
+    converter = _get_converter()
+    result = converter.convert(pdf_path)
+    doc = result.document
 
-    # --- First pass: collect font sizes to compute median ---
-    all_font_sizes: list[float] = []
-    for page in doc:
-        blocks = page.get_text("dict")["blocks"]
-        for block in blocks:
-            if block["type"] != 0:  # skip image blocks
-                continue
-            for line in block["lines"]:
-                for span in line["spans"]:
-                    text = span["text"].strip()
-                    if text:
-                        all_font_sizes.append(span["size"])
+    # --- Pass 1: Iterate items in reading order, collect all blocks ---
+    # Store (text, page, is_header) where is_header is Docling's raw classification
+    raw_blocks: list[tuple[str, int, bool]] = []
+    # Bboxes for header blocks only (block_index → docling bbox)
+    header_bboxes: dict[int, object] = {}
 
-    if not all_font_sizes:
-        doc.close()
+    for item, _level in doc.iterate_items():
+        # Skip pictures (no text content)
+        if item.label == DocItemLabel.PICTURE:
+            continue
+
+        # Determine page number (1-based, default to 1 if provenance missing)
+        page_num = item.prov[0].page_no if item.prov else 1
+
+        if item.label == DocItemLabel.SECTION_HEADER:
+            idx = len(raw_blocks)
+            raw_blocks.append((item.text.strip(), page_num, True))
+            if item.prov:
+                header_bboxes[idx] = item.prov[0].bbox
+        elif item.label == DocItemLabel.TABLE:
+            # Tables have no .text — export as markdown
+            table_md = item.export_to_markdown(doc)
+            if table_md.strip():
+                raw_blocks.append((table_md.strip(), page_num, False))
+        else:
+            # TEXT, PARAGRAPH, LIST_ITEM, FORMULA, etc.
+            text = item.text.strip() if hasattr(item, "text") else ""
+            if text:
+                raw_blocks.append((text, page_num, False))
+
+    if not raw_blocks:
         return [{"section": None, "text": "", "page_map": []}]
 
-    median_size = median(all_font_sizes)
-    header_threshold = median_size * 1.2
+    # --- Pass 2: Classify which headers are major section breaks ---
+    # Collect all Docling-detected headers with their indices and bboxes
+    header_entries: list[tuple[str, int, object | None]] = []  # (text, page_num, bbox)
+    header_block_indices: list[int] = []  # index into raw_blocks
+    for i, (text, page_num, is_header) in enumerate(raw_blocks):
+        if is_header:
+            header_entries.append((text, page_num, header_bboxes.get(i)))
+            header_block_indices.append(i)
 
-    # --- Second pass: extract text blocks with header detection ---
-    # Each block becomes (text, page_number, is_header)
+    # Determine which are major
+    major_set = _classify_major_headers(header_entries, pdf_path)
+
+    # Build the set of raw_blocks indices that are major headers
+    major_block_indices = {header_block_indices[i] for i in major_set}
+
+    # Force-promote "Abstract" to major — it's always a meaningful section break
+    # even when its font size is smaller than the main headers
+    for i, block_idx in enumerate(header_block_indices):
+        text = raw_blocks[block_idx][0]
+        if re.match(r"^abstract\b", text.strip(), re.IGNORECASE):
+            major_block_indices.add(block_idx)
+
+    # Reclassify: only major headers are treated as section breaks
     text_blocks: list[tuple[str, int, bool]] = []
+    for i, (text, page_num, is_header) in enumerate(raw_blocks):
+        if is_header and i in major_block_indices:
+            text_blocks.append((text, page_num, True))
+        else:
+            # Minor headers become body text
+            text_blocks.append((text, page_num, False))
 
-    for page_num, page in enumerate(doc):
-        blocks = page.get_text("dict")["blocks"]
-        for block in blocks:
-            if block["type"] != 0:
-                continue
-
-            # --- Check for inline "Abstract:" label ---
-            # Some journals format abstract as a single block:
-            #   "Abstract: The full abstract text here..."
-            # where "Abstract:" is bold and the rest is regular.
-            # Split into a header block + body block.
-            first_span = None
-            for line in block["lines"]:
-                for span in line["spans"]:
-                    if span["text"].strip():
-                        first_span = span
-                        break
-                if first_span:
-                    break
-
-            if first_span:
-                first_text = first_span["text"].strip().rstrip(":").lower()
-                if first_text == "abstract" and (first_span["flags"] & 16):
-                    # Emit "Abstract" as a header
-                    text_blocks.append(("Abstract", page_num, True))
-                    # Collect remaining text as body
-                    body_parts: list[str] = []
-                    skip_first = True
-                    for line in block["lines"]:
-                        for span in line["spans"]:
-                            t = span["text"].strip()
-                            if not t:
-                                continue
-                            if skip_first:
-                                # Remove "Abstract:" prefix from first span
-                                stripped = re.sub(r"^[Aa]bstract:?\s*", "", span["text"]).strip()
-                                if stripped:
-                                    body_parts.append(stripped)
-                                skip_first = False
-                            else:
-                                body_parts.append(t)
-                    body_text = " ".join(body_parts).strip()
-                    if body_text:
-                        text_blocks.append((body_text, page_num, False))
-                    continue
-
-            block_text_parts: list[str] = []
-            block_max_font: float = 0
-            block_is_bold = True  # assume bold until proven otherwise
-
-            for line in block["lines"]:
-                for span in line["spans"]:
-                    text = span["text"].strip()
-                    if text:
-                        block_text_parts.append(text)
-                        block_max_font = max(block_max_font, span["size"])
-                        # pymupdf flags: bit 4 (16) = bold
-                        if not (span["flags"] & 16):
-                            block_is_bold = False
-
-            block_text = " ".join(block_text_parts).strip()
-            if not block_text:
-                continue
-
-            # Detect headers via three signals:
-            # 1. Large font (>= 1.2x median) + short text
-            # 2. Bold + short text + known section keyword
-            # 3. Bold + short text + top-level numbered pattern (e.g. "3. Topic Name")
-            is_header = False
-            if len(block_text) < 100:
-                # Normalize: lowercase, strip punctuation, strip leading numbers
-                # "1. Introduction" → "introduction", "3.2 Results" → "results"
-                normalized = block_text.lower().strip().rstrip(".:;")
-                normalized = re.sub(r"^[\d]+\.?\d*\.?\s*", "", normalized)
-
-                # Check if text starts with a top-level number pattern (e.g. "3.", "12.")
-                # but NOT a sub-section (e.g. "3.1", "3.1.2")
-                is_top_level_numbered = bool(re.match(r"^\d+\.\s+\S", block_text))
-
-                if block_max_font >= header_threshold:
-                    # Large font + short text = header (keyword match optional)
-                    is_header = True
-                elif block_is_bold and normalized in KNOWN_SECTIONS:
-                    # Same-size bold font + known keyword = header
-                    is_header = True
-                elif block_is_bold and is_top_level_numbered:
-                    # Same-size bold font + "3. Something" pattern = major section
-                    is_header = True
-
-            text_blocks.append((block_text, page_num, is_header))
-
-    doc.close()
+    # --- Detect abstract in body text before the first major header ---
+    # Some papers (MDPI, Frontiers) have "Abstract:" as body text, not a header.
+    # Scan body blocks before the first major header and inject a synthetic
+    # "Abstract" section break if found.
+    first_major_idx = next(
+        (i for i, (_, _, is_h) in enumerate(text_blocks) if is_h), len(text_blocks)
+    )
+    for i in range(first_major_idx):
+        text, page_num, _ = text_blocks[i]
+        match = re.match(r"^abstract\s*[:\-—.]?\s*", text, re.IGNORECASE)
+        if match:
+            remainder = text[match.end():].strip()
+            # Replace block with "Abstract" header + remaining body text
+            text_blocks[i] = ("Abstract", page_num, True)
+            if remainder:
+                text_blocks.insert(i + 1, (remainder, page_num, False))
+            break  # only inject one abstract
 
     # --- Group blocks into sections ---
-    # Count detected headers
     header_count = sum(1 for _, _, is_header in text_blocks if is_header)
 
     if header_count <= 1:
@@ -195,7 +384,7 @@ def extract_sections(pdf_path: str) -> list[dict]:
             "page_map": page_map,
         }]
 
-    # Multiple headers detected — group into sections
+    # Multiple major headers — group into sections
     sections: list[dict] = []
     current_section: str | None = None
     current_text_parts: list[str] = []

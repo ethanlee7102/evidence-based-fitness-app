@@ -59,7 +59,9 @@ flame-fitness/
 │       │   └── db.py             # Supabase client
 │       ├── scripts/
 │       │   ├── ingest_paper.py   # Single paper CLI ingestion
-│       │   └── ingest_batch.py   # Batch ingestion from manifest.json
+│       │   ├── ingest_batch.py   # Batch ingestion from manifest.json
+│       │   ├── reingest_all.py   # Delete all + re-ingest all 9 papers
+│       │   └── test_retrieval.py # CLI retrieval testing
 │       ├── papers/               # PDF storage (gitignored) + manifest.json
 │       ├── tests/
 │       └── app.py                # FastAPI entry point
@@ -83,7 +85,7 @@ flame-fitness/
 - **HTTP clients**: Shared module-level `httpx.AsyncClient` per provider (connection pooling). Cleaned up via FastAPI `lifespan` hook in `app.py`.
 - **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI. `embed_texts()` has retry logic (3 attempts, exponential backoff on 429/500/503).
 - **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini. Both accept `temperature` and `max_tokens` params.
-- **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Section detection via font size, bold+keyword, bold+numbered patterns. Inline Abstract detection.
+- **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Uses IBM Docling + pymupdf hybrid: Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables; pymupdf provides font size/bold via bounding box spatial matching for header hierarchy classification. Layered hierarchy: 1a) font size grouping, 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback. Abstract detection: force-promotes "Abstract" headers to major regardless of font size, and scans pre-header body text for "Abstract:" labels (handles MDPI papers where abstract is body text, not a header).
 - **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing). Logs query, chunk count, similarity range, timing at INFO level.
 
 ### Database Tables
@@ -143,8 +145,8 @@ cd apps/api && python -m scripts.ingest_batch
 - Core infrastructure in place
 - RAG Phase 1 (database schema) complete — pgvector tables + RPC running in Supabase
 - RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
-- RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 2 papers ingested (138 chunks)
-- RAG Phase 4 (retrieval pipeline) complete — `retrieve_chunks()` function, `RetrievalResult` dataclass, migration 007 adds `token_count` to `match_chunks` RPC
+- RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 9 papers ingested (414 chunks across hypertrophy/nutrition/strength)
+- RAG Phase 4 (retrieval pipeline) complete — `retrieve_chunks()` function, `RetrievalResult` dataclass, migration 007 adds `token_count` to `match_chunks` RPC, `test_retrieval.py` CLI script
 - Migration 006: Added `license` field to `papers` table for tracking content usage rights
 - Migration 007: DROP + CREATE `match_chunks` RPC to include `token_count` in return (PostgreSQL requires DROP when RETURNS TABLE columns change)
 
@@ -240,7 +242,7 @@ Database tables needed:
   → Stuff into prompt with citation instructions → LLM generates cited answer
 
   #### Ingestion Pipeline (offline, run once per paper)
-  1. Load PDFs using pymupdf (fitz) with font analysis to detect section headers
+  1. Load PDFs using IBM Docling (DocLayNet ML model) — automatic layout analysis for columns, headers, tables
   2. Section-aware chunking — RecursiveCharacterTextSplitter within sections (never across), with fixed-size fallback if no headers detected
   3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, license, section, chunk_index
   4. Embed each chunk using Voyage AI `voyage-4-large` (1024-dim), `input_type: "document"`, batched in groups of ~200
@@ -343,7 +345,7 @@ Database tables needed:
   - Vector DB: pgvector in Supabase (already using PostgreSQL)
   - Embedding model: Voyage AI `voyage-4-large` (1024 dims)
   - LLM: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
-  - PDF loading: pymupdf (fitz)
+  - PDF loading: IBM Docling (DocLayNet ML model)
   - Chunking: `langchain_text_splitters` (standalone, no LangChain orchestration)
   - Observability: Custom TraceLogger → Supabase `rag_traces` table
   - Streaming: SSE from FastAPI
