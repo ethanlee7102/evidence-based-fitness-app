@@ -373,7 +373,7 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 - SSE parsing with debug logging on malformed lines
 - Shared httpx AsyncClient with connection pooling
 
-**2D. Dependencies** — Added `pymupdf>=1.24.0`, `langchain-text-splitters>=0.2.0`
+**2D. Dependencies** — Added `docling>=2.0.0`, `pymupdf>=1.24.0`, `langchain-text-splitters>=0.2.0`
 
 **2E. Lifespan** — `app.py` updated with `lifespan` hook to clean up shared httpx clients on shutdown
 
@@ -389,13 +389,13 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 - Literal types for Category, License, StudyType matching DB CHECK constraints
 
 **3B. Ingestion Core** — `apps/api/src/core/ingestion.py`
-- `extract_sections(pdf_path)` — section header detection via 3 paths:
-  1. Large font (>= 1.2x median body font) + short text
-  2. Bold + known section keyword (Abstract, Introduction, Methods, Results, etc.)
-  3. Bold + top-level numbered pattern (e.g. "3. Topic Name" but not "3.1 Subtopic")
-- Inline "Abstract:" detection — splits bold "Abstract:" label from body text when they're in one block
+- `extract_sections(pdf_path)` — IBM Docling + pymupdf hybrid:
+  - Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables
+  - pymupdf provides font size/bold via bounding box spatial matching for header hierarchy
+  - Layered hierarchy: 1a) font size grouping, 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback
+  - Abstract detection: force-promotes "Abstract" headers to major regardless of font size; scans pre-header body text for "Abstract:" labels (MDPI papers where abstract is body text)
 - Per-chunk page tracking via char-offset-to-page mapping
-- Fallback: if <= 1 header detected → single section with `section=None`
+- Fallback: if <= 1 major header detected → single section with `section=None`
 - `chunk_sections(sections)` — RecursiveCharacterTextSplitter within sections, chunk_size=3200 chars (~800 tokens), overlap=200 chars
 - `compute_content_hash(pdf_path)` — SHA-256 of PDF bytes for dedup
 - `ingest_paper(pdf_path, metadata)` — full pipeline: hash → dedup check → extract → chunk → embed → store. Delete paper row on error (try/except cleanup).
@@ -411,11 +411,17 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 
 **3E. Papers Directory** — `apps/api/papers/` (PDFs gitignored) + `manifest.json` (checked in)
 
+**3F. Test Script** — `apps/api/scripts/test_retrieval.py`
+- CLI tool for testing retrieval: `python -m scripts.test_retrieval "query" --top-k 5 --category strength`
+- Shows chunk metadata, similarity scores, and text previews
+
 **Verified**:
-- Ingested 2 papers: Wax et al. 2021 (70 chunks, 9 sections), Kazeminasab et al. 2025 (68 chunks, 7 sections)
+- Ingested 9 papers (414 chunks): 3 hypertrophy, 1 nutrition, 5 strength
 - Dedup working — re-run skips with "Paper already ingested"
-- Abstract detected as proper section in both papers
+- Abstract detected as own section in 7/9 papers (2 Frontiers papers have unlabeled abstracts)
 - Retry logic triggered and worked on Voyage 429 (before adding payment method)
+- Double-column handling verified — Docling ML model handles reading order correctly
+- Header hierarchy verified across all 9 papers — proper font size, bold, and ALL_CAPS tiebreakers
 
 ---
 
@@ -519,6 +525,7 @@ apps/api/src/api/chat.py
 apps/api/src/api/traces.py
 apps/api/scripts/ingest_paper.py
 apps/api/scripts/ingest_batch.py
+apps/api/scripts/test_retrieval.py
 apps/api/papers/manifest.json
 apps/api/tests/eval/test_dataset.json
 apps/api/tests/eval/test_rag_pipeline.py
@@ -537,7 +544,7 @@ apps/web/src/features/chat/components/CitationCard.tsx
 ```
 apps/api/src/utils/config.py          — add RAG env vars
 apps/api/src/api/router.py            — register chat + traces routers
-apps/api/requirements.txt             — add pymupdf, langchain-text-splitters
+apps/api/requirements.txt             — add docling, pymupdf, langchain-text-splitters
 apps/api/.env                         — add API keys + config
 apps/web/src/features/chat/screens/ChatScreen.tsx    — full rewrite
 apps/web/src/features/chat/components/index.ts       — export new components

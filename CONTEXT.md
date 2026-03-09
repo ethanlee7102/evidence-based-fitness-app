@@ -155,7 +155,7 @@ SSE (Server-Sent Events) via `?alt=sse` query param. Each event is a `GenerateCo
 - **2A. Config** (`config.py`) — Added 11 RAG env vars with sensible defaults. Only VOYAGE_API_KEY and GOOGLE_API_KEY are required.
 - **2B. Embedding Provider** (`embedding_provider.py`) — `embed_texts()` with document input_type + auto-batching, `embed_query()` with query input_type
 - **2C. LLM Provider** (`llm_provider.py`) — `generate()` non-streaming + `generate_stream()` SSE streaming, both with configurable `temperature` and `max_tokens` params
-- **2D. Dependencies** — pymupdf + langchain-text-splitters added and installed
+- **2D. Dependencies** — docling + pymupdf + langchain-text-splitters added and installed. Docling for ML-based layout analysis, pymupdf for font metadata via bounding box matching.
 - **Lifespan hook** in `app.py` — cleans up shared httpx clients on shutdown
 
 ### Decisions Made
@@ -239,17 +239,35 @@ Added via migration `006_add_paper_license.sql`. Column on `papers` table with C
 - **CLI scripts** — `scripts/ingest_paper.py` (single) + `scripts/ingest_batch.py` (batch from manifest.json)
 - **Papers directory** — `papers/` for PDFs (gitignored), `papers/manifest.json` checked in
 
-### Section Detection (3 paths + Abstract handling)
-Header detection evolved through testing with real papers:
+### Section Detection (Docling + pymupdf hybrid)
+IBM Docling (DocLayNet ML model) handles layout analysis — reading order, header detection, tables, headers/footers. pymupdf provides font metadata (size, bold) for header hierarchy classification via bounding box spatial matching.
 
-1. **Large font** (>= 1.2x median body font) + short text (<100 chars) → header
-2. **Bold + known keyword** — handles papers where headers are same font size but bold. Keywords: abstract, introduction, methods, results, discussion, conclusion(s), references, etc.
-3. **Bold + top-level numbered** — regex `^\d+\.\s+\S` catches "3. Exercise and Sports Performance" but not "3.1 Subtopic". Needed because many section titles aren't in the keyword list.
-4. **Inline Abstract** — some journals (MDPI/Nutrients) format as `"Abstract: full text..."` in one block. Detects bold "Abstract" first span, splits into header + body.
+**Docling handles**:
+- **Section headers**: ML classification via `DocItemLabel.SECTION_HEADER`
+- **Double-column layouts**: Automatic layout analysis, correct reading order
+- **Tables**: Exported as markdown via `item.export_to_markdown(doc)`
+- **Headers/footers**: Automatically excluded
+- **Page numbers**: 1-based from `item.prov[0].page_no`
 
-Normalization strips leading numbers before keyword matching: `"1. Introduction"` → `"introduction"`, `"3.2 Results"` → `"results"`
+**pymupdf handles** (font metadata only):
+- **Bounding box matching**: Docling `item.prov[0].bbox` (BOTTOMLEFT coords) → convert y-axis (`pymupdf_y = page_height - docling_y`) → find overlapping pymupdf spans → read font size and bold flag
+- 246/246 headers matched across 9 papers (100% hit rate), <1pt coordinate discrepancy
 
-Fallback: if <= 1 header detected → entire document as one section with `section=None`
+**Header hierarchy** (layered classification in `_classify_major_headers`):
+1. **Font size grouping** — largest font-size group with >= 2 members = major
+2. **Bold tiebreaker** — if selected group has bold/non-bold mix, only bold = major (MDPI journals)
+3. **ALL_CAPS tiebreaker** — if selected group has CAPS/mixed-case mix AND group is >70% of valid headers, only CAPS = major (Frontiers journals)
+4. **ALL_CAPS/numbered fallback** — when no font size groups found
+5. **All major fallback** — when no hierarchy signal detected
+
+**Abstract detection** (after hierarchy classification):
+- **Force-promote**: Any Docling-detected header matching `^abstract\b` (case-insensitive) is promoted to major regardless of font size
+- **Body text scan**: Before the first major header, scans body text blocks for "Abstract:" prefix (regex: `^abstract\s*[:\-—.]?\s*`). If found, injects a synthetic "Abstract" section break and keeps the remaining text as body content. Handles MDPI papers where abstract is labeled as body text, not a header.
+- Result: 7/9 papers have Abstract as its own section. 2 Frontiers papers have completely unlabeled abstracts (no "Abstract" text in PDF at all).
+
+Fallback: if <= 1 major header → entire document as one section with `section=None`
+
+Lazy converter singleton loads ML models once on first use, reuses for batch ingestion. First run downloads ~6.2 GB of models to `~/.cache/huggingface/hub/`.
 
 ### Per-Chunk Page Tracking
 Each section carries a `page_map: list[tuple[int, int]]` mapping char offsets to page numbers. After chunking, `_find_page_range()` maps each chunk's text position back to specific pages for accurate citations.
@@ -262,11 +280,21 @@ paper_id = result.data[0]["id"]  # auto-generated UUID returned by default
 supabase-py sends `Prefer: return=representation` by default. Don't include `"id"` in the insert dict — let PostgreSQL generate it via `gen_random_uuid()`.
 
 ### Test Results
-- **Wax et al. 2021** (creatine review) — 70 chunks, 9 sections detected including Abstract
-- **Kazeminasab et al. 2025** (creatine meta-analysis) — 68 chunks, 7 sections detected including Abstract
+- **Wax et al. 2021** (creatine review) — 70 chunks, 9 sections including Abstract (body text scan)
+- **Kazeminasab et al. 2025** (creatine meta-analysis) — 71 chunks, 7 sections including Abstract (Docling header + force-promote)
+- **Schoenfeld et al. 2021** (rep ranges, hypertrophy) — 52 chunks, 8 sections including Abstract (body text scan)
+- **Bernardez-Vazquez et al. 2022** (hypertrophy umbrella review) — 32 chunks, 9 sections (Frontiers, no abstract label)
+- **Krzysztofik et al. 2019** (advanced RT techniques) — 28 chunks, 7 sections including Abstract (body text scan)
+- **Travis et al. 2020** (tapering for powerlifting) — 34 chunks, 8 sections including Abstract (body text scan)
+- **Androulakis-Korakakis et al. 2021** (minimum effective dose) — 64 chunks, 16 sections (Frontiers, no abstract label)
+- **Latella et al. 2020** (15-year powerlifting analysis) — 20 chunks, 10 sections including Abstract (Docling header + force-promote)
+- **Thompson et al. 2020** (load prescription methods) — 43 chunks, 8 sections including Abstract (Docling header + force-promote)
+- **Total**: 9 papers, 414 chunks (3 hypertrophy, 1 nutrition, 5 strength)
 - Dedup confirmed — re-run skips with "Paper already ingested"
 - Retry logic confirmed — triggered on Voyage 429 before payment method was added
 - Voyage free tier without payment: 3 RPM / 10K TPM (very restrictive). Adding payment method unlocks normal limits, free tokens still apply.
+- Double-column handling verified with `sort=True` — text reads coherently
+- Section detection path 4 verified on JSCR paper — detected Introduction, Methods, Discussion, References
 
 ### Async/Sync Pattern
 `ingest_paper()` is async (to await embed_texts) but uses sync Supabase client for DB calls. Fine for CLI scripts — sync calls block event loop briefly but nothing else is waiting. Comment in code notes to wrap in `asyncio.to_thread()` if ever called from web handlers.
@@ -320,6 +348,216 @@ Phase 5 needs token counts to budget how many chunks fit in the LLM's context wi
 - **Phase 4 implementation** complete — retrieval module, schema updates, migration all in place.
 - **PLAN.md** exists at project root — keep phase statuses updated there as work completes.
 - **CLAUDE.md** has a reference to PLAN.md at the top.
-- **Corpus**: 2 papers ingested (138 chunks total). Both from Nutrients journal, CC-BY licensed. PDFs in `apps/api/papers/` (gitignored).
+- **Corpus**: 9 papers ingested (414 chunks total). 3 hypertrophy, 1 nutrition, 5 strength. All CC-BY licensed. PDFs in `apps/api/papers/` (gitignored). Abstract detected as own section in 7/9 papers.
 - **Next**: Phase 5 (RAG Generation Pipeline) — build_rag_prompt, rag_query, rag_query_stream.
+
+---
+
+## Phase 5: RAG Generation Pipeline — Implementation Plan
+
+### Context
+
+Phases 1-4 are complete: DB schema, embedding/LLM providers, ingestion pipeline (9 papers / 409 chunks), and retrieval pipeline. Phase 5 bridges retrieval and generation — given a user question, retrieve relevant chunks, format them into a citation-aware prompt, and generate a cited answer via the LLM. After this phase, one function call produces a fully cited exercise science answer end-to-end.
+
+### Design Decisions (locked in)
+
+| # | Decision |
+|---|----------|
+| Q1 | Native multi-turn — modify `generate()`/`generate_stream()` to accept `messages` list |
+| Q2 | Conditional query rewriting — only rewrite when history exists |
+| Q3 | Composite object — `StreamingRAGResult` with `.stream` async generator |
+| Q4 | Hardcode temperature 0.3 — no config |
+| Q5 | No-chunks: still call LLM with disclaimer instruction + `grounded: bool` flag |
+| Q6 | Abstract augmentation deferred to post-eval |
+
+---
+
+### Implementation Steps
+
+#### Step 1: Modify `llm_provider.py` for multi-turn
+
+**File**: `apps/api/src/core/llm_provider.py`
+
+Add `messages: list[dict] | None = None` parameter to three functions:
+
+**`_build_gemini_payload()`** — If `messages` provided, build `contents` array from history + current prompt. Map neutral `"assistant"` role to Gemini's `"model"`. Append `prompt` as the final user turn. If no messages, existing single-prompt behavior unchanged.
+
+```python
+def _build_gemini_payload(
+    prompt: str,
+    system: str | None = None,
+    temperature: float = 0.7,
+    max_tokens: int = 2048,
+    messages: list[dict] | None = None,   # <-- new
+) -> dict:
+```
+
+Contents-building logic:
+```python
+if messages:
+    role_map = {"assistant": "model", "user": "user"}
+    contents = [
+        {"role": role_map[msg["role"]], "parts": [{"text": msg["content"]}]}
+        for msg in messages
+    ]
+    contents.append({"role": "user", "parts": [{"text": prompt}]})
+else:
+    contents = [{"role": "user", "parts": [{"text": prompt}]}]
+```
+
+**`generate()` and `generate_stream()`** — Add same `messages` param, pass through to `_build_gemini_payload()`. Backward compatible (default `None`).
+
+---
+
+#### Step 2: Add new types to `schema/rag.py`
+
+**File**: `apps/api/src/schema/rag.py`
+
+**`ChatMessage`** — TypedDict for history entries (neutral format):
+```python
+class ChatMessage(TypedDict):
+    role: Literal["user", "assistant"]
+    content: str
+```
+
+**`RAGResult`** — dataclass for non-streaming response (eval pipeline):
+```python
+@dataclass
+class RAGResult:
+    answer: str
+    chunks: list[ChunkResponse]
+    query: str
+    rewritten_query: str | None
+    prompt_sent: str
+    retrieval_time_ms: float
+    generation_time_ms: float
+    model: str
+    grounded: bool
+```
+
+**`StreamingRAGResult`** — dataclass for streaming response (chat UI):
+```python
+@dataclass
+class StreamingRAGResult:
+    chunks: list[ChunkResponse]
+    query: str
+    rewritten_query: str | None
+    prompt_sent: str
+    retrieval_time_ms: float
+    model: str
+    grounded: bool
+    stream: AsyncGenerator[str, None]
+```
+
+No `answer` or `generation_time_ms` — those aren't available until the stream finishes. Phase 6 route handler measures generation timing and accumulates the full answer.
+
+---
+
+#### Step 3: Create `rag_pipeline.py`
+
+**File**: `apps/api/src/core/rag_pipeline.py` (new)
+
+##### Constants
+
+**`SYSTEM_PROMPT`** — Exercise science assistant persona. Cite `[Author, Year]`, beginner-level, "I don't know" when lacking sources, no fabrication, acknowledge disagreements between sources.
+
+**`NO_CHUNKS_INSTRUCTION`** — Replaces sources block when retrieval returns empty. Instructs LLM to answer from general knowledge but disclaim it's not backed by research.
+
+**`REWRITE_PROMPT`** — Template for query rewriting. Takes `{history}` and `{query}` placeholders.
+
+##### Functions
+
+**`_rewrite_query(query, history) -> str`**
+- If no history: return query unchanged (first message, no rewrite needed)
+- If history: format history as readable text, call `generate()` with temp=0.0, max_tokens=256
+- Log original → rewritten (truncated)
+
+**`_build_sources_block(chunks) -> str`**
+- Format chunks as numbered sources: `[1] Author, Year (Journal) [Section: X]: "chunk text"`
+- Used by `build_rag_prompt()`
+
+**`build_rag_prompt(query, chunks) -> str`**
+- If chunks: sources block + question
+- If no chunks: no-chunks instruction + question
+- System prompt is NOT included here — it goes via the `system` parameter to `generate()`
+
+**`rag_query(query, history, top_k, category) -> RAGResult`**
+- Full pipeline: rewrite → retrieve → build prompt → `generate()` → return RAGResult
+- Temperature 0.3, max_tokens 2048
+- Logs chunk count, grounded status, retrieval + generation timing
+
+**`rag_query_stream(query, history, top_k, category) -> StreamingRAGResult`**
+- Same pipeline but generation is lazy — creates `generate_stream()` generator without consuming it
+- Returns StreamingRAGResult with metadata + `.stream`
+- Phase 6 route reads metadata first, then iterates `.stream` for SSE events
+
+---
+
+#### Step 4: Create test script
+
+**File**: `apps/api/scripts/test_rag_pipeline.py` (new)
+
+CLI script following `ingest_paper.py` pattern:
+```bash
+cd apps/api
+python -m scripts.test_rag_pipeline "How does creatine affect muscle growth?"
+python -m scripts.test_rag_pipeline "Tell me more about dosing" --stream --history '[...]'
+```
+
+Prints: metadata (grounded, chunks, timing, rewritten query) + sources list + answer + prompt preview.
+
+---
+
+### File Summary
+
+| File | Action |
+|------|--------|
+| `apps/api/src/core/llm_provider.py` | Modify — add `messages` param to 3 functions |
+| `apps/api/src/schema/rag.py` | Modify — add ChatMessage, RAGResult, StreamingRAGResult |
+| `apps/api/src/core/rag_pipeline.py` | **Create** — system prompt, rewrite, prompt builder, rag_query, rag_query_stream |
+| `apps/api/scripts/test_rag_pipeline.py` | **Create** — CLI test script |
+
+### Implementation Order
+
+1. `llm_provider.py` (Step 1) — must come first, `rag_pipeline.py` depends on `messages` param
+2. `schema/rag.py` (Step 2) — must come before `rag_pipeline.py` which imports new types
+3. `rag_pipeline.py` (Step 3) — core deliverable
+4. `test_rag_pipeline.py` (Step 4) — verification
+
+### Verification
+
+Test scenarios to run with the CLI script:
+
+1. **Grounded query**: `"How does creatine affect muscle mass?"` — should return cited answer from ingested papers, `grounded=True`
+2. **Streaming mode**: same query with `--stream` — tokens print incrementally
+3. **Ungrounded query**: `"What's the best programming language?"` — `grounded=False`, disclaimer in answer
+4. **Follow-up with history**: `"Tell me more about the dosing"` with history — `rewritten_query` should be non-None, should retrieve relevant chunks
+5. **Category filter**: `--category nutrition` — only retrieves from matching papers
+
+### Note
+
+Gemini requires `contents` to alternate user/model roles. The pipeline trusts the caller (Phase 6) to enforce alternation. Worth adding a comment in `rag_pipeline.py` but not validating at this layer.
+
+---
+
+## Double-Column PDF Issue — Resolved with Docling + pymupdf hybrid
+
+### Problem Discovered
+
+After ingesting 9 papers, found that double-column PDFs have section content assigned to wrong headers. pymupdf's `sort=True` on `get_text("dict")` sorts blocks by position (top-to-bottom, left-to-right), but this breaks when headers and content are in different columns.
+
+### Decision: IBM Docling + pymupdf hybrid
+
+**Why**: Docling's ML-based layout analysis handles columns, headers, and tables automatically. pymupdf provides font size/bold metadata for header hierarchy (Docling detects headers but doesn't distinguish major vs minor).
+
+**Bounding box matching**: Instead of matching Docling headers to pymupdf by text (fragile — pymupdf fragments text differently), match by position. Docling provides `item.prov[0].bbox` (BOTTOMLEFT coords), pymupdf provides span bboxes (TOPLEFT coords). Conversion: x identical, `pymupdf_y = page_height - docling_y`. 246/246 headers matched across 9 papers.
+
+**What changed**:
+- `extract_sections()` in `ingestion.py` uses Docling for layout + pymupdf for font info
+- `docling>=2.0.0` added to requirements.txt, `pymupdf>=1.24.0` kept (font metadata only)
+- Header hierarchy: font size grouping → bold tiebreaker → ALL_CAPS tiebreaker → fallbacks
+- All downstream functions unchanged (`chunk_sections`, `_find_page_range`, `ingest_paper`)
+- See `DOCLING-REFACTOR.md` for full implementation history
+
+**After rewrite**: Re-ingested all 9 papers. 414 total chunks. Retrieval verified with cross-paper queries (similarity 0.65-0.75).
 
