@@ -52,7 +52,8 @@ flame-fitness/
 │       │   │   ├── embedding_provider.py  # Voyage AI embed_texts/embed_query
 │       │   │   ├── llm_provider.py        # Gemini generate/generate_stream
 │       │   │   ├── ingestion.py           # PDF extraction, chunking, ingestion pipeline
-│       │   │   └── retrieval.py           # retrieve_chunks() → vector search → RetrievalResult
+│       │   │   ├── retrieval.py           # retrieve_chunks() → vector search → RetrievalResult
+│       │   │   └── rag_pipeline.py       # rag_query/rag_query_stream → cited answers
 │       │   ├── schema/           # Pydantic models (profile.py, rag.py)
 │       │   ├── service/          # db_service, storage_service
 │       │   ├── utils/            # config, auth, logging
@@ -61,7 +62,8 @@ flame-fitness/
 │       │   ├── ingest_paper.py   # Single paper CLI ingestion
 │       │   ├── ingest_batch.py   # Batch ingestion from manifest.json
 │       │   ├── reingest_all.py   # Delete all + re-ingest all 9 papers
-│       │   └── test_retrieval.py # CLI retrieval testing
+│       │   ├── test_retrieval.py # CLI retrieval testing
+│       │   └── test_rag_pipeline.py # CLI end-to-end RAG testing
 │       ├── papers/               # PDF storage (gitignored) + manifest.json
 │       ├── tests/
 │       └── app.py                # FastAPI entry point
@@ -84,7 +86,8 @@ flame-fitness/
 - **Auth**: JWT verification via `get_current_user` dependency
 - **HTTP clients**: Shared module-level `httpx.AsyncClient` per provider (connection pooling). Cleaned up via FastAPI `lifespan` hook in `app.py`.
 - **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI. `embed_texts()` has retry logic (3 attempts, exponential backoff on 429/500/503).
-- **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini. Both accept `temperature` and `max_tokens` params.
+- **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini (2.5 Flash). Both accept `temperature`, `max_tokens`, and `messages` (multi-turn history) params. Role alternation warning log for Gemini's strict user/model requirement.
+- **RAG Pipeline**: `src/core/rag_pipeline.py` — `rag_query()` (non-streaming for eval) and `rag_query_stream()` (streaming for chat UI). Conditional query rewriting on follow-ups. Citations as `[Author, Year, p. X]`. Temperature 0.3 for faithfulness. `grounded: bool` flag for UI display.
 - **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Uses IBM Docling + pymupdf hybrid: Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables; pymupdf provides font size/bold via bounding box spatial matching for header hierarchy classification. Layered hierarchy: 1a) font size grouping, 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback. Abstract detection: force-promotes "Abstract" headers to major regardless of font size, and scans pre-header body text for "Abstract:" labels (handles MDPI papers where abstract is body text, not a header).
 - **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing). Logs query, chunk count, similarity range, timing at INFO level.
 
@@ -136,7 +139,7 @@ cd apps/api && python -m scripts.ingest_batch
 - `SUPABASE_SECRET_KEY`
 - `VOYAGE_API_KEY` — required for RAG embedding (Voyage AI)
 - `GOOGLE_API_KEY` — required for RAG generation (Gemini)
-- Optional with defaults: `EMBEDDING_MODEL` (voyage-4-large), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_BATCH_SIZE` (200), `LLM_PROVIDER` (google), `LLM_MODEL` (gemini-2.0-flash), `CHUNK_SIZE` (800 tokens — passed as ~3200 chars to splitter), `CHUNK_OVERLAP` (200 chars), `RAG_TOP_K` (5), `RAG_SIMILARITY_THRESHOLD` (0.3)
+- Optional with defaults: `EMBEDDING_MODEL` (voyage-4-large), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_BATCH_SIZE` (200), `LLM_PROVIDER` (google), `LLM_MODEL` (gemini-2.5-flash), `CHUNK_SIZE` (800 tokens — passed as ~3200 chars to splitter), `CHUNK_OVERLAP` (200 chars), `RAG_TOP_K` (5), `RAG_SIMILARITY_THRESHOLD` (0.3)
 
 ## Current Status
 - Auth flow working with Supabase
@@ -147,8 +150,10 @@ cd apps/api && python -m scripts.ingest_batch
 - RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
 - RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 9 papers ingested (414 chunks across hypertrophy/nutrition/strength)
 - RAG Phase 4 (retrieval pipeline) complete — `retrieve_chunks()` function, `RetrievalResult` dataclass, migration 007 adds `token_count` to `match_chunks` RPC, `test_retrieval.py` CLI script
+- RAG Phase 5 (generation pipeline) complete — `rag_pipeline.py` with `rag_query()`/`rag_query_stream()`, conditional query rewriting, `[Author, Year, p. X]` citations, grounded/ungrounded handling, `test_rag_pipeline.py` CLI script
 - Migration 006: Added `license` field to `papers` table for tracking content usage rights
 - Migration 007: DROP + CREATE `match_chunks` RPC to include `token_count` in return (PostgreSQL requires DROP when RETURNS TABLE columns change)
+- LLM model: gemini-2.5-flash (upgraded from 2.0-flash after Google deprecated free tier)
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
@@ -207,7 +212,7 @@ Database tables needed:
   - [x] Chunking strategies advanced
   - [x] Vector databases comparison
   - [x] Retrieval & re-ranking
-  - [ ] Prompt engineering for citations — learn by doing
+  - [x] Prompt engineering for citations — implemented in Phase 5 (system prompt + source block format)
   - [x] RAG evaluation (DeepEval/RAGAS metrics)
   - [ ] Agents & routing — deferred to v2
 
@@ -266,7 +271,7 @@ Database tables needed:
   - Use async for embedding calls
   - Voyage AI `input_type` param: `"document"` for ingestion, `"query"` for retrieval (improves retrieval quality)
   - Batch embedding limit: ~200 chunks per call (120K token limit for voyage-4-large)
-  - LLM provider swappable via env var (Gemini 2.0 Flash default, OpenAI as alternative)
+  - LLM provider swappable via env var (Gemini 2.5 Flash default, OpenAI as alternative)
   - Gemini auth: API key as query param (not Bearer header). Endpoint: `generativelanguage.googleapis.com/v1beta/models/{model}`
   - System prompt via `system_instruction` field (separate from `contents` array)
   - Two SSE hops for streaming: Gemini → backend (Gemini SSE) → browser (our SSE endpoint)
@@ -344,7 +349,7 @@ Database tables needed:
   - Backend: FastAPI (already in Flame Fitness)
   - Vector DB: pgvector in Supabase (already using PostgreSQL)
   - Embedding model: Voyage AI `voyage-4-large` (1024 dims)
-  - LLM: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
+  - LLM: Gemini 2.5 Flash (cheapest, swappable via env var + wrapper)
   - PDF loading: IBM Docling (DocLayNet ML model)
   - Chunking: `langchain_text_splitters` (standalone, no LangChain orchestration)
   - Observability: Custom TraceLogger → Supabase `rag_traces` table

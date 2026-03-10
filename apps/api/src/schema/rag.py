@@ -1,6 +1,7 @@
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
@@ -83,6 +84,13 @@ class ChunkResponse(BaseModel):
     study_type: Optional[StudyType] = None
 
 
+class ChatMessage(TypedDict):
+    """A single message in conversation history. Provider-agnostic format."""
+
+    role: Literal["user", "assistant"]
+    content: str
+
+
 @dataclass
 class RetrievalResult:
     """Result from retrieve_chunks() — bundles chunks with query metadata."""
@@ -90,3 +98,41 @@ class RetrievalResult:
     chunks: list[ChunkResponse] = field(default_factory=list)
     query: str = ""
     retrieval_time_ms: float = 0.0
+
+
+@dataclass
+class RAGResult:
+    """Non-streaming RAG response — used by eval pipeline (Phase 8).
+
+    Contains the full answer and all metadata needed for evaluation and tracing.
+    """
+
+    answer: str
+    chunks: list[ChunkResponse]
+    query: str
+    rewritten_query: str | None
+    prompt_sent: str
+    retrieval_time_ms: float
+    generation_time_ms: float
+    model: str
+    grounded: bool
+
+
+@dataclass
+class StreamingRAGResult:
+    """Streaming RAG response — used by chat UI (Phase 7).
+
+    Metadata is available immediately. The .stream generator yields text chunks
+    as they arrive from the LLM. answer and generation_time_ms are NOT included
+    because they aren't known until the stream finishes — Phase 6 route handler
+    accumulates the answer and measures timing.
+    """
+
+    chunks: list[ChunkResponse]
+    query: str
+    rewritten_query: str | None
+    prompt_sent: str
+    retrieval_time_ms: float
+    model: str
+    grounded: bool
+    stream: AsyncGenerator[str, None]

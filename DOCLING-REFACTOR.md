@@ -20,57 +20,49 @@ Double-column PDFs have section content assigned to wrong headers because pymupd
 
 ---
 
-## Current State
-
-### What's implemented (`apps/api/src/core/ingestion.py`)
+## Final Implementation (`apps/api/src/core/ingestion.py`)
 
 **Dependencies**: `docling>=2.0.0` + `pymupdf>=1.24.0` + `langchain-text-splitters>=0.2.0`
 
-**Architecture**: Two-pass extraction in `extract_sections()`:
-1. **Pass 1 (Docling)**: `DocumentConverter.convert()` → `doc.iterate_items()` in correct reading order. Classifies items by `DocItemLabel` (SECTION_HEADER, TABLE, PICTURE, TEXT, etc.). Tables exported as markdown. Pictures skipped. Page numbers 1-based from `item.prov[0].page_no`.
-2. **Pass 2 (pymupdf font size)**: `_classify_major_headers()` determines which Docling headers are major section breaks vs subsections.
+**Architecture**: Multi-pass extraction in `extract_sections()`:
+1. **Pass 1 (Docling)**: `DocumentConverter.convert()` → `doc.iterate_items()` in correct reading order. Classifies items by `DocItemLabel` (SECTION_HEADER, TABLE, PICTURE, TEXT, etc.). Tables exported as markdown. Pictures skipped. Page numbers 1-based from `item.prov[0].page_no`. Stores header bboxes for Pass 2.
+2. **Pass 2 (pymupdf font size)**: `_classify_major_headers()` determines which Docling headers are major section breaks vs subsections via bounding box spatial matching.
+3. **Abstract detection**: Force-promotes "Abstract" headers to major. Scans pre-header body text for "Abstract:" labels and injects synthetic section breaks.
 
 **Lazy converter singleton**: `_get_converter()` loads Docling ML models once (~6.2 GB download on first run to `~/.cache/huggingface/hub/`), reuses for batch ingestion.
 
 **Header hierarchy classification** (`_classify_major_headers()`):
-- **Layer 1 (font size grouping)**: `_build_font_size_map()` scans entire PDF with pymupdf, collects short text blocks (< 100 chars) with max font sizes. `_lookup_header_font_size()` matches Docling headers against this map (exact → prefix → first-4-words). `_group_by_font_size()` clusters by size with 0.5pt tolerance. Picks the largest font group with >= 2 members (skips single-member groups like titles).
-- **Layer 2 (ALL_CAPS / numbered)**: Fallback when font sizes are uniform. ALL_CAPS headers (>= 3 alpha chars, all uppercase) or numbered (`^\d+\.\s+\S`) = major.
+- **Layer 1a (font size grouping)**: `_find_font_info_by_bbox()` converts Docling bbox (BOTTOMLEFT) to pymupdf coords (TOPLEFT), finds overlapping spans, reads font size and bold flag. `_group_by_font_size()` clusters by size with 0.5pt tolerance. Picks the largest font group with >= 2 members.
+- **Layer 1b (bold tiebreaker)**: If selected font-size group has bold/non-bold mix, only bold = major (handles MDPI journals).
+- **Layer 1c (ALL_CAPS tiebreaker)**: If selected font-size group has CAPS/mixed-case mix AND group is >70% of valid headers, only CAPS = major (handles Frontiers journals). Gated to avoid demoting legitimate majors in well-split papers.
+- **Layer 2 (ALL_CAPS / numbered)**: Fallback when font sizes are uniform.
 - **Layer 3**: Final fallback — all headers kept as section breaks.
 
-**Unchanged functions**: `compute_content_hash()`, `_find_page_range()`, `chunk_sections()`, `ingest_paper()` — same interfaces, no changes needed.
+**Abstract detection** (after hierarchy classification):
+- Force-promotes any Docling header matching `^abstract\b` (case-insensitive) to major regardless of font size
+- Scans body text before first major header for "Abstract:" prefix (regex: `^abstract\s*[:\-—.]?\s*`). Injects synthetic "Abstract" header + remaining text as body. Handles MDPI papers where abstract is body text.
+- Result: 7/9 papers have Abstract as own section. 2 Frontiers papers have unlabeled abstracts.
 
-### Current test results
+**Key functions**: `_bbox_overlap()`, `_find_font_info_by_bbox()`, `_group_by_font_size()`, `_is_all_caps()`, `_classify_major_headers()`
 
-**JSCR (Latella 2020)** — 11 sections (was 20 without hierarchy):
+**Unchanged functions**: `compute_content_hash()`, `_find_page_range()`, `chunk_sections()`, `ingest_paper()` — same interfaces.
+
+### Final test results (after re-ingestion)
+
+**9 papers, 414 total chunks**:
 ```
-[(no section)] (70 chars)
-[Christopher Latella...] (2959 chars)
-[Introduction] (5477 chars)
-[Methods] (5703 chars)          ← contains Experimental Approach, Subjects, Procedures, Statistical Analyses
-[Results] (1803 chars)          ← contains Descriptive Statistics, Sex Differences, Strength Changes, Correlations
-[Discussion] (7504 chars)
-[Results of the analyses...] (5897 chars)  ← TABLE CAPTION false positive (same font size as headers)
-[Results of bivariate...] (1305 chars)     ← TABLE CAPTION false positive
-[Practical Applications] (578 chars)
-[Acknowledgments] (134 chars)
-[References] (8433 chars)
+nutrients-13 — 70 chunks, 9 sections incl. Abstract (body text scan, bold tiebreaker)
+nutrients-17 — 71 chunks, 7 sections incl. Abstract (Docling header + force-promote)
+ijerph-16   — 28 chunks, 7 sections incl. Abstract (body text scan, bold tiebreaker)
+fspor-04    — 32 chunks, 9 sections (ALL_CAPS tiebreaker, no abstract label in PDF)
+sports-09   — 52 chunks, 8 sections incl. Abstract (body text scan)
+sports-08   — 34 chunks, 8 sections incl. Abstract (body text scan, bold tiebreaker)
+fspor-03    — 64 chunks, 16 sections (font size grouping, no abstract label in PDF)
+jscr-34     — 20 chunks, 10 sections incl. Abstract (Docling header + force-promote)
+40279_2019  — 43 chunks, 8 sections incl. Abstract (Docling header + force-promote)
 ```
 
-**Frontiers (Androulakis-Korakakis 2021)** — 12 sections (was 61 without hierarchy):
-```
-[(no section)] (3773 chars)     ← front matter (Edited by, Reviewed by, etc.) correctly demoted
-[INTRODUCTION] (4820 chars)
-[OVERVIEW OF STUDIES] (11914 chars)
-[Supplementary Material .] (101825 chars)  ← PROBLEM: swallows Studies 1-5 + General Discussion
-[CONCLUSIONS] (1199 chars)
-[REFERENCES] (811 chars)
-[DATA AVAILABILITY STATEMENT] (178 chars)
-[ETHICS STATEMENT] (238 chars)
-[AUTHOR CONTRIBUTIONS] (639 chars)
-[FUNDING] (121 chars)
-[ACKNOWLEDGMENTS] (167 chars)
-[SUPPLEMENTARY MATERIAL] (14045 chars)
-```
+Retrieval verified with cross-paper queries (similarity 0.65-0.75).
 
 ---
 
@@ -81,15 +73,19 @@ All three issues from the font-map approach were resolved by switching to **boun
 ### Root cause (font map approach)
 `_build_font_size_map()` built a text→font-size lookup from pymupdf blocks, then `_lookup_header_font_size()` tried to match Docling headers against it by text. This failed because pymupdf fragments text differently than Docling — many legitimate headers got `None` and were silently excluded from hierarchy classification.
 
-### Fix: Bounding box spatial matching + bold tiebreaker
+### Fix: Bounding box spatial matching + tiebreakers
 Instead of matching by text, match by position. Docling provides `item.prov[0].bbox` for each header. pymupdf provides `span["bbox"]` for each text span. The coordinate systems differ only by a y-axis flip:
 - **x**: identical between Docling and pymupdf
 - **y**: `pymupdf_y = page_height - docling_y` (Docling uses BOTTOMLEFT origin, pymupdf uses TOPLEFT)
 - Discrepancies consistently < 1pt, handled with 2pt overlap tolerance
 
-Additionally, pymupdf's `span["flags"]` bit 4 indicates bold. When font size grouping selects a major group where all headers are the same size, if there's a bold/non-bold mix, bold headers are kept as major and non-bold are demoted. This handles MDPI-format papers (URWPalladioL font family) where top-level headers are bold and subsections are italic, both at the same font size.
+**Bold tiebreaker** (Layer 1b): pymupdf's `span["flags"]` bit 4 indicates bold. When font size grouping selects a major group where all headers are the same size, if there's a bold/non-bold mix, bold headers are kept as major and non-bold are demoted. Handles MDPI-format papers (URWPalladioL font family) where top-level headers are bold and subsections are italic, both at the same font size.
 
-**New functions**: `_bbox_overlap()`, `_find_font_info_by_bbox()` — replaced `_build_font_size_map()`, `_lookup_header_font_size()`
+**ALL_CAPS tiebreaker** (Layer 1c): When the font-size group has ALL_CAPS/mixed-case mix AND the group represents >70% of all valid headers, only ALL_CAPS = major. The >70% gate prevents over-splitting in papers where font size already made a meaningful split (e.g., fspor-03 where 12pt correctly separates Study headers).
+
+**Abstract detection**: Force-promotes "Abstract" headers to major regardless of font size. Also scans body text before the first major header for "Abstract:" prefix and injects a synthetic section break. Handles MDPI papers where abstract is body text (`[text]` label), not a `[section_header]`.
+
+**New functions**: `_bbox_overlap()`, `_find_font_info_by_bbox()`, `_is_all_caps()` — replaced `_build_font_size_map()`, `_lookup_header_font_size()`
 
 ### Results
 - **246/246 headers matched (100%)** across all 9 papers — zero misses
@@ -104,7 +100,8 @@ Additionally, pymupdf's `span["flags"]` bit 4 indicates bold. When font size gro
 | File | Status | Change |
 |------|--------|--------|
 | `apps/api/requirements.txt` | Done | Added `docling>=2.0.0`, kept `pymupdf>=1.24.0` |
-| `apps/api/src/core/ingestion.py` | Done | Rewrote `extract_sections()`, added `_get_converter()`, `_bbox_overlap()`, `_find_font_info_by_bbox()`, `_group_by_font_size()`, `_classify_major_headers()` |
+| `apps/api/src/core/ingestion.py` | Done | Rewrote `extract_sections()`, added `_get_converter()`, `_bbox_overlap()`, `_find_font_info_by_bbox()`, `_group_by_font_size()`, `_is_all_caps()`, `_classify_major_headers()`, abstract detection |
+| `apps/api/scripts/reingest_all.py` | Done | New script: delete all papers/chunks + re-ingest all 9 papers |
 | `CLAUDE.md` | Done | Updated ingestion description, pipeline step 1, tech stack |
 | `CONTEXT.md` | Done | Updated Phase 3 section detection, Phase 2 deps, double-column issue section |
 | `MEMORY.md` | Done | Updated Phase 2 deps, Phase 3 section detection |

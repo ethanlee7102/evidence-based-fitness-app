@@ -21,7 +21,7 @@ class Config:
     # LLM (Gemini default, swappable)
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "google")
-    LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-2.0-flash")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 
     # RAG pipeline
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "800"))

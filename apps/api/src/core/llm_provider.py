@@ -33,15 +33,42 @@ def _build_gemini_payload(
     system: str | None = None,
     temperature: float = 0.7,
     max_tokens: int = 2048,
+    messages: list[dict] | None = None,
 ) -> dict:
-    """Build the request body for Gemini."""
+    """Build the request body for Gemini.
+
+    Args:
+        prompt: The current user message (always appended as final turn).
+        system: Optional system instruction (sent via system_instruction field).
+        temperature: Sampling temperature.
+        max_tokens: Max output tokens.
+        messages: Optional conversation history. Each dict has "role" ("user"|"assistant")
+            and "content". Gemini requires strict user/model alternation — caller must
+            ensure this.
+    """
+    # Build contents from history + current prompt
+    if messages:
+        role_map = {"assistant": "model", "user": "user"}
+        contents = [
+            {"role": role_map[msg["role"]], "parts": [{"text": msg["content"]}]}
+            for msg in messages
+        ]
+        contents.append({"role": "user", "parts": [{"text": prompt}]})
+
+        # Warn if roles don't alternate (Gemini will 400)
+        for i in range(1, len(contents)):
+            if contents[i]["role"] == contents[i - 1]["role"]:
+                logger.warning(
+                    f"Non-alternating roles at position {i-1}/{i} "
+                    f"({contents[i-1]['role']}/{contents[i]['role']}) — "
+                    "Gemini may reject this request"
+                )
+                break
+    else:
+        contents = [{"role": "user", "parts": [{"text": prompt}]}]
+
     payload: dict = {
-        "contents": [
-            {
-                "role": "user",
-                "parts": [{"text": prompt}],
-            }
-        ],
+        "contents": contents,
         "generationConfig": {
             "temperature": temperature,
             "maxOutputTokens": max_tokens,
@@ -61,6 +88,7 @@ async def generate(
     system: str | None = None,
     temperature: float = 0.7,
     max_tokens: int = 2048,
+    messages: list[dict] | None = None,
 ) -> str:
     """Generate a full response (non-streaming).
 
@@ -75,7 +103,7 @@ async def generate(
     response = await client.post(
         _gemini_url(stream=False),
         headers={"Content-Type": "application/json"},
-        json=_build_gemini_payload(prompt, system, temperature, max_tokens),
+        json=_build_gemini_payload(prompt, system, temperature, max_tokens, messages),
     )
 
     if response.status_code != 200:
@@ -100,6 +128,7 @@ async def generate_stream(
     system: str | None = None,
     temperature: float = 0.7,
     max_tokens: int = 2048,
+    messages: list[dict] | None = None,
 ) -> AsyncGenerator[str, None]:
     """Stream response tokens as they're generated.
 
@@ -116,7 +145,7 @@ async def generate_stream(
         "POST",
         _gemini_url(stream=True),
         headers={"Content-Type": "application/json"},
-        json=_build_gemini_payload(prompt, system, temperature, max_tokens),
+        json=_build_gemini_payload(prompt, system, temperature, max_tokens, messages),
     ) as response:
         if response.status_code != 200:
             body = await response.aread()
