@@ -448,15 +448,42 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 ---
 
 ### Phase 5: RAG Generation Pipeline
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-Create `apps/api/src/core/rag_pipeline.py`:
-- `build_rag_prompt(query, chunks, history)` — format sources with `[Author, Year]`
-- `rag_query(query, history, top_k, category)` — non-streaming (for eval)
-- `rag_query_stream(query, history, top_k, category)` — streaming (for chat)
-- System prompt: cite sources, "I don't know" when insufficient, explain at beginner level
+**5A. Multi-turn LLM support** — `apps/api/src/core/llm_provider.py`
+- Added `messages: list[dict] | None` param to `_build_gemini_payload()`, `generate()`, `generate_stream()`
+- Maps `"assistant"` → `"model"` for Gemini's role format
+- Role alternation warning log (Gemini requires strict user/model alternation)
 
-**Verify**: `rag_query("What rep range is best for hypertrophy?")` returns cited answer.
+**5B. Schema types** — `apps/api/src/schema/rag.py`
+- `ChatMessage` (TypedDict) — provider-agnostic history format
+- `RAGResult` (dataclass) — non-streaming response for eval pipeline
+- `StreamingRAGResult` (dataclass) — streaming response with lazy `.stream` async generator
+
+**5C. RAG Pipeline** — `apps/api/src/core/rag_pipeline.py` (new)
+- `SYSTEM_PROMPT` — exercise science assistant persona, citation rules, beginner-level
+- `NO_CHUNKS_INSTRUCTION` — ungrounded answer disclaimer
+- `REWRITE_PROMPT` — query rewriting template for follow-ups
+- `_rewrite_query(query, history)` — conditional rewrite (skips if no history)
+- `_build_sources_block(chunks)` — formats as `[Author, Year]` with page numbers
+- `build_rag_prompt(query, chunks)` — sources + question (or no-chunks instruction)
+- `rag_query()` — non-streaming, returns `RAGResult` (for eval)
+- `rag_query_stream()` — streaming, returns `StreamingRAGResult` (for chat UI)
+- Temperature hardcoded at 0.3, max_tokens 8192
+
+**5D. Test Script** — `apps/api/scripts/test_rag_pipeline.py` (new)
+- CLI: `python -m scripts.test_rag_pipeline "query" --stream --history '[...]' --category X --show-prompt`
+
+**5E. Model Migration** — gemini-2.0-flash → gemini-2.5-flash
+- Google zeroed free tier quotas for gemini-2.0-flash (deprecated, shutdown June 1, 2026)
+- Updated default in `config.py` and `apps/api/.env`
+
+**Verified**:
+- Grounded query: cited answer with [Author, Year, p. X] format ✅
+- Cross-paper citations: Schoenfeld 2021 + Bernardez-Vazquez 2022 + Androulakis-Korakakis 2021 ✅
+- Streaming mode: tokens arrive incrementally ✅
+- Follow-up with history: "Tell me more about the dosing" → rewritten to standalone query ✅
+- Ungrounded query: grounded=False, disclaimer prefix, brief general answer ✅
 
 ---
 

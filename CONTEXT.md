@@ -349,15 +349,17 @@ Phase 5 needs token counts to budget how many chunks fit in the LLM's context wi
 - **PLAN.md** exists at project root — keep phase statuses updated there as work completes.
 - **CLAUDE.md** has a reference to PLAN.md at the top.
 - **Corpus**: 9 papers ingested (414 chunks total). 3 hypertrophy, 1 nutrition, 5 strength. All CC-BY licensed. PDFs in `apps/api/papers/` (gitignored). Abstract detected as own section in 7/9 papers.
-- **Next**: Phase 5 (RAG Generation Pipeline) — build_rag_prompt, rag_query, rag_query_stream.
+- **Phase 5 implementation** complete — rag_pipeline.py, multi-turn LLM support, query rewriting, [Author, Year, p. X] citations, grounded/ungrounded handling.
+- **Gemini model migration**: gemini-2.0-flash → gemini-2.5-flash (Google zeroed free tier for 2.0-flash, deprecated with June 2026 shutdown).
+- **Next**: Phase 6 (Chat API + TraceLogger) — SSE endpoint, session CRUD, trace logging.
 
 ---
 
-## Phase 5: RAG Generation Pipeline — Implementation Plan
+## Phase 5: RAG Generation Pipeline — ✅ Complete
 
-### Context
+### What Was Built
 
-Phases 1-4 are complete: DB schema, embedding/LLM providers, ingestion pipeline (9 papers / 409 chunks), and retrieval pipeline. Phase 5 bridges retrieval and generation — given a user question, retrieve relevant chunks, format them into a citation-aware prompt, and generate a cited answer via the LLM. After this phase, one function call produces a fully cited exercise science answer end-to-end.
+Phases 1-4 are complete: DB schema, embedding/LLM providers, ingestion pipeline (9 papers / 414 chunks), and retrieval pipeline. Phase 5 bridges retrieval and generation — given a user question, retrieve relevant chunks, format them into a citation-aware prompt, and generate a cited answer via the LLM. One function call now produces a fully cited exercise science answer end-to-end.
 
 ### Design Decisions (locked in)
 
