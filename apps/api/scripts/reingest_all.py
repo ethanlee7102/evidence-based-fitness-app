@@ -29,6 +29,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Nutrients",
         "study_type": "review",
+        "doi": "10.3390/nu13061915",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8228369/",
     },
     {
         "filename": "nutrients-17-02748.pdf",
@@ -39,6 +41,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Nutrients",
         "study_type": "meta-analysis",
+        "doi": "10.3390/nu17172748",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12430374/",
     },
     {
         "filename": "ijerph-16-04897.pdf",
@@ -49,6 +53,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "International Journal of Environmental Research and Public Health",
         "study_type": "systematic-review",
+        "doi": "10.3390/ijerph16244897",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6950543/",
     },
     {
         "filename": "fspor-04-949021.pdf",
@@ -59,6 +65,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Frontiers in Sports and Active Living",
         "study_type": "systematic-review",
+        "doi": "10.3389/fspor.2022.949021",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9302196/",
     },
     {
         "filename": "sports-09-00032.pdf",
@@ -69,6 +77,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Sports",
         "study_type": "review",
+        "doi": "10.3390/sports9020032",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7927075/",
     },
     {
         "filename": "sports-08-00125.pdf",
@@ -79,6 +89,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Sports",
         "study_type": "review",
+        "doi": "10.3390/sports8090125",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7552788/",
     },
     {
         "filename": "fspor-03-713655.pdf",
@@ -89,6 +101,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Frontiers in Sports and Active Living",
         "study_type": "review",
+        "doi": "10.3389/fspor.2021.713655",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435792/",
     },
     {
         "filename": "jscr-34-2412.pdf",
@@ -99,6 +113,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Journal of Strength and Conditioning Research",
         "study_type": "observational",
+        "doi": "10.1519/JSC.0000000000003657",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7448836/",
     },
     {
         "filename": "40279_2019_Article_1241.pdf",
@@ -109,6 +125,8 @@ PAPERS = [
         "license": "CC-BY",
         "journal": "Sports Medicine",
         "study_type": "systematic-review",
+        "doi": "10.1007/s40279-019-01241-3",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7142036/",
     },
 ]
 
@@ -136,6 +154,7 @@ async def main():
             license=entry["license"],
             journal=entry.get("journal"),
             doi=entry.get("doi"),
+            url=entry.get("url"),
             study_type=entry.get("study_type"),
         )
 

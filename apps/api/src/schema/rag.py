@@ -98,6 +98,7 @@ class RetrievalResult:
     chunks: list[ChunkResponse] = field(default_factory=list)
     query: str = ""
     retrieval_time_ms: float = 0.0
+    embedding_time_ms: float = 0.0
 
 
 @dataclass
@@ -113,6 +114,7 @@ class RAGResult:
     rewritten_query: str | None
     prompt_sent: str
     retrieval_time_ms: float
+    embedding_time_ms: float
     generation_time_ms: float
     model: str
     grounded: bool
@@ -133,6 +135,55 @@ class StreamingRAGResult:
     rewritten_query: str | None
     prompt_sent: str
     retrieval_time_ms: float
+    embedding_time_ms: float
     model: str
     grounded: bool
     stream: AsyncGenerator[str, None]
+
+
+# --- API models (Phase 6: Chat API) ---
+
+
+class ChatMessageRequest(BaseModel):
+    """POST body for /chat/message endpoint."""
+
+    message: str = Field(..., min_length=1, max_length=10000)
+    session_id: Optional[str] = None
+    category: Optional[Category] = None
+
+
+class CitationPayload(BaseModel):
+    """Citation data stored as JSONB on assistant messages."""
+
+    chunk_id: str
+    title: str
+    authors: str
+    year: int
+    category: Category
+    similarity: float
+    journal: Optional[str] = None
+    doi: Optional[str] = None
+    section: Optional[str] = None
+    page_start: Optional[int] = None
+    page_end: Optional[int] = None
+
+
+class SessionResponse(BaseModel):
+    """Chat session returned from the API."""
+
+    id: str
+    user_id: str
+    title: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class MessageResponse(BaseModel):
+    """Chat message returned from the API."""
+
+    id: str
+    session_id: str
+    role: str
+    content: str
+    citations: Optional[list[CitationPayload]] = None
+    created_at: datetime

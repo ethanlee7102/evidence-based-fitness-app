@@ -488,38 +488,88 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 ---
 
 ### Phase 6: Chat API + TraceLogger
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-**6A. TraceLogger** — `apps/api/src/core/trace_logger.py`
-- Records query, chunks, prompt, response, timing, errors → stores in `rag_traces`
+**6A. Retrieval update** — `apps/api/src/core/retrieval.py`
+- Split `embedding_time_ms` from total `retrieval_time_ms` with separate timer around `embed_query()`
+- Added `embedding_time_ms` field to `RetrievalResult`, `RAGResult`, `StreamingRAGResult` dataclasses
+- Threaded through `rag_pipeline.py` to both `rag_query()` and `rag_query_stream()`
 
-**6B. Chat Service** — `apps/api/src/service/chat_service.py`
-- Session CRUD, message history, auto-title from first message
+**6B. Schema additions** — `apps/api/src/schema/rag.py`
+- `ChatMessageRequest` — POST body: message (1-10000), session_id (optional), category (optional)
+- `CitationPayload` — chunk_id, title, authors, year, category, similarity, journal, doi, section, pages
+- `SessionResponse` — id, user_id, title, created_at, updated_at
+- `MessageResponse` — id, session_id, role, content, citations (optional), created_at
 
-**6C. Chat Route** — `apps/api/src/api/chat.py`
-- `GET /chat/sessions`, `GET /chat/sessions/{id}/messages`
-- `POST /chat/message` — SSE streaming endpoint
-- `DELETE /chat/sessions/{id}`
-- SSE events: `citations`, `session`, `data`, `done`, `error`
+**6C. TraceLogger** — `apps/api/src/core/trace_logger.py`
+- `log_trace()` — fire-and-forget via `asyncio.create_task()`, never blocks response
+- `_insert_trace()` — async DB insert, catches all exceptions internally
+- `_chunks_to_json()` — full chunk text included for self-contained trace snapshots
+- Maps to DB columns: `llm_response` (not `answer`), rounds timing to integers
 
-**6D. Traces Route** — `apps/api/src/api/traces.py`
-- `GET /chat/traces` — debugging endpoint
+**6D. Chat Service** — `apps/api/src/service/chat_service.py`
+- Session CRUD: create, get, list (newest first), delete (FK cascade)
+- Message CRUD: save (with optional citations JSONB), get (oldest first, limit 50)
+- `get_recent_messages()` → `list[ChatMessage]` for RAG history (last 10, oldest first)
+- `update_session_title()` and `update_session_timestamp()` (uses `datetime.now(timezone.utc)`)
 
-**Verify**: curl POST to `/chat/message`, see SSE events streaming.
+**6E. Chat Route** — `apps/api/src/api/chat.py`
+- `POST /chat/message` — main SSE streaming endpoint
+  - Auto-creates session if no session_id provided
+  - Fetches history BEFORE saving user message (avoids dedup)
+  - SSE event flow: `session` (new only) → `citations` (always) → `data*` (text chunks) → `done`
+  - On error: emits `error` event, logs trace, does NOT save partial answer
+  - After stream: saves assistant message, logs trace (fire-and-forget), generates title if first message (fire-and-forget)
+- `GET /chat/sessions` — list sessions (newest first)
+- `GET /chat/sessions/{id}` — single session
+- `GET /chat/sessions/{id}/messages` — message history (oldest first, limit 50)
+- `DELETE /chat/sessions/{id}` — delete session (FK cascade)
+- Auto-title: LLM generates 3-8 word title, strips quotes/preamble, truncates 60 chars
+
+**6F. Migration** — `supabase/migrations/008_rag_traces_add_columns.sql`
+- Adds `rewritten_query`, `chunk_count`, `model`, `grounded` columns to `rag_traces`
+
+**6G. Router registration** — `apps/api/src/api/router.py`
+- Added `chat.router` to api_router
+
+**Verified**:
+- SSE streaming: session → citations → data* → done events ✅
+- Session auto-creation and listing ✅
+- Auto-title generation ("Rep Ranges") ✅
+- Message persistence with citations JSONB ✅
+- Follow-up with history: query rewriting worked ("What about for strength?" → "Optimal repetition range for strength development...") ✅
+- rag_traces populated: both queries logged with timing, chunks, model, grounded flag ✅
+- Typical timing: embedding ~200-400ms, retrieval ~400-900ms, generation ~11-15s
 
 ---
 
 ### Phase 7: Frontend Chat UI
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-**7A. Types** — `features/chat/types/index.ts`
-**7B. Service** — `features/chat/services/chatService.ts` (SSE parsing)
-**7C. Hook** — `features/chat/hooks/useChat.ts` (state management)
-**7D. Components**:
-- ChatInput, ChatMessageBubble, ChatMessageList, SessionSidebar, CitationCard
-**7E. ChatScreen rewrite** — SessionSidebar + Chat area with streaming
+**7A. Types** — `features/chat/types/index.ts` — Citation, ChatSession, ChatMessageData, StreamingMessage, SendMessageRequest, SSECallbacks, SUGGESTED_QUESTIONS
+**7B. Service** — `features/chat/services/chatService.ts` — REST wrappers (getSessions, getMessages, deleteSession) + `sendMessageSSE()` with fetch + ReadableStream + buffer accumulation for SSE parsing
+**7C. Hook** — `features/chat/hooks/useChat.ts` — sessions, messages, streamingMessage, isSending, error state. Functional state updates for stale closure safety. AbortController cleanup. Retry with stored failed message.
+**7D. Components** (7 files):
+- TypingIndicator — animated bouncing dots
+- CitationCard — grouped by paper (1 card per paper), sections + page ranges, DOI links, category badges. `normalizeCiteKey()` for matching inline citations.
+- SuggestedQuestions — 4 clickable exercise science questions (empty state)
+- ChatMessage — user/assistant bubbles, react-markdown + remark-gfm rendering, inline clickable citations (`[Author, Year]` → scroll to card with highlight), streaming cursor, ungrounded disclaimer
+- ChatInput — auto-resize textarea, Enter to send, Shift+Enter newline
+- ChatMessageList — scrollable container, auto-scroll near bottom, typing indicator
+- SessionSidebar — collapsible panel with session list, new chat, delete
+**7E. ChatScreen rewrite** — edge-to-edge layout (`-m-6` + `h-screen`), collapsible sidebar (ChevronLeft/Right toggle), error banner with Retry, loading spinner for session switches
+**7F. Dependencies** — `react-markdown`, `remark-gfm`
 
-**Verify**: Navigate to `/dashboard/chat`, send message, see streaming + citations.
+**Verified**:
+- Suggested questions empty state ✅
+- Streaming responses with markdown rendering ✅
+- Clickable inline citations scroll to citation cards with highlight ✅
+- Citation cards grouped by paper with section + page subsections ✅
+- DOI links open in new tab ✅
+- Session sidebar: create, select, delete ✅
+- Multi-turn with query rewriting ✅
+- Error banner with retry ✅
+- Auto-title appears after ~3s delay ✅
 
 ---
 
@@ -537,9 +587,12 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 
 ### File Manifest
 
-**New Files**:
+**New Files (created so far)**:
 ```
 supabase/migrations/005_rag_tables.sql
+supabase/migrations/006_add_paper_license.sql
+supabase/migrations/007_match_chunks_add_token_count.sql
+supabase/migrations/008_rag_traces_add_columns.sql
 apps/api/src/core/embedding_provider.py
 apps/api/src/core/llm_provider.py
 apps/api/src/core/ingestion.py
@@ -549,31 +602,50 @@ apps/api/src/core/trace_logger.py
 apps/api/src/schema/rag.py
 apps/api/src/service/chat_service.py
 apps/api/src/api/chat.py
-apps/api/src/api/traces.py
 apps/api/scripts/ingest_paper.py
 apps/api/scripts/ingest_batch.py
+apps/api/scripts/reingest_all.py
 apps/api/scripts/test_retrieval.py
+apps/api/scripts/test_rag_pipeline.py
 apps/api/papers/manifest.json
+```
+
+**New Files (Phase 7 — created)**:
+```
+apps/web/src/features/chat/types/index.ts
+apps/web/src/features/chat/services/chatService.ts
+apps/web/src/features/chat/services/index.ts
+apps/web/src/features/chat/hooks/useChat.ts
+apps/web/src/features/chat/hooks/index.ts
+apps/web/src/features/chat/components/TypingIndicator.tsx
+apps/web/src/features/chat/components/CitationCard.tsx
+apps/web/src/features/chat/components/SuggestedQuestions.tsx
+apps/web/src/features/chat/components/ChatMessage.tsx
+apps/web/src/features/chat/components/ChatInput.tsx
+apps/web/src/features/chat/components/ChatMessageList.tsx
+apps/web/src/features/chat/components/SessionSidebar.tsx
+```
+
+**Modified Files (Phase 7)**:
+```
+apps/web/src/features/chat/components/index.ts   — 7 component exports
+apps/web/src/features/chat/screens/ChatScreen.tsx — full rewrite
+apps/web/src/features/chat/index.ts               — add hooks/services/types exports
+apps/web/package.json                              — react-markdown, remark-gfm
+```
+
+**New Files (planned — Phase 8+)**:
+```
 apps/api/tests/eval/test_dataset.json
 apps/api/tests/eval/test_rag_pipeline.py
 apps/api/scripts/evaluate_rag.py
-apps/web/src/features/chat/types/index.ts
-apps/web/src/features/chat/services/chatService.ts
-apps/web/src/features/chat/hooks/useChat.ts
-apps/web/src/features/chat/components/ChatInput.tsx
-apps/web/src/features/chat/components/ChatMessageBubble.tsx
-apps/web/src/features/chat/components/ChatMessageList.tsx
-apps/web/src/features/chat/components/SessionSidebar.tsx
-apps/web/src/features/chat/components/CitationCard.tsx
 ```
 
 **Modified Files**:
 ```
 apps/api/src/utils/config.py          — add RAG env vars
-apps/api/src/api/router.py            — register chat + traces routers
+apps/api/src/api/router.py            — register chat router
 apps/api/requirements.txt             — add docling, pymupdf, langchain-text-splitters
 apps/api/.env                         — add API keys + config
-apps/web/src/features/chat/screens/ChatScreen.tsx    — full rewrite
-apps/web/src/features/chat/components/index.ts       — export new components
-apps/web/src/features/chat/index.ts                  — updated exports
+apps/api/src/core/rag_pipeline.py     — thread embedding_time_ms through results
 ```
