@@ -38,7 +38,13 @@ flame-fitness/
 │   │       │   ├── home/         # Landing page + HomeDashboardScreen
 │   │       │   ├── workouts/     # Workout logging + history
 │   │       │   ├── analysis/     # AI trends, charts
-│   │       │   ├── chat/         # AI assistant
+│   │       │   ├── chat/         # AI assistant (RAG chatbot)
+│   │       │   │   ├── components/  # TypingIndicator, CitationCard, SuggestedQuestions,
+│   │       │   │   │                # ChatMessage, ChatInput, ChatMessageList, SessionSidebar
+│   │       │   │   ├── hooks/       # useChat (state management, SSE callbacks)
+│   │       │   │   ├── screens/     # ChatScreen (full chat UI)
+│   │       │   │   ├── services/    # chatService (REST + SSE streaming)
+│   │       │   │   └── types/       # Citation, ChatSession, ChatMessageData, etc.
 │   │       │   ├── profile/      # User settings
 │   │       │   └── onboarding/   # Multi-step user onboarding
 │   │       ├── shared/           # Shared UI (Button, Card, Loading, Layout)
@@ -47,15 +53,17 @@ flame-fitness/
 │   │
 │   └── api/                      # Python backend (port 8000)
 │       ├── src/
-│       │   ├── api/              # Route handlers (health, profile)
+│       │   ├── api/              # Route handlers (health, profile, chat)
+│       │   │   └── chat.py               # SSE streaming + session CRUD (5 endpoints)
 │       │   ├── core/             # Business logic
 │       │   │   ├── embedding_provider.py  # Voyage AI embed_texts/embed_query
 │       │   │   ├── llm_provider.py        # Gemini generate/generate_stream
 │       │   │   ├── ingestion.py           # PDF extraction, chunking, ingestion pipeline
 │       │   │   ├── retrieval.py           # retrieve_chunks() → vector search → RetrievalResult
-│       │   │   └── rag_pipeline.py       # rag_query/rag_query_stream → cited answers
+│       │   │   ├── rag_pipeline.py        # rag_query/rag_query_stream → cited answers
+│       │   │   └── trace_logger.py        # Fire-and-forget RAG trace logging
 │       │   ├── schema/           # Pydantic models (profile.py, rag.py)
-│       │   ├── service/          # db_service, storage_service
+│       │   ├── service/          # db_service, storage_service, chat_service
 │       │   ├── utils/            # config, auth, logging
 │       │   └── db.py             # Supabase client
 │       ├── scripts/
@@ -89,7 +97,10 @@ flame-fitness/
 - **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini (2.5 Flash). Both accept `temperature`, `max_tokens`, and `messages` (multi-turn history) params. Role alternation warning log for Gemini's strict user/model requirement.
 - **RAG Pipeline**: `src/core/rag_pipeline.py` — `rag_query()` (non-streaming for eval) and `rag_query_stream()` (streaming for chat UI). Conditional query rewriting on follow-ups. Citations as `[Author, Year, p. X]`. Temperature 0.3 for faithfulness. `grounded: bool` flag for UI display.
 - **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Uses IBM Docling + pymupdf hybrid: Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables; pymupdf provides font size/bold via bounding box spatial matching for header hierarchy classification. Layered hierarchy: 1a) font size grouping, 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback. Abstract detection: force-promotes "Abstract" headers to major regardless of font size, and scans pre-header body text for "Abstract:" labels (handles MDPI papers where abstract is body text, not a header).
-- **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing). Logs query, chunk count, similarity range, timing at INFO level.
+- **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing + embedding_time_ms). Logs query, chunk count, similarity range, timing at INFO level.
+- **TraceLogger**: `src/core/trace_logger.py` — `log_trace()` fires async task via `asyncio.create_task()`. Never blocks, never raises. Logs to `rag_traces` table with full chunk text snapshots.
+- **ChatService**: `src/service/chat_service.py` — Session CRUD, message persistence, `get_recent_messages()` returns `list[ChatMessage]` for RAG history (last 10). Uses service_role client, enforces user_id in every query.
+- **Chat API**: `src/api/chat.py` — 5 endpoints: `POST /chat/message` (SSE streaming), `GET /chat/sessions`, `GET /chat/sessions/{id}`, `GET /chat/sessions/{id}/messages`, `DELETE /chat/sessions/{id}`. SSE event flow: session → citations → data* → done. Auto-title via fire-and-forget LLM call.
 
 ### Database Tables
 - `profiles` - extends Supabase auth.users with onboarding fields:
@@ -146,14 +157,20 @@ cd apps/api && python -m scripts.ingest_batch
 - Onboarding flow implemented (4-step profile setup)
 - Dashboard with 5-tab sidebar navigation (Home, Workouts, Analysis, Chat, Profile)
 - Core infrastructure in place
-- RAG Phase 1 (database schema) complete — pgvector tables + RPC running in Supabase
-- RAG Phase 2 (backend infrastructure) complete — embedding provider, LLM provider, config all working
-- RAG Phase 3 (ingestion pipeline) complete — PDF extraction, section-aware chunking, CLI scripts, 9 papers ingested (414 chunks across hypertrophy/nutrition/strength)
-- RAG Phase 4 (retrieval pipeline) complete — `retrieve_chunks()` function, `RetrievalResult` dataclass, migration 007 adds `token_count` to `match_chunks` RPC, `test_retrieval.py` CLI script
-- RAG Phase 5 (generation pipeline) complete — `rag_pipeline.py` with `rag_query()`/`rag_query_stream()`, conditional query rewriting, `[Author, Year, p. X]` citations, grounded/ungrounded handling, `test_rag_pipeline.py` CLI script
-- Migration 006: Added `license` field to `papers` table for tracking content usage rights
-- Migration 007: DROP + CREATE `match_chunks` RPC to include `token_count` in return (PostgreSQL requires DROP when RETURNS TABLE columns change)
+- RAG Phases 1-7 complete — full pipeline from PDF ingestion to frontend chat UI
+- RAG Phase 1 (database schema) — pgvector tables + RPC running in Supabase
+- RAG Phase 2 (backend infrastructure) — embedding provider, LLM provider, config
+- RAG Phase 3 (ingestion pipeline) — PDF extraction, section-aware chunking, 9 papers ingested (414 chunks)
+- RAG Phase 4 (retrieval pipeline) — `retrieve_chunks()`, `RetrievalResult`, `match_chunks` RPC
+- RAG Phase 5 (generation pipeline) — `rag_pipeline.py`, query rewriting, `[Author, Year, p. X]` citations
+- RAG Phase 6 (chat API) — SSE streaming endpoint, session CRUD, TraceLogger, auto-title
+- RAG Phase 7 (frontend chat UI) — ChatGPT-like interface with streaming, clickable inline citations, grouped citation cards, session sidebar, suggested questions, markdown rendering, error handling with retry
+- Migration 006: `license` field on `papers` table
+- Migration 007: `match_chunks` RPC updated with `token_count`
+- Migration 008: `rewritten_query`, `chunk_count`, `model`, `grounded` columns on `rag_traces`
 - LLM model: gemini-2.5-flash (upgraded from 2.0-flash after Google deprecated free tier)
+- Papers: all 9 papers have DOI and PMC URL metadata
+- Next: Phase 8 (Automated RAG Evaluation Pipeline)
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)

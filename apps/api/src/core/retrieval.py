@@ -29,7 +29,9 @@ async def retrieve_chunks(
     start = time.perf_counter()
 
     # 1. Embed the query
+    embed_start = time.perf_counter()
     embedding = await embed_query(query)
+    embedding_time_ms = (time.perf_counter() - embed_start) * 1000
 
     # 2. Call match_chunks RPC
     rpc_params = {
@@ -63,4 +65,5 @@ async def retrieve_chunks(
         chunks=chunks,
         query=query,
         retrieval_time_ms=elapsed_ms,
+        embedding_time_ms=embedding_time_ms,
     )
