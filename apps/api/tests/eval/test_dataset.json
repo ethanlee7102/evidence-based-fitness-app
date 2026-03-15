@@ -78,6 +78,123 @@
         "tags": ["hypertrophy", "repetition-continuum", "single-paper"]
     },
     {
+        "id": "HYP-007",
+        "question": "How does rest interval duration between sets affect muscle hypertrophy?",
+        "category": null,
+        "expected_facts": [
+            "Hypertrophy can be achieved across a range of rest interval lengths",
+            "Longer rest intervals (2+ minutes) may provide a small benefit for hypertrophy",
+            "Shorter rest intervals increase metabolic stress but may limit volume load"
+        ],
+        "expected_papers": ["Singer 2024"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "rest-intervals"]
+    },
+    {
+        "id": "HYP-008",
+        "question": "How does repetition tempo or movement speed influence muscle hypertrophy?",
+        "category": null,
+        "expected_facts": [
+            "Both slow and fast tempos can produce hypertrophy",
+            "Extremely slow tempos (>10 seconds per rep) may be suboptimal due to reduced load",
+            "Moderate tempos (2-6 seconds per rep) are generally effective for hypertrophy"
+        ],
+        "expected_papers": ["Wilk 2021", "Androulakis Korakakis 2024"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "tempo", "multi-paper"]
+    },
+    {
+        "id": "HYP-009",
+        "question": "What does the research say about how close to failure you need to train for optimal hypertrophy?",
+        "category": null,
+        "expected_facts": [
+            "Training to or near failure enhances hypertrophy compared to stopping well short of failure",
+            "The effect of training to failure vs near failure is small (trivial effect size)",
+            "Proximity-to-failure may be more important than absolute load for hypertrophy"
+        ],
+        "expected_papers": ["Refalo 2023"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "proximity-to-failure"]
+    },
+    {
+        "id": "HYP-010",
+        "question": "How does range of motion affect hypertrophy, and is full range of motion always better?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "Full range of motion generally produces greater hypertrophy than partial range of motion",
+            "Training at longer muscle lengths (stretched position) may be particularly effective",
+            "Partial range of motion at long muscle lengths can still produce meaningful hypertrophy"
+        ],
+        "expected_papers": ["Androulakis Korakakis 2024", "Warneke 2023"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "range-of-motion", "multi-paper"]
+    },
+    {
+        "id": "HYP-011",
+        "question": "What is stretch-mediated hypertrophy and what mechanisms drive it?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "Mechanical tension at long muscle lengths can trigger hypertrophy through mechanotransduction",
+            "Animal studies show dramatic muscle growth from chronic stretch loading",
+            "Human evidence supports training at long muscle lengths for enhanced hypertrophy"
+        ],
+        "expected_papers": ["Warneke 2023"],
+        "difficulty": "hard",
+        "tags": ["hypertrophy", "stretch-mediated", "mechanisms"]
+    },
+    {
+        "id": "HYP-012",
+        "question": "What are the benefits of eccentric training for muscle hypertrophy and how do eccentric contractions differ from concentric?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "Eccentric contractions can produce greater force at lower metabolic cost compared to concentric",
+            "Eccentric training can effectively promote muscle hypertrophy",
+            "Eccentric exercise initially causes greater muscle damage but leads to a protective repeated bout effect"
+        ],
+        "expected_papers": ["Hody 2019"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "eccentric", "contraction-type"]
+    },
+    {
+        "id": "HYP-013",
+        "question": "What role does metabolic stress play in muscle hypertrophy compared to mechanical tension?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "Mechanical tension is considered the primary driver of muscle hypertrophy",
+            "Metabolic stress (e.g., lactate accumulation) may contribute to hypertrophy through cell swelling and hormonal responses",
+            "The relative contribution of metabolic stress vs mechanical tension is still debated"
+        ],
+        "expected_papers": ["Lawson 2022"],
+        "difficulty": "hard",
+        "tags": ["hypertrophy", "mechanisms", "metabolic-stress"]
+    },
+    {
+        "id": "HYP-014",
+        "question": "Is periodized resistance training necessary for maximizing hypertrophy, and how do linear vs undulating models compare?",
+        "category": null,
+        "expected_facts": [
+            "Periodized training is generally superior to non-periodized training for strength gains",
+            "Linear and daily undulating periodization produce similar hypertrophy outcomes",
+            "The evidence for periodization's effect on hypertrophy specifically is less clear than for strength"
+        ],
+        "expected_papers": ["Evans 2019", "Grgic 2017"],
+        "difficulty": "hard",
+        "tags": ["hypertrophy", "periodization", "multi-paper"]
+    },
+    {
+        "id": "HYP-015",
+        "question": "How can you design a time-efficient resistance training program without sacrificing muscle growth?",
+        "category": null,
+        "expected_facts": [
+            "Supersets and other time-saving techniques can maintain training effectiveness",
+            "Multi-joint exercises are more time-efficient than single-joint exercises for overall muscle development",
+            "Reducing rest periods or using drop sets can compress training time"
+        ],
+        "expected_papers": ["Iversen 2021"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "time-efficiency", "practical"]
+    },
+    {
         "id": "STR-001",
         "question": "What is tapering and why is it important for powerlifting performance?",
         "category": null,
