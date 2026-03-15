@@ -24,15 +24,15 @@ pgvector HNSW index caps at 2,000 dimensions for `vector` type. Original plan us
 
 ---
 
-## LLM Decision (Open)
+## LLM Decision (Resolved)
 
-### Current Plan
-Gemini 2.0 Flash — chosen as cheapest option, swappable via env var.
-
-### Still To Decide
-1. Whether to do a deep dive comparison like we did for embeddings. The provider is designed to be swappable, so this is less critical — can change later without re-processing anything.
-2. ~~Verify Voyage AI REST API format~~ ✅ Verified (see below)
-3. ~~Verify Gemini REST API format~~ ✅ Verified (see below)
+### Decision: Gemini 2.5 Flash
+- Cheapest option, swappable via env var + `llm_provider.py` wrapper
+- Migrated from gemini-2.0-flash → gemini-2.5-flash (Google deprecated 2.0-flash free tier, shutdown June 2026)
+- Free tier: 10 RPM, 250 RPD, 250K TPM
+- Provider designed to be swappable — can change later without re-processing anything
+- ~~Verify Voyage AI REST API format~~ ✅ Verified (see below)
+- ~~Verify Gemini REST API format~~ ✅ Verified (see below)
 
 ---
 
@@ -289,7 +289,7 @@ supabase-py sends `Prefer: return=representation` by default. Don't include `"id
 - **Androulakis-Korakakis et al. 2021** (minimum effective dose) — 64 chunks, 16 sections (Frontiers, no abstract label)
 - **Latella et al. 2020** (15-year powerlifting analysis) — 20 chunks, 10 sections including Abstract (Docling header + force-promote)
 - **Thompson et al. 2020** (load prescription methods) — 43 chunks, 8 sections including Abstract (Docling header + force-promote)
-- **Total**: 9 papers, 414 chunks (3 hypertrophy, 1 nutrition, 5 strength)
+- **Total (original 9)**: 9 papers, 414 chunks (3 hypertrophy, 1 nutrition, 5 strength). Expanded to 24 papers, 909 chunks after Phase 8 corpus expansion.
 - Dedup confirmed — re-run skips with "Paper already ingested"
 - Retry logic confirmed — triggered on Voyage 429 before payment method was added
 - Voyage free tier without payment: 3 RPM / 10K TPM (very restrictive). Adding payment method unlocks normal limits, free tokens still apply.
@@ -343,18 +343,21 @@ Phase 5 needs token counts to budget how many chunks fit in the LLM's context wi
 - **Phase 1 migration** has been run in Supabase — tables and pgvector extension confirmed working.
 - **Phase 2 implementation** complete and verified — embedding provider, LLM provider, config, dependencies all working.
 - **Migration 006** — `license` column added to papers table and applied in Supabase.
-- **Phase 3 implementation** complete and verified — 2 papers ingested, section detection working, dedup working.
+- **Phase 3 implementation** complete and verified — 24 papers ingested, section detection working, dedup working.
 - **Migration 007** — `match_chunks` RPC updated to return `token_count`. Requires DROP+CREATE (not CREATE OR REPLACE) due to return type change.
 - **Phase 4 implementation** complete — retrieval module, schema updates, migration all in place.
 - **PLAN.md** exists at project root — keep phase statuses updated there as work completes.
 - **CLAUDE.md** has a reference to PLAN.md at the top.
-- **Corpus**: 9 papers ingested (414 chunks total). 3 hypertrophy, 1 nutrition, 5 strength. All CC-BY licensed. PDFs in `apps/api/papers/` (gitignored). Abstract detected as own section in 7/9 papers.
+- **Corpus**: 24 papers ingested (909 chunks total). 3 hypertrophy, 18 nutrition, 5 strength. All CC-BY licensed. PDFs in `apps/api/papers/` (gitignored).
 - **Phase 5 implementation** complete — rag_pipeline.py, multi-turn LLM support, query rewriting, [Author, Year, p. X] citations, grounded/ungrounded handling.
 - **Gemini model migration**: gemini-2.0-flash → gemini-2.5-flash (Google zeroed free tier for 2.0-flash, deprecated with June 2026 shutdown).
 - **Phase 6 implementation** complete — Chat API (SSE streaming), TraceLogger (fire-and-forget), ChatService (session CRUD), migration 008 (trace columns).
 - **Phase 7 implementation** complete — Frontend chat UI with streaming, clickable inline citations, grouped citation cards, session sidebar.
-- Papers updated with DOI and PMC URL metadata (all 9 papers).
-- **Next**: Phase 8 (Automated RAG Evaluation Pipeline).
+- **Phase 8 implementation** complete — Custom LLM-as-judge eval pipeline (5 metrics, 20 test cases, CLI + pytest). Awaiting baseline run.
+- **Corpus expansion** — 15 new nutrition papers added (protein, supplements, timing, recovery, sleep). See "Corpus Expansion" section below.
+- **Ingestion quality fixes** — Title-level font group skip heuristic (while loop) fixes JISSN and TSMED papers. See "Ingestion Quality Fixes" section below.
+- Papers updated with DOI and PMC URL metadata (all 24 papers).
+- **Next**: Run baseline eval, review test dataset Q&A pairs, set pytest thresholds.
 
 ---
 
@@ -1251,4 +1254,89 @@ None new. Uses only:
 - `src/core/llm_provider.generate()` (existing)
 - Standard library: `json`, `re`, `statistics`, `asyncio`, `time`, `argparse`, `pathlib`, `dataclasses`, `logging`
 - `pytest` (already installed)
+
+---
+
+## Corpus Expansion — 15 New Nutrition Papers
+
+### Context
+Original corpus was 9 papers (3 hypertrophy, 1 nutrition, 5 strength). Expanded with 15 CC-BY nutrition papers from PMC Open Access Subset to improve coverage for evaluation and user queries.
+
+### Papers Added
+All CC-BY licensed, sourced from PMC with `cc by license[filter]`:
+
+**Protein & MPS**:
+- Cintineo et al. 2018 — Protein supplementation effects on performance & recovery (Frontiers in Nutrition)
+- Zhao et al. 2024 — Protein intake & athletic performance meta-analysis (Frontiers in Nutrition)
+- Davies et al. 2024 — Muscle protein synthetic response to resistance exercise (Translational Sports Medicine)
+- Gwin et al. 2020 — MPS responses to EAAs, intact protein, mixed meals (Nutrients)
+- Pearson et al. 2023 — Protein supplementation & recovery from exercise-induced muscle damage (European J Clinical Nutrition)
+- Roth et al. 2022 — Lean mass sparing during caloric restriction (European J Applied Physiology)
+
+**Nutrient Timing & Pre-Sleep Protein**:
+- Arent et al. 2020 — Nutrient timing review (Nutrients)
+- Trommelen & van Loon 2016 — Pre-sleep protein ingestion (Nutrients)
+- Snijders et al. 2019 — Pre-sleep protein update (Frontiers in Nutrition)
+
+**Supplements**:
+- Antonio et al. 2024 — Top 5 sport supplements (Nutrients)
+- Grgic et al. 2018 — Caffeine effects on strength & power meta-analysis (JISSN)
+- Trexler et al. 2015 — ISSN position stand: beta-alanine (JISSN)
+- Bird et al. 2024 — Supplementation strategies for strength/power athletes (Nutrients)
+
+**Recovery & Sleep**:
+- Mielgo-Ayuso & Fernández-Lázaro 2021 — Nutrition and muscle recovery (Nutrients)
+- Doherty et al. 2019 — Sleep and nutrition interactions for athletes (Nutrients)
+
+### Ingestion Results
+- All 15 papers ingested successfully (0 failures)
+- Total corpus: 24 papers, 909 chunks
+- Metadata in `papers/manifest.json` and `scripts/reingest_all.py`
+
+---
+
+## Ingestion Quality Fixes — Title-Level Font Group Skip
+
+### Problem
+Some papers had font size hierarchy misclassification in `_classify_major_headers()`. Title-level or page-label font groups (≤2 members) at a larger font size were classified as major headers, pushing the real section headers to minor.
+
+**Affected papers**:
+- **Davies et al. 2024** (TSMED) — Paper title at 17.9pt (2 headers) classified as major. Real sections at 12.0pt (12 headers) classified as minor. Result: 1 section instead of 13.
+- **Trexler et al. 2015** (JISSN) — Page labels "REVIEW", "Open Access" at 13.0pt (2 headers) classified as major. Real sections at 9.2pt (13 headers) missed. Result: 2 wrong sections instead of 16.
+- **Grgic et al. 2018** (JISSN) — Same JISSN page label issue at 13.0pt. Real sections at 10.3pt (6 headers) missed. Result: 2 wrong sections instead of 8.
+
+### Fix
+Changed the title-level skip logic in `_classify_major_headers()` from a single `if` check to a `while` loop:
+
+```python
+# Before (single skip):
+if (len(qualifying) >= 2
+        and len(qualifying[0][1]) <= 2
+        and len(qualifying[1][1]) >= 3):
+    qualifying = qualifying[1:]
+
+# After (chain skip):
+while (len(qualifying) >= 2
+        and len(qualifying[0][1]) <= 2
+        and any(len(q[1]) >= 3 for q in qualifying[1:])):
+    qualifying = qualifying[1:]
+```
+
+**Why while loop**: Trexler 2015 has TWO small font groups before the real sections:
+- 23.4pt (1 member) — title, already filtered by single-member check
+- 13.0pt (2 members) — "REVIEW", "Open Access" page labels
+- 10.3pt (2 members) — "Abstract", "Introduction" (separate from main sections)
+- 9.2pt (13 members) — real content sections
+
+The single `if` could only skip one group. The `while` loop skips the chain of small groups until it reaches the real sections.
+
+### Results After Fix
+| Paper | Before | After |
+|-------|--------|-------|
+| Davies 2024 | 1 section (35 chunks) | 13 sections (42 chunks) |
+| Trexler 2015 | 2 wrong sections | 16 sections (32 chunks) |
+| Grgic 2018 | 2 wrong sections | 8 sections (24 chunks) |
+| All other papers | unchanged | unchanged |
+
+Regression tested across all 24 papers — no changes to any other paper's section count.
 

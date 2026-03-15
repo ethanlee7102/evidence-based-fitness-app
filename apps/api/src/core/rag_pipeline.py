@@ -202,6 +202,11 @@ async def rag_query(
     )
     gen_time_ms = (time.perf_counter() - gen_start) * 1000
 
+    # Override grounded if LLM self-identified insufficient sources
+    if grounded and "I don't have enough research" in answer:
+        grounded = False
+        logger.info("LLM flagged insufficient sources — overriding grounded=False")
+
     logger.info(
         f"RAG query complete: {len(chunks)} chunks, grounded={grounded}, "
         f"retrieval={retrieval_result.retrieval_time_ms:.0f}ms, "

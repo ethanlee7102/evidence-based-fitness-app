@@ -69,11 +69,13 @@ flame-fitness/
 │       ├── scripts/
 │       │   ├── ingest_paper.py   # Single paper CLI ingestion
 │       │   ├── ingest_batch.py   # Batch ingestion from manifest.json
-│       │   ├── reingest_all.py   # Delete all + re-ingest all 9 papers
+│       │   ├── reingest_all.py   # Delete all + re-ingest all 24 papers
+│       │   ├── evaluate_rag.py   # RAG evaluation CLI (--combined, --dry-run, --verbose)
 │       │   ├── test_retrieval.py # CLI retrieval testing
 │       │   └── test_rag_pipeline.py # CLI end-to-end RAG testing
 │       ├── papers/               # PDF storage (gitignored) + manifest.json
 │       ├── tests/
+│       │   └── eval/             # RAG evaluation test suite
 │       └── app.py                # FastAPI entry point
 │
 ├── packages/shared/types/        # Shared TypeScript types (profile.ts, user.ts)
@@ -96,7 +98,7 @@ flame-fitness/
 - **Embedding**: `src/core/embedding_provider.py` — `embed_texts()` and `embed_query()` via Voyage AI. `embed_texts()` has retry logic (3 attempts, exponential backoff on 429/500/503).
 - **LLM**: `src/core/llm_provider.py` — `generate()` and `generate_stream()` via Gemini (2.5 Flash). Both accept `temperature`, `max_tokens`, and `messages` (multi-turn history) params. Role alternation warning log for Gemini's strict user/model requirement.
 - **RAG Pipeline**: `src/core/rag_pipeline.py` — `rag_query()` (non-streaming for eval) and `rag_query_stream()` (streaming for chat UI). Conditional query rewriting on follow-ups. Citations as `[Author, Year, p. X]`. Temperature 0.3 for faithfulness. `grounded: bool` flag for UI display.
-- **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Uses IBM Docling + pymupdf hybrid: Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables; pymupdf provides font size/bold via bounding box spatial matching for header hierarchy classification. Layered hierarchy: 1a) font size grouping, 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback. Abstract detection: force-promotes "Abstract" headers to major regardless of font size, and scans pre-header body text for "Abstract:" labels (handles MDPI papers where abstract is body text, not a header).
+- **Ingestion**: `src/core/ingestion.py` — `extract_sections()`, `chunk_sections()`, `compute_content_hash()`, `ingest_paper()`. Uses IBM Docling + pymupdf hybrid: Docling (DocLayNet ML model) handles layout analysis, reading order, header detection, tables; pymupdf provides font size/bold via bounding box spatial matching for header hierarchy classification. Layered hierarchy: 1a) font size grouping with title-level skip (while loop skips chains of ≤2-member font groups when a ≥3-member group exists downstream), 1b) bold tiebreaker, 1c) ALL_CAPS tiebreaker, 2) text pattern fallback. Abstract detection: force-promotes "Abstract" headers to major regardless of font size, and scans pre-header body text for "Abstract:" labels (handles MDPI papers where abstract is body text, not a header).
 - **Retrieval**: `src/core/retrieval.py` — `retrieve_chunks(query, top_k, category, similarity_threshold)`. Embeds query via Voyage AI, calls `match_chunks` RPC (pgvector cosine similarity), returns `RetrievalResult` dataclass (chunks + query + timing + embedding_time_ms). Logs query, chunk count, similarity range, timing at INFO level.
 - **TraceLogger**: `src/core/trace_logger.py` — `log_trace()` fires async task via `asyncio.create_task()`. Never blocks, never raises. Logs to `rag_traces` table with full chunk text snapshots.
 - **ChatService**: `src/service/chat_service.py` — Session CRUD, message persistence, `get_recent_messages()` returns `list[ChatMessage]` for RAG history (last 10). Uses service_role client, enforces user_id in every query.
@@ -136,6 +138,14 @@ cd apps/api && python -m scripts.ingest_paper --pdf papers/example.pdf --title "
 
 # Batch ingest from manifest
 cd apps/api && python -m scripts.ingest_batch
+
+# RAG evaluation
+cd apps/api && python -m scripts.evaluate_rag --dry-run          # Preview call count
+cd apps/api && python -m scripts.evaluate_rag --combined --verbose  # Run eval (combined mode)
+cd apps/api && python -m scripts.evaluate_rag --output results/baseline.json  # Save report
+
+# RAG evaluation tests
+cd apps/api && pytest tests/eval/ -m eval -v
 ```
 
 ## Environment Variables
@@ -157,20 +167,22 @@ cd apps/api && python -m scripts.ingest_batch
 - Onboarding flow implemented (4-step profile setup)
 - Dashboard with 5-tab sidebar navigation (Home, Workouts, Analysis, Chat, Profile)
 - Core infrastructure in place
-- RAG Phases 1-7 complete — full pipeline from PDF ingestion to frontend chat UI
+- RAG Phases 1-8 complete — full pipeline from PDF ingestion to frontend chat UI + automated evaluation
 - RAG Phase 1 (database schema) — pgvector tables + RPC running in Supabase
 - RAG Phase 2 (backend infrastructure) — embedding provider, LLM provider, config
-- RAG Phase 3 (ingestion pipeline) — PDF extraction, section-aware chunking, 9 papers ingested (414 chunks)
+- RAG Phase 3 (ingestion pipeline) — PDF extraction, section-aware chunking, 24 papers ingested (909 chunks)
 - RAG Phase 4 (retrieval pipeline) — `retrieve_chunks()`, `RetrievalResult`, `match_chunks` RPC
 - RAG Phase 5 (generation pipeline) — `rag_pipeline.py`, query rewriting, `[Author, Year, p. X]` citations
 - RAG Phase 6 (chat API) — SSE streaming endpoint, session CRUD, TraceLogger, auto-title
 - RAG Phase 7 (frontend chat UI) — ChatGPT-like interface with streaming, clickable inline citations, grouped citation cards, session sidebar, suggested questions, markdown rendering, error handling with retry
+- RAG Phase 8 (evaluation pipeline) — custom LLM-as-judge, 5 metrics, 20 test cases, CLI + pytest integration
+- Corpus: 24 papers (3 hypertrophy, 18 nutrition, 5 strength), 909 chunks, all CC-BY
 - Migration 006: `license` field on `papers` table
 - Migration 007: `match_chunks` RPC updated with `token_count`
 - Migration 008: `rewritten_query`, `chunk_count`, `model`, `grounded` columns on `rag_traces`
 - LLM model: gemini-2.5-flash (upgraded from 2.0-flash after Google deprecated free tier)
-- Papers: all 9 papers have DOI and PMC URL metadata
-- Next: Phase 8 (Automated RAG Evaluation Pipeline)
+- Papers: all 24 papers have DOI and PMC URL metadata
+- Next: Run baseline eval, then set thresholds
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
