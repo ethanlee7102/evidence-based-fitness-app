@@ -112,13 +112,24 @@ async def generate(
         )
 
     data = response.json()
-    text = data["candidates"][0]["content"]["parts"][0]["text"]
+    parts = data["candidates"][0]["content"]["parts"]
+
+    # Gemini 2.5 Flash includes thinking parts (thought: true) — skip them
+    text_parts = [p["text"] for p in parts if "text" in p and not p.get("thought")]
+    if not text_parts:
+        # Fallback: take any part with text
+        text_parts = [p["text"] for p in parts if "text" in p]
+    text = "".join(text_parts)
 
     usage = data.get("usageMetadata", {})
-    logger.info(
+    thoughts = usage.get("thoughtsTokenCount", 0)
+    log_msg = (
         f"LLM generate: {usage.get('promptTokenCount', '?')} prompt tokens, "
         f"{usage.get('candidatesTokenCount', '?')} completion tokens"
     )
+    if thoughts:
+        log_msg += f" ({thoughts} thinking tokens)"
+    logger.info(log_msg)
 
     return text
 
@@ -170,5 +181,9 @@ async def generate_stream(
                 continue
 
             parts = candidates[0].get("content", {}).get("parts", [])
-            if parts and "text" in parts[0]:
-                yield parts[0]["text"]
+            for part in parts:
+                # Skip Gemini 2.5 thinking parts
+                if part.get("thought"):
+                    continue
+                if "text" in part:
+                    yield part["text"]

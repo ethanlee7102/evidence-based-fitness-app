@@ -323,7 +323,7 @@ Building an exercise science RAG chatbot for Flame Fitness at `/dashboard/chat`.
 ### Tech Stack Decisions
 - **Vector DB**: pgvector in Supabase (already using PostgreSQL)
 - **Embedding**: Voyage AI `voyage-4-large` (1024 dims)
-- **LLM**: Gemini 2.0 Flash (cheapest, swappable via env var + wrapper)
+- **LLM**: Gemini 2.5 Flash (cheapest, swappable via env var + wrapper)
 - **Chunking**: Section-aware with fixed-size fallback (standalone `langchain_text_splitters`)
 - **Observability**: Custom TraceLogger (stores traces in Supabase)
 - **Eval**: Manual during dev, automated eval pipeline at end of v1
@@ -416,12 +416,13 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 - Shows chunk metadata, similarity scores, and text previews
 
 **Verified**:
-- Ingested 9 papers (414 chunks): 3 hypertrophy, 1 nutrition, 5 strength
+- Ingested 24 papers (909 chunks): 3 hypertrophy, 18 nutrition, 5 strength (see Phase 8+ corpus expansion)
 - Dedup working — re-run skips with "Paper already ingested"
-- Abstract detected as own section in 7/9 papers (2 Frontiers papers have unlabeled abstracts)
+- Abstract detected as own section in most papers (some Frontiers papers have unlabeled abstracts)
 - Retry logic triggered and worked on Voyage 429 (before adding payment method)
 - Double-column handling verified — Docling ML model handles reading order correctly
-- Header hierarchy verified across all 9 papers — proper font size, bold, and ALL_CAPS tiebreakers
+- Header hierarchy verified across all 24 papers — proper font size, bold, and ALL_CAPS tiebreakers
+- Title-level font group skip heuristic: while loop skips chains of ≤2-member font groups (handles JISSN page labels)
 
 ---
 
@@ -574,14 +575,62 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 ---
 
 ### Phase 8: Automated Evaluation Pipeline
-**Status**: ⏳ Planned
+**Status**: ✅ Complete
 
-**8A. Test Dataset** — `apps/api/tests/eval/test_dataset.json` (30-50 Q&A pairs)
-**8B. Eval Script** — `apps/api/scripts/evaluate_rag.py`
-- 5 metrics via LLM-as-judge: Contextual Relevancy, Recall, Precision, Answer Relevancy, Faithfulness
-**8C. Pytest Integration** — `apps/api/tests/eval/test_rag_pipeline.py`
+**8A. Test Dataset** — `apps/api/tests/eval/test_dataset.json`
+- 20 test cases: 6 hypertrophy, 6 strength, 4 nutrition, 2 cross-category, 2 out-of-scope
+- Each case: question, category, expected_facts, expected_papers, difficulty, tags
 
-**Verify**: Run eval script, review metrics, iterate.
+**8B. Judge Module** — `apps/api/src/core/eval/judge.py`
+- 5 individual judge prompt templates (contextual relevancy/recall/precision, answer relevancy, faithfulness)
+- Combined mode: 1 LLM call scores all 5 metrics
+- `judge_all()` dispatcher: separate (default, 5 calls + inter_call_delay) or combined (1 call)
+- `_generate_with_retry()` for 429 rate limit handling (2s, 5s, 10s backoff)
+- `extract_score()`: JSON parsing with regex fallback
+- `MetricScore` and `JudgeResult` dataclasses
+- Judge temperature 0.0 for reproducibility
+
+**8C. Eval Runner** — `apps/api/src/core/eval/runner.py`
+- `EvalRunner` class: sequential test case processing with rate limiting
+- `_rag_query_with_retry()`: retry wrapper for RAG pipeline 429s
+- Per-case: rag_query → judge_all → compute overall_score
+- `--metrics` filter: "retrieval" (contextual_*) or "generation" (answer+faithfulness)
+- Error isolation: failed cases don't stop the run
+
+**8D. Report Generator** — `apps/api/src/core/eval/report.py`
+- `compute_aggregates()`: mean/std/min/max per metric, by_category, by_difficulty breakdowns
+- `print_summary()`: formatted console output (aggregate, categories, worst performers, OOS, errors)
+- `save_json_report()`: full JSON report with metadata + per-case results
+
+**8E. CLI Script** — `apps/api/scripts/evaluate_rag.py`
+- Flags: `--combined`, `--dry-run`, `--ids`, `--metrics`, `--judge-model`, `--dataset`, `--output`, `--verbose`
+- `--dry-run` prints expected Gemini/Voyage call counts and quota percentage
+
+**8F. Pytest Integration** — `apps/api/tests/eval/`
+- `conftest.py`: `eval` marker, `test_dataset` fixture, `eval_results` session fixture (cached, combined mode)
+- `test_rag_eval.py`: threshold assertions per metric, no errors, no catastrophic scores (1), OOS returns grounded=false
+- `pytest.ini`: registers `eval` marker
+- Run with: `pytest tests/eval/ -m eval -v`
+
+**Verified**: Imports, dry run, report formatting, pytest collection (9 tests) all passing.
+
+---
+
+### Phase 8+: Corpus Expansion & Ingestion Quality Fixes
+**Status**: ✅ Complete
+
+**Corpus Expansion** — Added 15 new CC-BY nutrition papers from PMC Open Access Subset:
+- Protein supplementation & MPS (Cintineo 2018, Zhao 2024, Davies 2024, Gwin 2020, Pearson 2023, Roth 2022)
+- Nutrient timing & pre-sleep protein (Arent 2020, Trommelen 2016, Snijders 2019)
+- Supplements: caffeine (Grgic 2018), beta-alanine (Trexler 2015), top-5 overview (Antonio 2024), carb/protein/AA strategies (Bird 2024)
+- Recovery & sleep (Mielgo-Ayuso 2021, Doherty 2019)
+- All metadata in `papers/manifest.json` and `scripts/reingest_all.py`
+- Corpus now: 24 papers, 909 chunks (3 hypertrophy, 18 nutrition, 5 strength)
+
+**Ingestion Quality Fixes** — Font size hierarchy misclassification:
+- **Problem**: Title-level font groups (≤2 members) were being classified as major headers, pushing real section headers to minor. Affected JISSN papers (page labels like "REVIEW", "Open Access" at 13pt) and Davies 2024 (title at 17.9pt).
+- **Fix**: Changed `_classify_major_headers()` in `ingestion.py` from single `if` skip to `while` loop. Skips chains of ≤2-member qualifying font groups as long as a ≥3-member group exists downstream.
+- **Results**: Trexler 2015: 2 → 16 sections (32 chunks). Grgic 2018: 2 → 8 sections (24 chunks). Davies 2024: 1 → 13 sections (42 chunks). All 24 papers regression-tested — no changes to other papers.
 
 ---
 
@@ -634,11 +683,18 @@ apps/web/src/features/chat/index.ts               — add hooks/services/types e
 apps/web/package.json                              — react-markdown, remark-gfm
 ```
 
-**New Files (planned — Phase 8+)**:
+**New Files (Phase 8 — created)**:
 ```
-apps/api/tests/eval/test_dataset.json
-apps/api/tests/eval/test_rag_pipeline.py
+apps/api/src/core/eval/__init__.py
+apps/api/src/core/eval/judge.py
+apps/api/src/core/eval/runner.py
+apps/api/src/core/eval/report.py
 apps/api/scripts/evaluate_rag.py
+apps/api/tests/eval/__init__.py
+apps/api/tests/eval/conftest.py
+apps/api/tests/eval/test_dataset.json
+apps/api/tests/eval/test_rag_eval.py
+apps/api/pytest.ini
 ```
 
 **Modified Files**:
@@ -648,4 +704,7 @@ apps/api/src/api/router.py            — register chat router
 apps/api/requirements.txt             — add docling, pymupdf, langchain-text-splitters
 apps/api/.env                         — add API keys + config
 apps/api/src/core/rag_pipeline.py     — thread embedding_time_ms through results
+apps/api/src/core/ingestion.py        — title-level font group skip heuristic (while loop)
+apps/api/scripts/reingest_all.py      — expanded from 9 to 24 papers
+apps/api/papers/manifest.json         — 15 new nutrition papers with full metadata
 ```

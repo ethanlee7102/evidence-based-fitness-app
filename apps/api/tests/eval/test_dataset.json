@@ -1,0 +1,371 @@
+[
+    {
+        "id": "HYP-001",
+        "question": "What rep range is best for muscle hypertrophy?",
+        "category": null,
+        "expected_facts": [
+            "Hypertrophy can occur across a wide range of rep ranges, not just 6-12",
+            "Training close to failure matters more than a specific rep range",
+            "The traditional hypertrophy zone (6-12 reps) is effective but not exclusively superior"
+        ],
+        "expected_papers": ["Schoenfeld 2021", "Bernardez-Vazquez 2022"],
+        "difficulty": "easy",
+        "tags": ["hypertrophy", "rep-ranges", "multi-paper"]
+    },
+    {
+        "id": "HYP-002",
+        "question": "How many sets per muscle group per week are optimal for hypertrophy?",
+        "category": null,
+        "expected_facts": [
+            "Higher weekly set volumes generally produce greater hypertrophy up to a point",
+            "10 or more sets per muscle group per week tends to be more effective than lower volumes",
+            "There is likely an upper limit beyond which additional volume has diminishing returns"
+        ],
+        "expected_papers": ["Bernardez-Vazquez 2022", "Krzysztofik 2019"],
+        "difficulty": "easy",
+        "tags": ["hypertrophy", "volume", "multi-paper"]
+    },
+    {
+        "id": "HYP-003",
+        "question": "What are some advanced resistance training techniques for maximizing muscle growth?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "Drop sets can increase metabolic stress and time under tension",
+            "Supersets allow more work in less time",
+            "Techniques like forced reps or rest-pause can be used to extend sets beyond failure"
+        ],
+        "expected_papers": ["Krzysztofik 2019"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "advanced-techniques"]
+    },
+    {
+        "id": "HYP-004",
+        "question": "Does training to muscular failure improve hypertrophy outcomes?",
+        "category": null,
+        "expected_facts": [
+            "Training to failure can enhance muscle hypertrophy by maximizing motor unit recruitment",
+            "Training to failure is not always necessary and may increase fatigue and recovery demands",
+            "Proximity to failure (e.g., 1-3 reps in reserve) may be a practical compromise"
+        ],
+        "expected_papers": ["Bernardez-Vazquez 2022", "Schoenfeld 2021"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "failure", "multi-paper"]
+    },
+    {
+        "id": "HYP-005",
+        "question": "How does training frequency affect muscle hypertrophy when volume is equated?",
+        "category": "hypertrophy",
+        "expected_facts": [
+            "When weekly volume is equated, training a muscle group 2 or more times per week may be superior to once per week",
+            "Higher frequencies allow better volume distribution across the week",
+            "The effect of frequency may be more important for advanced trainees"
+        ],
+        "expected_papers": ["Bernardez-Vazquez 2022", "Schoenfeld 2021"],
+        "difficulty": "medium",
+        "tags": ["hypertrophy", "frequency"]
+    },
+    {
+        "id": "HYP-006",
+        "question": "What is the repetition continuum and how has the traditional view been challenged by recent research?",
+        "category": null,
+        "expected_facts": [
+            "The repetition continuum traditionally assigns specific rep ranges to strength, hypertrophy, and endurance adaptations",
+            "Recent evidence challenges the strict zones, showing hypertrophy across a broader range of loads",
+            "Low-load training (high reps) can produce similar hypertrophy to high-load training when taken to failure"
+        ],
+        "expected_papers": ["Schoenfeld 2021"],
+        "difficulty": "hard",
+        "tags": ["hypertrophy", "repetition-continuum", "single-paper"]
+    },
+    {
+        "id": "STR-001",
+        "question": "What is tapering and why is it important for powerlifting performance?",
+        "category": null,
+        "expected_facts": [
+            "Tapering is a planned reduction in training load before competition",
+            "The goal of tapering is to reduce accumulated fatigue while maintaining fitness",
+            "Proper tapering can lead to significant increases in maximal strength performance"
+        ],
+        "expected_papers": ["Travis 2020"],
+        "difficulty": "easy",
+        "tags": ["strength", "tapering", "powerlifting"]
+    },
+    {
+        "id": "STR-002",
+        "question": "What is the minimum effective training dose for increasing 1RM strength?",
+        "category": null,
+        "expected_facts": [
+            "Meaningful strength gains can occur with relatively low training volumes",
+            "Even a few sets per week can produce measurable increases in 1RM for trained lifters",
+            "The minimum effective dose may vary based on training experience and current strength level"
+        ],
+        "expected_papers": ["Androulakis-Korakakis 2021"],
+        "difficulty": "easy",
+        "tags": ["strength", "minimum-dose", "powerlifting"]
+    },
+    {
+        "id": "STR-003",
+        "question": "How do competitive powerlifters' strength levels change over a long career?",
+        "category": "strength",
+        "expected_facts": [
+            "Strength improvements tend to be largest in the early years of training",
+            "Long-term strength development shows diminishing returns over time",
+            "Powerlifters can continue to make progress even after many years of training, though at a slower rate"
+        ],
+        "expected_papers": ["Latella 2020"],
+        "difficulty": "medium",
+        "tags": ["strength", "long-term", "powerlifting"]
+    },
+    {
+        "id": "STR-004",
+        "question": "What are the main methods for prescribing training load in strength training?",
+        "category": null,
+        "expected_facts": [
+            "Percentage-based training (% of 1RM) is a common load prescription method",
+            "Autoregulatory methods like RPE or velocity-based training adjust load based on daily readiness",
+            "Both methods can be effective for strength development"
+        ],
+        "expected_papers": ["Thompson 2020"],
+        "difficulty": "medium",
+        "tags": ["strength", "load-prescription"]
+    },
+    {
+        "id": "STR-005",
+        "question": "How should powerlifters structure their peaking phase before a competition?",
+        "category": "strength",
+        "expected_facts": [
+            "Peaking involves reducing volume while maintaining or increasing intensity",
+            "The peaking phase typically lasts 1-3 weeks before competition",
+            "Intensity should be progressively increased toward competition-level loads"
+        ],
+        "expected_papers": ["Travis 2020"],
+        "difficulty": "medium",
+        "tags": ["strength", "peaking", "powerlifting"]
+    },
+    {
+        "id": "STR-006",
+        "question": "What factors predict long-term strength development in competitive powerlifters based on longitudinal data?",
+        "category": "strength",
+        "expected_facts": [
+            "Body weight and weight class influence long-term strength trajectories",
+            "Sex differences exist in strength development patterns over time",
+            "Age and years of competitive experience affect the rate of strength gains"
+        ],
+        "expected_papers": ["Latella 2020"],
+        "difficulty": "hard",
+        "tags": ["strength", "predictors", "longitudinal"]
+    },
+    {
+        "id": "NUT-001",
+        "question": "How does creatine supplementation affect exercise performance?",
+        "category": null,
+        "expected_facts": [
+            "Creatine increases intramuscular phosphocreatine stores",
+            "Creatine improves performance in high-intensity, short-duration activities",
+            "Creatine supplementation can increase lean body mass"
+        ],
+        "expected_papers": ["Wax 2021"],
+        "difficulty": "easy",
+        "tags": ["nutrition", "creatine", "performance"]
+    },
+    {
+        "id": "NUT-002",
+        "question": "Does creatine supplementation improve upper body and lower body strength differently?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Creatine can improve both upper and lower body strength",
+            "The magnitude of improvement may differ between upper and lower body exercises",
+            "The meta-analysis examined both 1RM and power outcomes across body regions"
+        ],
+        "expected_papers": ["Kazeminasab 2025"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "creatine", "upper-lower"]
+    },
+    {
+        "id": "NUT-003",
+        "question": "How does protein supplementation affect resistance training performance and body composition?",
+        "category": null,
+        "expected_facts": [
+            "Protein supplementation can enhance gains in lean body mass when combined with resistance training",
+            "Higher protein intakes are generally associated with greater improvements in muscle strength",
+            "The benefits of protein supplementation may be more pronounced during prolonged resistance training programs"
+        ],
+        "expected_papers": ["Cintineo 2018", "Zhao 2024"],
+        "difficulty": "easy",
+        "tags": ["nutrition", "protein", "performance", "multi-paper"]
+    },
+    {
+        "id": "NUT-004",
+        "question": "Does protein supplementation help with recovery from exercise-induced muscle damage?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Protein supplementation may attenuate markers of muscle damage after resistance exercise",
+            "Protein can help reduce delayed-onset muscle soreness (DOMS)",
+            "The timing and amount of protein may influence recovery outcomes"
+        ],
+        "expected_papers": ["Pearson 2023", "Cintineo 2018"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "protein", "recovery", "multi-paper"]
+    },
+    {
+        "id": "NUT-005",
+        "question": "What factors influence the muscle protein synthesis response to resistance exercise?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Resistance exercise stimulates muscle protein synthesis for up to 24-48 hours post-exercise",
+            "Training volume, intensity, and proximity to failure affect the magnitude of the MPS response",
+            "Protein ingestion after exercise further augments the MPS response"
+        ],
+        "expected_papers": ["Davies 2024"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "MPS", "resistance-exercise"]
+    },
+    {
+        "id": "NUT-006",
+        "question": "How do essential amino acids compare to intact protein and mixed meals for stimulating muscle protein synthesis, particularly during an energy deficit?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Essential amino acids (especially leucine) are the primary drivers of muscle protein synthesis",
+            "Intact protein sources provide a sustained aminoacidemia compared to free amino acids",
+            "Energy deficit impairs muscle protein synthesis, making protein intake even more critical"
+        ],
+        "expected_papers": ["Gwin 2020"],
+        "difficulty": "hard",
+        "tags": ["nutrition", "EAA", "MPS", "energy-deficit"]
+    },
+    {
+        "id": "NUT-007",
+        "question": "How can resistance-trained athletes preserve lean mass during a caloric deficit?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Maintaining a high resistance training volume helps preserve lean mass during caloric restriction",
+            "Higher protein intake is important for lean mass retention during a deficit",
+            "The rate of weight loss (aggressive vs moderate deficit) influences lean mass preservation"
+        ],
+        "expected_papers": ["Roth 2022"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "caloric-deficit", "lean-mass"]
+    },
+    {
+        "id": "NUT-008",
+        "question": "Does nutrient timing around workouts matter for muscle growth and recovery?",
+        "category": null,
+        "expected_facts": [
+            "The anabolic window may be wider than the traditional 30-60 minutes post-exercise",
+            "Pre-exercise nutrition can be as important as post-exercise nutrition",
+            "Total daily nutrient intake may be more important than precise timing for most individuals"
+        ],
+        "expected_papers": ["Arent 2020"],
+        "difficulty": "easy",
+        "tags": ["nutrition", "nutrient-timing"]
+    },
+    {
+        "id": "NUT-009",
+        "question": "Does consuming protein before sleep improve muscle growth and recovery?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Pre-sleep protein ingestion (especially casein) can stimulate overnight muscle protein synthesis",
+            "Pre-sleep protein may improve whole-body protein balance during overnight recovery",
+            "Long-term studies suggest pre-sleep protein can augment gains in muscle mass and strength"
+        ],
+        "expected_papers": ["Trommelen 2016", "Snijders 2019"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "pre-sleep-protein", "multi-paper"]
+    },
+    {
+        "id": "NUT-010",
+        "question": "How does caffeine intake affect muscle strength and power output?",
+        "category": null,
+        "expected_facts": [
+            "Caffeine can acutely improve maximal muscle strength and power",
+            "Effective doses are typically in the range of 3-6 mg/kg body mass",
+            "The ergogenic effect of caffeine on strength may vary between upper and lower body exercises"
+        ],
+        "expected_papers": ["Grgic 2018"],
+        "difficulty": "easy",
+        "tags": ["nutrition", "caffeine", "strength"]
+    },
+    {
+        "id": "NUT-011",
+        "question": "What are the evidence-based recommendations for beta-alanine supplementation?",
+        "category": "nutrition",
+        "expected_facts": [
+            "Beta-alanine increases intramuscular carnosine concentrations",
+            "Beta-alanine primarily improves performance in exercises lasting 1-4 minutes",
+            "A daily dose of 3.2-6.4 g/day is recommended, typically with a loading phase"
+        ],
+        "expected_papers": ["Trexler 2015"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "beta-alanine", "supplementation"]
+    },
+    {
+        "id": "NUT-012",
+        "question": "What nutritional strategies best support muscle recovery and sleep quality in athletes?",
+        "category": null,
+        "expected_facts": [
+            "Adequate carbohydrate and protein intake supports glycogen replenishment and muscle repair",
+            "Certain nutrients (e.g., tart cherry, omega-3s) may help reduce inflammation and soreness",
+            "Dietary factors like tryptophan-rich foods and avoiding caffeine late in the day can influence sleep quality"
+        ],
+        "expected_papers": ["Mielgo-Ayuso 2021", "Doherty 2019"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "recovery", "sleep", "multi-paper"]
+    },
+    {
+        "id": "NUT-013",
+        "question": "What are the most evidence-based supplements for strength and power athletes?",
+        "category": null,
+        "expected_facts": [
+            "Creatine, caffeine, and protein are among the most well-supported supplements for strength athletes",
+            "Beta-alanine and sodium bicarbonate have evidence for specific performance contexts",
+            "Many popular supplements lack sufficient evidence to support their use"
+        ],
+        "expected_papers": ["Antonio 2024", "Bird 2024"],
+        "difficulty": "medium",
+        "tags": ["nutrition", "supplements", "overview", "multi-paper"]
+    },
+    {
+        "id": "CROSS-001",
+        "question": "How do rep ranges and rest periods interact to affect both strength and hypertrophy outcomes?",
+        "category": null,
+        "expected_facts": [
+            "Longer rest periods (2-3+ minutes) are generally better for strength outcomes",
+            "Shorter rest periods increase metabolic stress, which may contribute to hypertrophy",
+            "The optimal rest period depends on the training goal (strength vs hypertrophy)"
+        ],
+        "expected_papers": ["Schoenfeld 2021", "Krzysztofik 2019"],
+        "difficulty": "hard",
+        "tags": ["cross-category", "rest-periods", "multi-paper"]
+    },
+    {
+        "id": "CROSS-002",
+        "question": "Can creatine supplementation enhance maximal strength for powerlifting?",
+        "category": null,
+        "expected_facts": [
+            "Creatine supplementation can increase maximal strength (1RM)",
+            "The effect may be mediated through increased training capacity and lean mass",
+            "Creatine is one of the most well-studied and effective supplements for strength"
+        ],
+        "expected_papers": ["Kazeminasab 2025", "Wax 2021"],
+        "difficulty": "medium",
+        "tags": ["cross-category", "creatine", "strength"]
+    },
+    {
+        "id": "OOS-001",
+        "question": "What is the best marathon training program for a beginner runner?",
+        "category": null,
+        "expected_facts": [],
+        "expected_papers": [],
+        "difficulty": "easy",
+        "tags": ["out-of-scope", "endurance"]
+    },
+    {
+        "id": "OOS-002",
+        "question": "How should a torn ACL be treated and what is the typical rehabilitation timeline?",
+        "category": null,
+        "expected_facts": [],
+        "expected_papers": [],
+        "difficulty": "easy",
+        "tags": ["out-of-scope", "injury"]
+    }
+]

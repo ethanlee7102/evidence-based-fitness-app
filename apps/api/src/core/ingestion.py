@@ -184,9 +184,25 @@ def _classify_major_headers(
         groups = _group_by_font_size(list(valid_sizes))
 
         if len(groups) >= 2:
-            # Multiple font size groups — find the largest font group with >= 2 members
-            # (single-member groups are likely titles or outliers)
-            for group in groups:
+            # Multiple font size groups — find the largest font group that represents
+            # actual section headers (not just the paper title/label).
+            # Heuristic: if the largest group has <= 2 members and the next qualifying
+            # group has >= 3, the small top group is likely title-level — skip it.
+            qualifying = [(gi, group) for gi, group in enumerate(groups) if len(group) >= 2]
+
+            while (len(qualifying) >= 2
+                    and len(qualifying[0][1]) <= 2
+                    and any(len(q[1]) >= 3 for q in qualifying[1:])):
+                # Skip title-level / page-label group, use the next real one
+                _skipped = qualifying[0][1]
+                _skipped_texts = [headers[valid_indices[i]][0][:40] for i in _skipped]
+                logger.info(
+                    f"Skipping title-level font group ({len(_skipped)} headers: "
+                    f"{_skipped_texts}) in favor of larger group downstream"
+                )
+                qualifying = qualifying[1:]
+
+            for _gi, group in qualifying:
                 if len(group) >= 2:
                     major_indices = set(valid_indices[i] for i in group)
 
