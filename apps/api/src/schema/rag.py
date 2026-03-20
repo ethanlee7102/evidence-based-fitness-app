@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 # Literal types matching DB CHECK constraints (migrations 005 + 006)
 Category = Literal[
     "hypertrophy", "strength", "nutrition", "endurance",
-    "recovery", "mobility", "programming", "general",
+    "recovery", "mobility", "programming", "body-composition",
+    "general", "injury", "cardiovascular",
 ]
 
 StudyType = Literal[

@@ -1,0 +1,200 @@
+{
+  "metadata": {
+    "timestamp": "2026-03-19T13:54:06",
+    "model": "gemini-2.5-flash",
+    "judge_model": "gemini-2.5-flash",
+    "top_k": 5,
+    "similarity_threshold": 0.3,
+    "duration_s": 80.3,
+    "judge_mode": "combined",
+    "total_cases": 2,
+    "failed_cases": 0,
+    "metrics_filter": null
+  },
+  "results": [
+    {
+      "id": "STR-007",
+      "question": "What are the effects of plyometric training on physical performance, and how should it be programmed for optimal results?",
+      "category": "strength",
+      "difficulty": "medium",
+      "tags": [
+        "strength",
+        "plyometrics",
+        "programming",
+        "performance",
+        "multi-paper"
+      ],
+      "scores": {
+        "contextual_relevancy": {
+          "score": 5,
+          "reasoning": "All retrieved chunks are highly relevant to the question, providing information on both the effects of plyometric training and how it should be programmed. They cover various aspects such as performance improvements, programming variables (intensity, volume, frequency, rest), and specific study findings."
+        },
+        "contextual_recall": {
+          "score": 4,
+          "reasoning": "Most of the expected facts were found and well-supported within the retrieved chunks. The only partially supported fact was regarding specific exercise selection criteria like unilateral vs. bilateral or direction of movement, although general exercise types and techniques were discussed.",
+          "fact_coverage": {
+            "Plyometric training produces significant improvements in vertical jump height, sprint speed, and explosive strength": "supported",
+            "Key prescription variables include exercise type, intensity, volume, frequency, and rest intervals": "supported",
+            "A minimum dosage of approximately 4-8 weeks is needed for meaningful adaptations": "supported",
+            "Exercise selection should consider unilateral vs bilateral, direction of movement, and contact type": "partial"
+          }
+        },
+        "contextual_precision": {
+          "score": 5,
+          "reasoning": "All retrieved chunks are highly relevant, and their similarity scores are very close, indicating that the most relevant information is presented at the top. There are no instances of irrelevant chunks being ranked highly or highly relevant chunks being buried."
+        },
+        "answer_relevancy": {
+          "score": 5,
+          "reasoning": "The generated answer directly and comprehensively addresses both parts of the question: 'What are the effects of plyometric training on physical performance?' and 'how should it be programmed for optimal results?'. It is well-structured with clear sections for 'Effects on Physical Performance' and 'Programming Considerations for Optimal Results'."
+        },
+        "faithfulness": {
+          "score": 5,
+          "reasoning": "The generated answer is entirely faithful to the provided retrieved chunks. Every statement and claim is directly supported by the content of the chunks, and all citations are accurate. There is no evidence of hallucination or unsupported details.",
+          "unsupported_claims": []
+        }
+      },
+      "overall_score": 4.8,
+      "rag_result": {
+        "answer": "Plyometric training involves exercises that use the stretch-shortening cycle of muscles to improve power and explosiveness [Kons et al., 2023, p. 2; Montoro-Bomb\u00fa et al., 2023, pp. 2-3].\n\n**Effects on Physical Performance**\nPlyometric training has been shown to have several positive effects on physical performance:\n*   **Muscle Strength and Power** It can improve muscle strength, muscle power, and explosive strength [Kons et al., 2023, p. 2]. Studies have also shown improvements in lower limb power, optimal power production, ground reaction forces, and the rate of force development [Montoro-Bomb\u00fa et al., 2023, pp. 2-3].\n*   **Jump Performance** Plyometric training significantly improves jumping performance, including vertical jump height [Hakkinen et al., 1985, p. 2; Luebbers et al., 2003, p. 7]. Combining plyometric training with strength training can also enhance the kinetics and kinematics of the vertical jump [Sanchez-Sixto et al., 2021, p. 11]. Depth jump (DJ) training has been found superior to countermovement jump (CMJ) training in activities involving stretch-shortening cycles [Gehri et al., 1998, p. 7].\n*   **Speed and Agility** Improvements have been observed in sprint time and change of direction ability [Kons et al., 2023, p. 2]. It can also enhance kicking speed [Sedano et al., 2009, p. 7].\n*   **Endurance** Plyometric training can positively affect endurance performance [Kons et al., 2023, p. 2].\n*   **Other Benefits** It has been linked to injury prevention and obesity reduction [Nobre et al., 2017; van de Hoef et al., 2019; Zubac et al., 2019; Lee et al., 2020, p. 3]. It can also improve anaerobic power [Luebbers et al., 2003, p. 7].\n\n**Programming Considerations for Optimal Results**\nWhile plyometric training offers many benefits, there are several factors to consider for effective programming:\n\n*   **Combination Training**\n    *   Combining plyometric training with other strength training methods can lead to better results than plyometric training alone [Ramirez-Campillo et al., 2015, p. 11].\n    *   Similarly, combining different types of jumps (like DJ, CMJ, and squat jumps) contributes to training adaptations [Ram\u00edrez-Campillo et al., 2015, p. 11]. However, researchers note it can be difficult to determine the exact contribution of each exercise or training method to the final outcome [Montoro-Bomb\u00fa et al., 2023, p. 11].\n    *   Plyometric training with added weights can lead to better results in vertical jumps [Khlifa et al., 2010, p. 7].\n\n*   **Training Surface**\n    *   Performing plyometric training on hard surfaces has been shown to increase explosive performance [Ram\u00edrez-Campillo et al., 2013, p. 7].\n\n*   **Frequency and Volume**\n    *   High-volume plyometric training can improve explosive performance [Ram\u00edrez-Campillo et al., 2013, p. 7].\n    *   However, two moderate-volume plyometric sessions per week can produce similar improvements in maximal strength, vertical jump, and running with greater efficiency compared to four high-volume sessions [de Villarreal et al., 2008, p. 7].\n    *   Biweekly plyometric training has also been shown to improve components of athletic performance [Chelly et al., 2010, p. 7].\n\n*   **Training Duration**\n    *   Both 4-week and 7-week plyometric programs have been found equally effective in improving vertical jump height and anaerobic power after a 4-week recovery period [Luebbers et al., 2003, p. 7].\n\n*   **Intensity**\n    *   There is a lack of consensus on a single criterion for determining plyometric training intensity [Montoro-Bomb\u00fa et al., 2023, p. 15].\n    *   **Drop Height:** The optimal drop height for depth jumps is debated. Some research suggested 20 or 40 cm for rebounding depth jumps [Bobbert et al., 1987b, p. 3], while other findings indicated that 12 cm resulted in the best performance for jump height and instantaneous power [Lees and Fahmi, 1994b, p. 3]. It is recommended that drop height should be an integrated factor in determining intensity, rather than the sole determinant [Montoro-Bomb\u00fa et al., 2023, p. 15].\n    *   **Other Measures:** While parameters like power production (Pw), ground reaction forces (GRF), rate of force development (RFD), and reactive strength index (RSI) are used to assume intensity, they often require extensive laboratory equipment, making them difficult for daily implementation [Montoro-Bomb\u00fa et al., 2023, pp. 2-3].\n\n*   **Training Density**\n    *   Training density, defined as the ratio between the total duration of a session and the actual work performed, is an under-recognized variable [Montoro-Bomb\u00fa et al., 2023, p. 11]. Rest intervals are crucial for density; longer recovery times lead to lower training density, which can affect the actual intensity in terms of power output [Lawton et al., 2006, p. 11].\n\n*   **Individualization and Experience Level**\n    *   There is a recognized lack of specific criteria for individualizing plyometric training programs [Montoro-Bomb\u00fa et al., 2023, p. 15].\n    *   When working with individuals new to plyometric training, positive effects are generally expected if injuries are avoided. However, experienced athletes may show smaller improvements due to their high level of accumulated training [Montoro-Bomb\u00fa et al., 2023, p. 11]. A new criterion for identifying subjects' experience level is recommended for future research and practice [Montoro-Bomb\u00fa et al., 2023, p. 15].",
+        "grounded": true,
+        "chunks_retrieved": 5,
+        "papers": [
+          "Montoro-Bomb\u00fa et al., 2023",
+          "Kons et al., 2023"
+        ],
+        "retrieval_time_ms": 2951.1,
+        "generation_time_ms": 18202.5,
+        "model": "gemini-2.5-flash",
+        "rewritten_query": null
+      },
+      "error": null
+    },
+    {
+      "id": "PROG-008",
+      "question": "What is block periodization and how does it work for strength development?",
+      "category": "programming",
+      "difficulty": "hard",
+      "tags": [
+        "programming",
+        "periodization",
+        "block-periodization"
+      ],
+      "scores": {
+        "contextual_relevancy": {
+          "score": 4,
+          "reasoning": "Four out of five retrieved chunks (1, 2, 4, 5) are relevant to the question. Chunks 1, 2, and 4 are highly relevant, providing definitions, phases, and mechanisms of block periodization. Chunk 5 is moderately relevant, describing a study that uses block periodization and discusses its effectiveness and the influence of training status. Chunk 3, however, is a list of references and completely irrelevant to answering the question."
+        },
+        "contextual_recall": {
+          "score": 4,
+          "reasoning": "Two out of the three expected facts are fully supported by the retrieved chunks, and one is partially supported. The fact about 'training status' is well-supported across multiple chunks. The definition of block periodization using 'sequential mesocycles with concentrated training loads directed at specific abilities' is also well-supported. The description of 'typical phases' (accumulation, transmutation, realization) is present, but the specific details 'higher volume, lower intensity' for accumulation and 'sport-specific' for transmutation are not explicitly stated in the chunks, only implied by 'general preparation' and 'special preparation'."
+        },
+        "contextual_precision": {
+          "score": 3,
+          "reasoning": "The most relevant chunk for defining block periodization and its phases (Chunk 2) is ranked second, not first. An irrelevant chunk (Chunk 3 - References) is ranked third, which significantly impacts precision. While Chunk 1 (Abstract) is relevant, Chunk 2 provides more detail for the core definition. The highly relevant Chunk 4 (Discussion) is ranked fourth. This indicates a mixed order of relevance."
+        },
+        "answer_relevancy": {
+          "score": 5,
+          "reasoning": "The answer directly and comprehensively addresses both parts of the question: 'What is block periodization' and 'how does it work for strength development'. It provides a clear definition, outlines the core principles, details the three main phases, explains the sequential development of physical qualities (hypertrophy, strength, power), describes phase potentiation, mentions the underlying theoretical support (GAS), and summarizes its effectiveness for strength and power development."
+        },
+        "faithfulness": {
+          "score": 5,
+          "reasoning": "The generated answer is entirely faithful to the content of the retrieved chunks. All claims made in the answer are directly supported by information found in the provided chunks, and there are no instances of hallucination or unsupported details. The citations provided also accurately point to the sections and implied page numbers within the source document."
+        }
+      },
+      "overall_score": 4.2,
+      "rag_result": {
+        "answer": "Block periodization is a training approach that organizes training into distinct phases, each focusing on developing one or a few compatible fitness characteristics [Wetmore et al., 2020, p. 2]. This differs from traditional periodization, which might try to develop many characteristics simultaneously [Wetmore et al., 2020, p. 2].\n\nThe core ideas behind periodization, including block periodization, are:\n*   Moving from less specific to more specific training [Wetmore et al., 2020, p. 2].\n*   Progressing from higher training volume to lower training volume [Wetmore et al., 2020, p. 2].\n\n**How Block Periodization Works for Strength Development:**\n\n1.  **Phased Approach:** Simple block periodization typically involves three main phases:\n    *   **Accumulation:** This is a general preparation phase [Wetmore et al., 2020, p. 2].\n    *   **Transmutation:** This is a special preparation phase [Wetmore et al., 2020, p. 2].\n    *   **Realization:** This phase focuses on competition and tapering (reducing training volume to allow for peak performance) [Wetmore et al., 2020, p. 2].\n\n2.  **Sequential Development:** For strength and power training, block periodization works by sequentially developing different physical qualities. This often means first focusing on muscle growth (hypertrophy), then building basic strength, and finally developing power [Wetmore et al., 2020, p. 2].\n\n3.  **Phase Potentiation:** This sequential programming is also known as \"phase-potentiation\" [Wetmore et al., 2020, p. 9]. It means that the adaptations gained in one training block (e.g., increased strength) can enhance or \"potentiate\" the adaptations in the next block (e.g., improved power) due to the accumulated training effects [Wetmore et al., 2020, p. 9]. For example, developing maximal strength can lead to greater gains in power [Wetmore et al., 2020, p. 9].\n\n4.  **Adaptation to Stimulus:** The effectiveness of periodization is supported by theories like the General Adaptation Syndrome (GAS), which describes how the body reacts and adapts to specific training stress [Wetmore et al., 2020, p. 2].\n\n5.  **Effectiveness:** Research indicates that block periodization is effective in improving maximum strength and explosive ability (power) [Wetmore et al., 2020, p. 1, 9]. Studies have shown that participants using block periodization can achieve substantial improvements in exercises like the back squat and various jump heights [Wetmore et al., 2020, p. 1]. This model is particularly beneficial for maximizing strength and power, especially in the later phases of training, often involving a reduction in training volume [Wetmore et al., 2020, p. 9].",
+        "grounded": true,
+        "chunks_retrieved": 5,
+        "papers": [
+          "Wetmore et al., 2020"
+        ],
+        "retrieval_time_ms": 1003.4,
+        "generation_time_ms": 11174.9,
+        "model": "gemini-2.5-flash",
+        "rewritten_query": null
+      },
+      "error": null
+    }
+  ],
+  "aggregate": {
+    "contextual_relevancy": {
+      "mean": 4.5,
+      "std": 0.71,
+      "min": 4,
+      "max": 5,
+      "n": 2
+    },
+    "contextual_recall": {
+      "mean": 4,
+      "std": 0.0,
+      "min": 4,
+      "max": 4,
+      "n": 2
+    },
+    "contextual_precision": {
+      "mean": 4,
+      "std": 1.41,
+      "min": 3,
+      "max": 5,
+      "n": 2
+    },
+    "answer_relevancy": {
+      "mean": 5,
+      "std": 0.0,
+      "min": 5,
+      "max": 5,
+      "n": 2
+    },
+    "faithfulness": {
+      "mean": 5,
+      "std": 0.0,
+      "min": 5,
+      "max": 5,
+      "n": 2
+    },
+    "overall": {
+      "mean": 4.5,
+      "std": 0.42,
+      "min": 4.2,
+      "max": 4.8,
+      "n": 2
+    }
+  },
+  "by_category": {
+    "programming": {
+      "contextual_relevancy": 4,
+      "contextual_recall": 4,
+      "contextual_precision": 3,
+      "answer_relevancy": 5,
+      "faithfulness": 5,
+      "n": 1
+    },
+    "strength": {
+      "contextual_relevancy": 5,
+      "contextual_recall": 4,
+      "contextual_precision": 5,
+      "answer_relevancy": 5,
+      "faithfulness": 5,
+      "n": 1
+    }
+  },
+  "by_difficulty": {
+    "hard": {
+      "contextual_relevancy": 4,
+      "contextual_recall": 4,
+      "contextual_precision": 3,
+      "answer_relevancy": 5,
+      "faithfulness": 5,
+      "n": 1
+    },
+    "medium": {
+      "contextual_relevancy": 5,
+      "contextual_recall": 4,
+      "contextual_precision": 5,
+      "answer_relevancy": 5,
+      "faithfulness": 5,
+      "n": 1
+    }
+  }
+}

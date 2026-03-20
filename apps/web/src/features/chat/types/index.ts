@@ -56,6 +56,10 @@ export interface SSECallbacks {
 export const SUGGESTED_QUESTIONS = [
   'What rep range is best for muscle hypertrophy?',
   'How does protein timing affect muscle growth?',
-  'What does the research say about training to failure?',
-  'How many sets per muscle group per week is optimal?',
+  'Is periodized resistance training necessary for maximizing hypertrophy, and how do linear vs undulating compare?',
+  'How does blood flow restriction training compare to heavy lifting for muscle and strength?',
+  'How should I warm up before squats and bench press for the best performance?',
+  'Can long-term stretching programs actually increase muscle strength or size?',
+  'What is rate of force development and how can it be trained?',
+  'What are supersets and are they as effective as traditional sets for building muscle?',
 ] as const
