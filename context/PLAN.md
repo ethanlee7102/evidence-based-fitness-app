@@ -249,14 +249,15 @@ create policy "Users can manage own sets" on workout_sets
 - ~~Deadlift, Squat, Bench analyzers~~
 - **Removed** - Pivoted to workout logger
 
-### Phase 3: Dashboard & Workout Logging ⏳ CURRENT
+### Phase 3: Dashboard & Workout Logging ✅
 - [x] Create Dashboard with 5-tab sidebar navigation
 - [x] Create feature folders (workouts, analysis, chat, profile)
-- [ ] Create database schema (exercises, workouts, workout_sets)
-- [ ] Build workout logging API endpoints
-- [ ] Build workout logging UI in WorkoutsScreen
-- [ ] Add exercise selection
-- [ ] Log sets with reps/weight
+- [x] Create database schema (exercises, workouts, workout_sets) — Migration 011
+- [x] Build workout logging API endpoints — 20 endpoints on `/workouts`
+- [x] Build workout logging UI in WorkoutsScreen
+- [x] Add exercise selection (search + recent exercises + custom creation)
+- [x] Log sets with reps/weight/RPE
+- [x] Phase 3 Polish: tap PREV to auto-populate, RPE input, workout detail view, recent exercises in search, rest timer with auto-start, per-card resume, pause-aware timer
 
 ### Phase 4: Progress Tracking
 - [ ] Historical workout view
@@ -476,7 +477,7 @@ Migration `006_add_paper_license.sql` adds `license` column (CC0, CC-BY, CC-BY-S
 - CLI: `python -m scripts.test_rag_pipeline "query" --stream --history '[...]' --category X --show-prompt`
 
 **5E. Model Migration** — gemini-2.0-flash → gemini-2.5-flash
-- Google zeroed free tier quotas for gemini-2.0-flash (deprecated, shutdown June 1, 2026)
+- Google zeroed free tier quotas for gemini-2.0-flash (deprecated, shutdown June 1, 2026). Now on Paid Tier 1.
 - Updated default in `config.py` and `apps/api/.env`
 
 **Verified**:

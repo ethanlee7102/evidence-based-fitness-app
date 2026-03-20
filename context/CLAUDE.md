@@ -110,6 +110,13 @@ flame-fitness/
   - `units_preference`, `experience_level`, `goal`
   - `workout_days_per_week`, `preferred_days`, `injuries_limitations`
   - `onboarding_completed`, `onboarding_completed_at`
+- `muscle_groups` - 33 reference rows (name, category, display_order). 11 categories: Chest, Back, Shoulders, Biceps, Triceps, Forearms, Quads, Hamstrings, Glutes, Calves, Abs
+- `exercises` - global library (137 seeded) + user custom. Fields: name, aliases, equipment, movement_pattern, force_type, body_region, laterality, is_compound, instructions, video_url, is_global, created_by
+- `exercise_muscles` - junction table (exercise_id, muscle_group_id, activation_level: maximum/high/medium/partial)
+- `workouts` - workout sessions (user_id, started_at, completed_at, duration_seconds, body_weight_kg, rating 1-5, notes)
+- `workout_exercises` - exercises within a workout (workout_id, exercise_id, sort_order, superset_group, rest_timer_seconds, notes)
+- `workout_sets` - individual sets (workout_exercise_id, set_number, weight_kg, reps, rpe, set_type, duration_seconds, rest_seconds, is_to_failure, completed, completed_at)
+- RAG tables: `papers`, `chunks` (pgvector HNSW), `chat_sessions`, `chat_messages`, `rag_traces`
 
 ## Commands
 
@@ -166,23 +173,15 @@ cd apps/api && pytest tests/eval/ -m eval -v
 - Auth flow working with Supabase
 - Onboarding flow implemented (4-step profile setup)
 - Dashboard with 5-tab sidebar navigation (Home, Workouts, Analysis, Chat, Profile)
-- Core infrastructure in place
 - RAG Phases 1-8 complete — full pipeline from PDF ingestion to frontend chat UI + automated evaluation
-- RAG Phase 1 (database schema) — pgvector tables + RPC running in Supabase
-- RAG Phase 2 (backend infrastructure) — embedding provider, LLM provider, config
-- RAG Phase 3 (ingestion pipeline) — PDF extraction, section-aware chunking, 24 papers ingested (909 chunks)
-- RAG Phase 4 (retrieval pipeline) — `retrieve_chunks()`, `RetrievalResult`, `match_chunks` RPC
-- RAG Phase 5 (generation pipeline) — `rag_pipeline.py`, query rewriting, `[Author, Year, p. X]` citations
-- RAG Phase 6 (chat API) — SSE streaming endpoint, session CRUD, TraceLogger, auto-title
-- RAG Phase 7 (frontend chat UI) — ChatGPT-like interface with streaming, clickable inline citations, grouped citation cards, session sidebar, suggested questions, markdown rendering, error handling with retry
-- RAG Phase 8 (evaluation pipeline) — custom LLM-as-judge, 5 metrics, 20 test cases, CLI + pytest integration
-- Corpus: 24 papers (3 hypertrophy, 18 nutrition, 5 strength), 909 chunks, all CC-BY
-- Migration 006: `license` field on `papers` table
-- Migration 007: `match_chunks` RPC updated with `token_count`
-- Migration 008: `rewritten_query`, `chunk_count`, `model`, `grounded` columns on `rag_traces`
-- LLM model: gemini-2.5-flash (upgraded from 2.0-flash after Google deprecated free tier)
-- Papers: all 24 papers have DOI and PMC URL metadata
-- Next: Run baseline eval, then set thresholds
+- Corpus: 195 papers (~8284 chunks), all CC-BY. Post-expansion eval: 4.57/5
+- Skill: `/ingest-papers` for corpus expansion workflow
+- **Phase 3 (Workout Logging) — code complete, in testing**
+  - Migration 011: 6 workout tables with RLS
+  - Backend: 17 API endpoints on `/workouts` (WorkoutService + FastAPI routes)
+  - Seed data: 137 exercises, 33 muscle groups, 478 muscle activation mappings
+  - Frontend: Full Liftoff-style workout modal (useReducer state, optimistic updates, debounced sync)
+  - History screen with resume in-progress banner, paginated history
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
@@ -201,16 +200,11 @@ cd apps/api && pytest tests/eval/ -m eval -v
   - `/dashboard/profile` → ProfileScreen (user settings)
 - **Icons**: Using `lucide-react` (Home, Dumbbell, BarChart3, MessageCircle, User)
 
-## Next Steps (Workout Logger)
-Features to implement:
-1. **Workout logging** - Log exercises, sets, reps, weight
-2. **Progress tracking** - Historical data visualization
-3. **AI insights** - Trend analysis and recommendations
-
-Database tables needed:
-- `workouts` - workout sessions (user_id, date, notes)
-- `exercises` - exercise definitions (name, muscle_group)
-- `workout_sets` - individual sets (workout_id, exercise_id, reps, weight)
+## Next Steps
+1. **Phase 3 polish** — Exercise video URLs, workout detail view, superset UI
+2. **Phase 4: Progress tracking** — Historical data visualization (volume per muscle, strength curves, training frequency)
+3. **Phase 5: AI insights** — Agentic RAG v2 with workout data analysis (router: literature path + SQL query path)
+4. **Templates/routines** — Save and reuse workout templates (deferred from Phase 3)
 
 
 ## AI Chatbot (Exercise Science RAG)   

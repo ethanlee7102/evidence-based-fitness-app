@@ -1,1 +1,11 @@
-// Workouts feature components
+export { WorkoutHistoryCard } from './WorkoutHistoryCard'
+export { WorkoutHistoryList } from './WorkoutHistoryList'
+export { ActiveWorkoutModal } from './ActiveWorkoutModal'
+export { ExerciseCard } from './ExerciseCard'
+export { SetRow } from './SetRow'
+export { ExerciseSearchModal } from './ExerciseSearchModal'
+export { WorkoutTimer } from './WorkoutTimer'
+export { WorkoutSummaryModal } from './WorkoutSummaryModal'
+export { CreateExerciseForm } from './CreateExerciseForm'
+export { WorkoutDetailModal } from './WorkoutDetailModal'
+export { RestTimerBar } from './RestTimerBar'
