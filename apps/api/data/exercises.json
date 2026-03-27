@@ -55,6 +55,57 @@
     ]
   },
   {
+    "name": "Close-Grip Bench Press",
+    "aliases": [
+      "CGBP"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on flat bench with hands shoulder-width or narrower",
+      "Lower bar to lower chest",
+      "Press up focusing on triceps"
+    ]
+  },
+  {
+    "name": "Floor Press",
+    "aliases": [
+      "Barbell Floor Press"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on the floor with knees bent and feet flat",
+      "Grip the barbell at shoulder width and unrack",
+      "Lower the bar until upper arms touch the floor",
+      "Pause briefly, then press up to lockout"
+    ]
+  },
+  {
+    "name": "Larsen Press",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a flat bench with legs extended straight and feet off the floor",
+      "Grip the barbell slightly wider than shoulder-width",
+      "Lower the bar to mid-chest with control",
+      "Press up to full extension while maintaining leg position"
+    ]
+  },
+  {
     "name": "Dumbbell Bench Press",
     "aliases": [
       "Flat Dumbbell Press"
@@ -141,20 +192,39 @@
     ]
   },
   {
-    "name": "Cable Fly",
+    "name": "Dumbbell Floor Press",
     "aliases": [
-      "Cable Crossover Fly"
+      "DB Floor Press"
     ],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
     "force_type": "push",
     "body_region": "upper",
     "laterality": "bilateral",
-    "is_compound": false,
+    "is_compound": true,
     "instructions": [
-      "Set cable pulleys to shoulder height",
-      "Step forward with slight lean",
-      "Bring handles together in front of chest with slight elbow bend"
+      "Lie on the floor holding dumbbells at chest level",
+      "Press dumbbells up until arms are fully extended",
+      "Lower until upper arms rest on the floor",
+      "Pause briefly, then press back up"
+    ]
+  },
+  {
+    "name": "Squeeze Press",
+    "aliases": [
+      "Dumbbell Squeeze Press"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a flat bench pressing two dumbbells together",
+      "Keep the dumbbells squeezed together throughout the movement",
+      "Press up to full extension maintaining inward pressure",
+      "Lower to chest while keeping dumbbells in contact"
     ]
   },
   {
@@ -172,6 +242,40 @@
       "Set cable pulleys high",
       "Step forward and bring handles down and together",
       "Squeeze chest at the bottom of the movement"
+    ]
+  },
+  {
+    "name": "Cable Fly",
+    "aliases": [
+      "Cable Crossover Fly"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set cable pulleys to shoulder height",
+      "Step forward with slight lean",
+      "Bring handles together in front of chest with slight elbow bend"
+    ]
+  },
+  {
+    "name": "Low Cable Fly",
+    "aliases": [
+      "Low to High Cable Fly"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set cable pulleys low",
+      "Step forward and bring handles up and together",
+      "Squeeze upper chest at top"
     ]
   },
   {
@@ -210,6 +314,56 @@
     ]
   },
   {
+    "name": "Smith Machine Bench Press",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on bench under Smith machine bar",
+      "Unrack and lower bar to chest",
+      "Press up to full extension"
+    ]
+  },
+  {
+    "name": "Machine Incline Press",
+    "aliases": [
+      "Incline Machine Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Adjust the seat so handles are at upper chest level",
+      "Press the handles forward and up to full extension",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Smith Machine Incline Press",
+    "aliases": [
+      "Smith Incline Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set bench to 30-45 degrees inside the Smith machine",
+      "Grip the bar slightly wider than shoulder-width",
+      "Unrack and lower the bar to upper chest",
+      "Press up to full extension"
+    ]
+  },
+  {
     "name": "Push-Up",
     "aliases": [
       "Press-Up"
@@ -227,6 +381,94 @@
     ]
   },
   {
+    "name": "Diamond Push-Up",
+    "aliases": [
+      "Close-Grip Push-Up"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place hands together in diamond shape under chest",
+      "Lower chest to hands",
+      "Push back up"
+    ]
+  },
+  {
+    "name": "Decline Push-Up",
+    "aliases": [
+      "Decline Pushup"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place feet on an elevated surface with hands on the floor",
+      "Set hands slightly wider than shoulder-width",
+      "Lower chest toward the floor",
+      "Push back up to full arm extension"
+    ]
+  },
+  {
+    "name": "Incline Push-Up",
+    "aliases": [
+      "Incline Pushup"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place hands on an elevated surface like a bench or box",
+      "Set hands slightly wider than shoulder-width",
+      "Lower chest toward the surface",
+      "Push back up to full arm extension"
+    ]
+  },
+  {
+    "name": "Wide Push-Up",
+    "aliases": [
+      "Wide Pushup"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in push-up position with hands wider than shoulder-width",
+      "Lower chest toward the floor keeping elbows flared",
+      "Push back up to full arm extension"
+    ]
+  },
+  {
+    "name": "Pike Push-Up",
+    "aliases": [
+      "Pike Pushup"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in a downward dog position with hips high",
+      "Bend elbows to lower the top of your head toward the floor",
+      "Press back up to the starting position",
+      "Keep hips elevated throughout"
+    ]
+  },
+  {
     "name": "Chest Dip",
     "aliases": [
       "Dip (Chest)"
@@ -241,6 +483,38 @@
       "Grip parallel bars and lean forward slightly",
       "Lower body until upper arms are parallel to floor",
       "Press back up to starting position"
+    ]
+  },
+  {
+    "name": "Machine Dip",
+    "aliases": [
+      "Assisted Dip Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit in dip machine and grip handles",
+      "Press down extending arms",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Landmine Press",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold end of landmine bar at shoulder",
+      "Press up and forward at an angle",
+      "Lower with control"
     ]
   },
   {
@@ -263,6 +537,40 @@
     ]
   },
   {
+    "name": "Pendlay Row",
+    "aliases": [
+      "Strict Row"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start with bar on floor, torso parallel to ground",
+      "Explosively row bar to lower chest",
+      "Return bar to floor each rep"
+    ]
+  },
+  {
+    "name": "Rack Pull",
+    "aliases": [
+      "Block Pull"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set barbell on rack pins at knee height",
+      "Grip bar and stand up fully",
+      "Lower back to pins with control"
+    ]
+  },
+  {
     "name": "Dumbbell Row",
     "aliases": [
       "Single-Arm Dumbbell Row",
@@ -278,6 +586,126 @@
       "Place one knee and hand on bench",
       "Pull dumbbell to hip with other arm",
       "Lower with control"
+    ]
+  },
+  {
+    "name": "Meadows Row",
+    "aliases": [
+      "Landmine Meadows Row"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand perpendicular to landmine bar",
+      "Hinge at hips and grip end of bar",
+      "Row bar to hip",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Dumbbell Pullover",
+    "aliases": [
+      "Pullover"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie across bench with dumbbell held over chest",
+      "Lower dumbbell behind head with slight elbow bend",
+      "Pull back over chest using lats and chest"
+    ]
+  },
+  {
+    "name": "Chest-Supported Dumbbell Row",
+    "aliases": [
+      "Chest Supported Row",
+      "Incline DB Row"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set an incline bench to 30-45 degrees",
+      "Lie face down on the bench holding dumbbells",
+      "Row both dumbbells up toward your hips, squeezing shoulder blades",
+      "Lower with control to full arm extension"
+    ]
+  },
+  {
+    "name": "Kroc Row",
+    "aliases": [
+      "Kroc Dumbbell Row"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place one hand on a bench for support with feet staggered",
+      "Hold a heavy dumbbell in the other hand at arm's length",
+      "Row the dumbbell to your hip using momentum on the last few reps",
+      "Focus on high reps with heavy weight and controlled eccentric"
+    ]
+  },
+  {
+    "name": "Gorilla Row",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand over two kettlebells or dumbbells in a hip-hinge position",
+      "Row one weight up while pressing the other into the floor",
+      "Alternate sides with each rep",
+      "Keep your back flat and core braced"
+    ]
+  },
+  {
+    "name": "Renegade Row",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in a push-up position gripping two dumbbells",
+      "Row one dumbbell to your hip while stabilizing on the other",
+      "Lower the weight and repeat on the other side",
+      "Keep hips square to the floor throughout"
+    ]
+  },
+  {
+    "name": "Seal Row",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie face down on an elevated bench with arms hanging straight down",
+      "Hold a barbell or dumbbells at arm's length",
+      "Row the weight up toward the bench, squeezing shoulder blades",
+      "Lower with control to full extension"
     ]
   },
   {
@@ -299,20 +727,54 @@
     ]
   },
   {
-    "name": "T-Bar Row",
+    "name": "Cable Lateral Pulldown",
     "aliases": [
-      "Landmine Row"
+      "Single-Arm Lat Pulldown"
     ],
-    "equipment": "barbell",
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit at lat pulldown with single handle",
+      "Pull handle down to shoulder",
+      "Squeeze lat and return with control"
+    ]
+  },
+  {
+    "name": "Cable Pullover",
+    "aliases": [
+      "Straight-Arm Pulldown"
+    ],
+    "equipment": "cable",
     "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
-    "is_compound": true,
+    "is_compound": false,
     "instructions": [
-      "Straddle the barbell with close-grip handle",
-      "Hinge at hips and pull bar to chest",
-      "Lower with control"
+      "Stand facing high cable with straight bar",
+      "Keep arms straight and pull bar down to thighs",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Face Pull",
+    "aliases": [
+      "Rope Face Pull"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set cable at face height with rope",
+      "Pull rope toward face separating ends",
+      "Squeeze rear delts and external rotate"
     ]
   },
   {
@@ -331,6 +793,203 @@
       "Pull bar to upper chest",
       "Squeeze lats at bottom",
       "Return with control"
+    ]
+  },
+  {
+    "name": "Lat Pulldown (Close Grip)",
+    "aliases": [
+      "Close-Grip Pulldown",
+      "V-Bar Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach close-grip or V-bar handle",
+      "Pull down to upper chest",
+      "Squeeze lats at bottom",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Straight-Arm Pulldown",
+    "aliases": [
+      "Straight Arm Lat Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand facing a cable machine with a bar attachment at the top",
+      "With arms straight, pull the bar down in an arc to your thighs",
+      "Squeeze your lats at the bottom",
+      "Return slowly to the starting position"
+    ]
+  },
+  {
+    "name": "Single-Arm Lat Pulldown",
+    "aliases": [
+      "One-Arm Lat Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit at a lat pulldown machine with a single handle attachment",
+      "Pull the handle down to your side, focusing on one lat",
+      "Squeeze at the bottom and control the return"
+    ]
+  },
+  {
+    "name": "Wide-Grip Lat Pulldown",
+    "aliases": [
+      "Wide Grip Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Grip the bar wider than shoulder-width at a lat pulldown station",
+      "Pull the bar down to your upper chest",
+      "Squeeze your lats at the bottom",
+      "Return with control to full arm extension"
+    ]
+  },
+  {
+    "name": "Reverse-Grip Lat Pulldown",
+    "aliases": [
+      "Reverse Grip Pulldown",
+      "Underhand Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Grip the lat pulldown bar with an underhand grip at shoulder-width",
+      "Pull the bar down to your upper chest",
+      "Focus on squeezing the lower lats",
+      "Return with control to full extension"
+    ]
+  },
+  {
+    "name": "Single-Arm Cable Row",
+    "aliases": [
+      "One-Arm Cable Row"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set a cable to mid-height with a single handle",
+      "Stand or kneel and pull the handle toward your hip",
+      "Squeeze your shoulder blade at full contraction",
+      "Return slowly to the starting position"
+    ]
+  },
+  {
+    "name": "Machine Row",
+    "aliases": [
+      "Seated Machine Row"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit with chest against pad",
+      "Pull handles back squeezing shoulder blades",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Reverse Pec Deck",
+    "aliases": [
+      "Machine Reverse Fly"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit facing the pec deck machine",
+      "Grip handles with arms extended forward",
+      "Open arms squeezing rear delts",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "T-Bar Row",
+    "aliases": [
+      "Landmine Row"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Straddle the barbell with close-grip handle",
+      "Hinge at hips and pull bar to chest",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Chest-Supported Machine Row",
+    "aliases": [
+      "Chest Supported Row Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit with chest against the pad on the machine row",
+      "Grip the handles and pull toward your torso",
+      "Squeeze your shoulder blades together at full contraction",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Assisted Pull-Up Machine",
+    "aliases": [
+      "Assisted Pull-Up"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set the counterweight to desired assistance level",
+      "Kneel or stand on the platform and grip the handles",
+      "Pull yourself up until chin is above the bar",
+      "Lower with control to full arm extension"
     ]
   },
   {
@@ -368,54 +1027,92 @@
     ]
   },
   {
-    "name": "Cable Pullover",
+    "name": "Hyperextension",
     "aliases": [
-      "Straight-Arm Pulldown"
+      "Back Extension"
     ],
-    "equipment": "cable",
-    "movement_pattern": "pull",
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Stand facing high cable with straight bar",
-      "Keep arms straight and pull bar down to thighs",
-      "Return with control"
+      "Position hips on pad with feet secured",
+      "Lower torso toward floor",
+      "Extend back up to neutral spine"
     ]
   },
   {
-    "name": "Machine Row",
+    "name": "Inverted Row",
     "aliases": [
-      "Seated Machine Row"
+      "Body Row",
+      "Australian Pull-Up"
     ],
-    "equipment": "machine",
+    "equipment": "bodyweight",
     "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Sit with chest against pad",
-      "Pull handles back squeezing shoulder blades",
-      "Return with control"
+      "Set a barbell in a rack at waist height",
+      "Hang underneath with arms extended and body straight",
+      "Pull your chest to the bar by squeezing shoulder blades",
+      "Lower with control back to full extension"
     ]
   },
   {
-    "name": "Face Pull",
+    "name": "Neutral-Grip Pull-Up",
     "aliases": [
-      "Rope Face Pull"
+      "Hammer Grip Pull-Up"
     ],
-    "equipment": "cable",
+    "equipment": "bodyweight",
     "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
-    "is_compound": false,
+    "is_compound": true,
     "instructions": [
-      "Set cable at face height with rope",
-      "Pull rope toward face separating ends",
-      "Squeeze rear delts and external rotate"
+      "Grip parallel handles with palms facing each other",
+      "Pull yourself up until chin clears the handles",
+      "Lower with control to full arm extension"
+    ]
+  },
+  {
+    "name": "Muscle-Up",
+    "aliases": [
+      "Bar Muscle-Up"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hang from a pull-up bar with a false grip",
+      "Pull explosively, transitioning from below to above the bar",
+      "Press up to full arm extension on top of the bar",
+      "Lower back down with control"
+    ]
+  },
+  {
+    "name": "Scapular Pull-Up",
+    "aliases": [
+      "Scap Pull-Up"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hang from a pull-up bar with arms fully extended",
+      "Without bending your elbows, retract and depress your shoulder blades",
+      "Hold the top position briefly",
+      "Relax back to a dead hang and repeat"
     ]
   },
   {
@@ -452,54 +1149,37 @@
     ]
   },
   {
-    "name": "Hyperextension",
+    "name": "Landmine Row",
     "aliases": [
-      "Back Extension"
+      "T-Bar Landmine Row"
     ],
-    "equipment": "bodyweight",
-    "movement_pattern": "hinge",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Position hips on pad with feet secured",
-      "Lower torso toward floor",
-      "Extend back up to neutral spine"
-    ]
-  },
-  {
-    "name": "Rack Pull",
-    "aliases": [
-      "Block Pull"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "hinge",
-    "force_type": "pull",
-    "body_region": "full",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Set barbell on rack pins at knee height",
-      "Grip bar and stand up fully",
-      "Lower back to pins with control"
-    ]
-  },
-  {
-    "name": "Pendlay Row",
-    "aliases": [
-      "Strict Row"
-    ],
-    "equipment": "barbell",
+    "equipment": "other",
     "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Start with bar on floor, torso parallel to ground",
-      "Explosively row bar to lower chest",
-      "Return bar to floor each rep"
+      "Straddle the end of a loaded landmine barbell",
+      "Hinge at the hips and grip the bar with both hands or a V-handle",
+      "Row the bar toward your chest",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Cable Shrug",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand between two low cable pulleys holding the handles",
+      "Shrug your shoulders straight up toward your ears",
+      "Hold the top position briefly",
+      "Lower with control"
     ]
   },
   {
@@ -519,6 +1199,76 @@
       "Hold barbell at shoulder height with overhand grip",
       "Press bar overhead to full extension",
       "Lower back to shoulders with control"
+    ]
+  },
+  {
+    "name": "Push Press",
+    "aliases": [
+      "Barbell Push Press"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell at shoulder height in the front rack position",
+      "Dip your knees slightly and drive the bar overhead using leg drive",
+      "Lock out arms at the top",
+      "Lower the bar back to shoulders with control"
+    ]
+  },
+  {
+    "name": "Behind-the-Neck Press",
+    "aliases": [
+      "BTN Press"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit or stand with a barbell resting behind your neck on your traps",
+      "Press the bar overhead to full lockout",
+      "Lower the bar back behind your neck with control",
+      "Use lighter weight and ensure adequate shoulder mobility"
+    ]
+  },
+  {
+    "name": "Bradford Press",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start with a barbell at the front rack position at shoulder height",
+      "Press the bar just high enough to clear your head",
+      "Lower behind your neck, then immediately press back over to the front",
+      "Alternate front-to-back without locking out"
+    ]
+  },
+  {
+    "name": "Z Press",
+    "aliases": [
+      "Seated Floor Press"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the floor with legs extended straight in front",
+      "Clean or rack a barbell to shoulder height",
+      "Press the bar overhead to full lockout without leaning back",
+      "Lower with control back to shoulders"
     ]
   },
   {
@@ -607,6 +1357,59 @@
     ]
   },
   {
+    "name": "Dumbbell Y Raise",
+    "aliases": [
+      "Y Raise"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand or lie face down on an incline bench holding light dumbbells",
+      "Raise the dumbbells up and out at a 45-degree angle forming a Y shape",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Dumbbell Lu Raise",
+    "aliases": [
+      "Lu Raise"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a dumbbell in each hand at your sides",
+      "Perform a lateral raise to shoulder height",
+      "At the top, rotate and press the dumbbells overhead",
+      "Reverse the motion back to starting position"
+    ]
+  },
+  {
+    "name": "Dumbbell W Raise",
+    "aliases": [
+      "W Raise"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on an incline bench holding light dumbbells",
+      "Raise the dumbbells with elbows bent to form a W shape",
+      "Squeeze shoulder blades together at the top",
+      "Lower with control"
+    ]
+  },
+  {
     "name": "Cable Lateral Raise",
     "aliases": [],
     "equipment": "cable",
@@ -618,23 +1421,6 @@
     "instructions": [
       "Stand sideways to low cable",
       "Raise arm out to side to shoulder height",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Machine Shoulder Press",
-    "aliases": [
-      "Shoulder Press Machine"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "push",
-    "force_type": "push",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Sit with back against pad",
-      "Press handles overhead",
       "Lower with control"
     ]
   },
@@ -656,6 +1442,306 @@
     ]
   },
   {
+    "name": "Cable Front Raise",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand facing away from a low cable with a handle or rope",
+      "With arm straight, raise the handle forward to shoulder height",
+      "Lower with control back to your side"
+    ]
+  },
+  {
+    "name": "Cable Rear Delt Fly",
+    "aliases": [
+      "Cable Reverse Fly"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set cables to shoulder height with crossover handles",
+      "Pull the handles outward and back, squeezing rear delts",
+      "Control the return to the starting position"
+    ]
+  },
+  {
+    "name": "Cable Upright Row",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand facing a low cable pulley with a straight bar attachment",
+      "Pull the bar up along your body toward chin height",
+      "Keep elbows high and lead with your elbows",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Machine Shoulder Press",
+    "aliases": [
+      "Shoulder Press Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit with back against pad",
+      "Press handles overhead",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Machine Lateral Raise",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit in machine with pads against outer arms",
+      "Raise arms out to sides",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Machine Rear Delt Fly",
+    "aliases": [
+      "Reverse Machine Fly"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit facing the pad on a pec deck or rear delt machine",
+      "Grip the handles and push them back in a reverse fly motion",
+      "Squeeze your rear delts at full contraction",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Handstand Push-Up",
+    "aliases": [
+      "Handstand Pushup",
+      "HSPU"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Kick up into a handstand against a wall",
+      "Lower yourself by bending your elbows until your head lightly touches the floor",
+      "Press back up to full arm extension",
+      "Maintain a tight core throughout"
+    ]
+  },
+  {
+    "name": "Landmine Lateral Raise",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand with one end of a landmine barbell at your side",
+      "Grip the end of the bar with the working hand",
+      "Raise the bar out to the side to shoulder height",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Plate Front Raise",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a weight plate with both hands at waist level",
+      "Raise the plate forward and up to shoulder height with arms straight",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Band Pull-Apart",
+    "aliases": [
+      "Banded Pull-Apart"
+    ],
+    "equipment": "band",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a resistance band in front of you at shoulder height with arms extended",
+      "Pull the band apart by squeezing your shoulder blades together",
+      "Return to the starting position with control"
+    ]
+  },
+  {
+    "name": "Bus Driver",
+    "aliases": [
+      "Plate Bus Driver"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a weight plate with both hands at arm's length in front",
+      "Rotate the plate like a steering wheel, alternating sides",
+      "Keep arms extended and core braced throughout"
+    ]
+  },
+  {
+    "name": "Dumbbell External Rotation",
+    "aliases": [
+      "DB External Rotation"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your side with a light dumbbell in the top hand",
+      "Keep your upper arm pinned to your side with elbow bent at 90 degrees",
+      "Rotate your forearm upward away from your body",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Cable External Rotation",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand sideways to a cable set at elbow height",
+      "Keep your elbow pinned to your side bent at 90 degrees",
+      "Rotate your forearm outward away from the cable",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Cable Internal Rotation",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand sideways to a cable set at elbow height",
+      "Keep your elbow pinned to your side bent at 90 degrees",
+      "Rotate your forearm inward toward your body",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Band External Rotation",
+    "aliases": [
+      "Banded External Rotation"
+    ],
+    "equipment": "band",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Attach a band at elbow height and stand sideways",
+      "Keep your elbow pinned to your side bent at 90 degrees",
+      "Rotate your forearm outward against the band's resistance",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Prone Y Raise",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on a flat bench or the floor with arms hanging down",
+      "Raise both arms up and outward to form a Y shape with thumbs up",
+      "Squeeze your lower traps at the top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Prone T Raise",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on a flat bench or the floor with arms hanging down",
+      "Raise both arms straight out to the sides to form a T shape",
+      "Squeeze your mid-back at the top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Cuban Press",
+    "aliases": [
+      "Cuban Rotation"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells with an overhand grip",
+      "Perform an upright row to shoulder height",
+      "Externally rotate the dumbbells until forearms point up",
+      "Press overhead, then reverse the entire sequence"
+    ]
+  },
+  {
     "name": "Barbell Curl",
     "aliases": [
       "Standing Barbell Curl"
@@ -670,6 +1756,92 @@
       "Stand with barbell at arm's length, underhand grip",
       "Curl bar up to shoulder height",
       "Lower with control"
+    ]
+  },
+  {
+    "name": "EZ-Bar Curl",
+    "aliases": [
+      "EZ Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand with EZ-bar at arm's length",
+      "Curl bar up to shoulder height",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Preacher Curl",
+    "aliases": [
+      "EZ-Bar Preacher Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit at preacher bench with arms over pad",
+      "Curl bar up squeezing biceps",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Drag Curl",
+    "aliases": [
+      "Barbell Drag Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a barbell with an underhand grip",
+      "Curl the bar up while dragging it along your torso",
+      "Keep your elbows behind the bar throughout",
+      "Lower with control along the same path"
+    ]
+  },
+  {
+    "name": "Reverse Curl",
+    "aliases": [
+      "Reverse Barbell Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand with barbell using overhand grip",
+      "Curl bar up keeping overhand grip",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Wide-Grip Barbell Curl",
+    "aliases": [
+      "Wide Grip Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a barbell with a wider-than-shoulder underhand grip",
+      "Curl the bar up toward your shoulders",
+      "Squeeze at the top and lower with control"
     ]
   },
   {
@@ -708,23 +1880,6 @@
     ]
   },
   {
-    "name": "Preacher Curl",
-    "aliases": [
-      "EZ-Bar Preacher Curl"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit at preacher bench with arms over pad",
-      "Curl bar up squeezing biceps",
-      "Lower with control"
-    ]
-  },
-  {
     "name": "Incline Dumbbell Curl",
     "aliases": [],
     "equipment": "dumbbell",
@@ -737,6 +1892,102 @@
       "Sit on incline bench with dumbbells hanging",
       "Curl dumbbells up keeping upper arms stationary",
       "Lower with control for full stretch"
+    ]
+  },
+  {
+    "name": "Incline Hammer Curl",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit on incline bench with dumbbells hanging",
+      "Curl with neutral grip keeping upper arms stationary",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Concentration Curl",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit and brace elbow against inner thigh",
+      "Curl dumbbell up squeezing bicep at top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Spider Curl",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on incline bench",
+      "Let arms hang straight down with dumbbells",
+      "Curl up squeezing biceps at top"
+    ]
+  },
+  {
+    "name": "Zottman Curl",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding dumbbells with palms facing up",
+      "Curl the dumbbells up with a supinated grip",
+      "At the top, rotate to a pronated (palms-down) grip",
+      "Lower slowly with the pronated grip, then rotate back at the bottom"
+    ]
+  },
+  {
+    "name": "Cross-Body Hammer Curl",
+    "aliases": [
+      "Cross Body Curl"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a dumbbell in each hand at your sides",
+      "Curl one dumbbell across your body toward the opposite shoulder",
+      "Lower with control and alternate sides"
+    ]
+  },
+  {
+    "name": "Prone Incline Curl",
+    "aliases": [
+      "Incline Prone Curl"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on an incline bench with arms hanging straight down",
+      "Hold dumbbells with palms forward",
+      "Curl the dumbbells up while keeping upper arms stationary",
+      "Lower with control"
     ]
   },
   {
@@ -757,120 +2008,136 @@
     ]
   },
   {
-    "name": "Concentration Curl",
+    "name": "Bayesian Cable Curl",
     "aliases": [],
-    "equipment": "dumbbell",
+    "equipment": "cable",
     "movement_pattern": "isolation",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "unilateral",
     "is_compound": false,
     "instructions": [
-      "Sit and brace elbow against inner thigh",
-      "Curl dumbbell up squeezing bicep at top",
-      "Lower with control"
+      "Face away from low cable holding handle",
+      "Arm starts behind body for full stretch",
+      "Curl forward squeezing bicep at top"
     ]
   },
   {
-    "name": "EZ-Bar Curl",
+    "name": "Cable Hammer Curl",
     "aliases": [
-      "EZ Curl"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Stand with EZ-bar at arm's length",
-      "Curl bar up to shoulder height",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Spider Curl",
-    "aliases": [],
-    "equipment": "dumbbell",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Lie face down on incline bench",
-      "Let arms hang straight down with dumbbells",
-      "Curl up squeezing biceps at top"
-    ]
-  },
-  {
-    "name": "Reverse Curl",
-    "aliases": [
-      "Reverse Barbell Curl"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Stand with barbell using overhand grip",
-      "Curl bar up keeping overhand grip",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Close-Grip Bench Press",
-    "aliases": [
-      "CGBP"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "push",
-    "force_type": "push",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Lie on flat bench with hands shoulder-width or narrower",
-      "Lower bar to lower chest",
-      "Press up focusing on triceps"
-    ]
-  },
-  {
-    "name": "Tricep Pushdown",
-    "aliases": [
-      "Cable Pushdown",
-      "Rope Pushdown"
+      "Rope Cable Curl"
     ],
     "equipment": "cable",
-    "movement_pattern": "isolation",
-    "force_type": "push",
+    "movement_pattern": "pull",
+    "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Stand at high cable with rope or bar attachment",
-      "Push weight down extending elbows fully",
-      "Return with control keeping elbows at sides"
+      "Attach a rope to a low cable pulley",
+      "Stand facing the machine and grip the rope with neutral grip",
+      "Curl the rope up keeping palms facing each other",
+      "Lower with control"
     ]
   },
   {
-    "name": "Overhead Tricep Extension",
+    "name": "Overhead Cable Curl",
     "aliases": [
-      "French Press",
-      "Overhead Extension"
+      "High Cable Curl"
     ],
-    "equipment": "dumbbell",
-    "movement_pattern": "isolation",
-    "force_type": "push",
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Hold dumbbell overhead with both hands",
-      "Lower behind head by bending elbows",
-      "Extend back to starting position"
+      "Stand between two high cable pulleys with handles attached",
+      "Grip the handles with palms facing up and arms extended to the sides",
+      "Curl the handles toward your head by flexing your biceps",
+      "Return with control to the starting position"
+    ]
+  },
+  {
+    "name": "Single-Arm Cable Curl",
+    "aliases": [
+      "One-Arm Cable Curl"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand facing a low cable with a single handle",
+      "Curl the handle up toward your shoulder",
+      "Squeeze at the top and lower with control"
+    ]
+  },
+  {
+    "name": "Machine Preacher Curl",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit at preacher curl machine",
+      "Curl handle up squeezing biceps",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Machine Bicep Curl",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit at the bicep curl machine with arms on the pad",
+      "Grip the handles and curl toward your shoulders",
+      "Squeeze at the top and lower with control"
+    ]
+  },
+  {
+    "name": "Chin-Up Curl",
+    "aliases": [
+      "Supinated Chin-Up"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hang from a pull-up bar with a narrow supinated grip",
+      "Pull yourself up focusing on bicep contraction",
+      "Lower with control to full extension"
+    ]
+  },
+  {
+    "name": "Body Drag Curl",
+    "aliases": [
+      "Bodyweight Drag Curl"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand upright and mimic a curl motion using body leverage",
+      "Drag your hands up along your body using a bar or surface",
+      "Focus on the bicep contraction throughout",
+      "Lower with control"
     ]
   },
   {
@@ -892,6 +2159,42 @@
     ]
   },
   {
+    "name": "JM Press",
+    "aliases": [
+      "JM Bench Press"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a flat bench and grip the barbell at close grip width",
+      "Lower the bar toward your chin/throat area by bending at the elbows",
+      "The bar path combines a skull crusher and close-grip press",
+      "Press back to lockout"
+    ]
+  },
+  {
+    "name": "Floor Skull Crusher",
+    "aliases": [
+      "Floor Tricep Extension"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on the floor holding an EZ-bar or dumbbells above your chest",
+      "Lower the weight toward your forehead by bending at the elbows",
+      "Let your upper arms touch the floor briefly",
+      "Extend back to the starting position"
+    ]
+  },
+  {
     "name": "Dumbbell Kickback",
     "aliases": [
       "Tricep Kickback"
@@ -905,6 +2208,91 @@
     "instructions": [
       "Hinge at hips with upper arm parallel to floor",
       "Extend forearm back until arm is straight",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Overhead Tricep Extension",
+    "aliases": [
+      "French Press",
+      "Overhead Extension"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold dumbbell overhead with both hands",
+      "Lower behind head by bending elbows",
+      "Extend back to starting position"
+    ]
+  },
+  {
+    "name": "Tate Press",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a flat bench holding dumbbells above your chest with palms facing your feet",
+      "Lower the dumbbells inward toward your chest by bending at the elbows",
+      "The dumbbells should touch your chest near the midline",
+      "Press back up to full extension"
+    ]
+  },
+  {
+    "name": "Single-Arm Dumbbell Overhead Extension",
+    "aliases": [
+      "One-Arm DB Overhead Extension"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand or sit holding one dumbbell overhead with arm fully extended",
+      "Lower the dumbbell behind your head by bending at the elbow",
+      "Extend back to the starting position",
+      "Keep your upper arm close to your head"
+    ]
+  },
+  {
+    "name": "Tricep Pushdown",
+    "aliases": [
+      "Cable Pushdown",
+      "Rope Pushdown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand at high cable with rope or bar attachment",
+      "Push weight down extending elbows fully",
+      "Return with control keeping elbows at sides"
+    ]
+  },
+  {
+    "name": "Single-Arm Cable Pushdown",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand at high cable with single handle",
+      "Push down extending elbow fully",
       "Return with control"
     ]
   },
@@ -926,6 +2314,93 @@
     ]
   },
   {
+    "name": "Tricep Pushdown (Rope)",
+    "aliases": [
+      "Rope Pushdown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Attach a rope to a high cable pulley",
+      "Grip the rope with neutral grip and elbows at your sides",
+      "Push down and spread the rope apart at the bottom",
+      "Return with control to the starting position"
+    ]
+  },
+  {
+    "name": "Tricep Pushdown (Reverse Grip)",
+    "aliases": [
+      "Reverse Grip Pushdown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Attach a straight bar to a high cable pulley",
+      "Grip the bar with an underhand (supinated) grip",
+      "Push down to full arm extension keeping elbows pinned",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Cable Kickback",
+    "aliases": [
+      "Cable Tricep Kickback"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set a cable to the lowest position with a single handle",
+      "Hinge forward and keep your upper arm parallel to your torso",
+      "Extend your forearm back until your arm is straight",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Machine Tricep Extension",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit at the tricep extension machine and grip the handles",
+      "Extend your arms fully against the resistance",
+      "Return with control to the starting position"
+    ]
+  },
+  {
+    "name": "Assisted Dip Machine",
+    "aliases": [
+      "Assisted Dip"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set the counterweight to desired assistance level",
+      "Kneel or stand on the platform and grip the dip handles",
+      "Lower your body by bending your elbows to 90 degrees",
+      "Press back up to full extension"
+    ]
+  },
+  {
     "name": "Tricep Dip",
     "aliases": [
       "Dip (Tricep)",
@@ -944,9 +2419,25 @@
     ]
   },
   {
-    "name": "Diamond Push-Up",
+    "name": "Bench Dip",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place your hands on the edge of a bench behind you with fingers forward",
+      "Extend your legs out in front",
+      "Lower your body by bending your elbows to about 90 degrees",
+      "Press back up to full extension"
+    ]
+  },
+  {
+    "name": "Bodyweight Tricep Extension",
     "aliases": [
-      "Close-Grip Push-Up"
+      "Bodyweight Skull Crusher"
     ],
     "equipment": "bodyweight",
     "movement_pattern": "push",
@@ -955,9 +2446,28 @@
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Place hands together in diamond shape under chest",
-      "Lower chest to hands",
-      "Push back up"
+      "Place your hands on a bar or surface at about waist height",
+      "Lean forward with arms extended and body at an angle",
+      "Lower your head under the bar by bending at the elbows",
+      "Press back to the starting position"
+    ]
+  },
+  {
+    "name": "Band Pushdown",
+    "aliases": [
+      "Banded Tricep Pushdown"
+    ],
+    "equipment": "band",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Attach a resistance band to a high anchor point",
+      "Grip the band with both hands at chest height",
+      "Push down to full arm extension keeping elbows at your sides",
+      "Return with control"
     ]
   },
   {
@@ -995,6 +2505,21 @@
     ]
   },
   {
+    "name": "Behind-the-Back Wrist Curl",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a barbell behind your back with an underhand grip",
+      "Curl your wrists upward, flexing the forearms",
+      "Lower with control and repeat"
+    ]
+  },
+  {
     "name": "Farmer's Walk",
     "aliases": [
       "Farmer's Carry"
@@ -1009,6 +2534,103 @@
       "Hold heavy dumbbells at sides",
       "Walk with upright posture for distance or time",
       "Maintain tight grip throughout"
+    ]
+  },
+  {
+    "name": "Plate Pinch Hold",
+    "aliases": [
+      "Plate Pinch"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Pinch two weight plates together smooth-side-out between your fingers and thumb",
+      "Hold at your side with arm extended for time",
+      "Focus on gripping with fingertips"
+    ]
+  },
+  {
+    "name": "Towel Pull-Up",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Drape a towel over a pull-up bar and grip each end",
+      "Perform a pull-up while squeezing the towel tightly",
+      "Lower with control to full extension"
+    ]
+  },
+  {
+    "name": "Fat Grip Barbell Hold",
+    "aliases": [
+      "Fat Grip Hold"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach fat grips to a barbell or use a thick bar",
+      "Deadlift the bar to lockout and hold for time",
+      "Focus on maintaining grip"
+    ]
+  },
+  {
+    "name": "Wrist Roller",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold a wrist roller device with arms extended in front",
+      "Roll the weight up by alternately flexing each wrist",
+      "Reverse the motion to lower the weight",
+      "Keep arms parallel to the floor throughout"
+    ]
+  },
+  {
+    "name": "Pronation/Supination",
+    "aliases": [
+      "Forearm Rotation"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold a light dumbbell or hammer by one end with elbow at your side",
+      "Rotate your forearm inward (pronation) then outward (supination)",
+      "Perform slowly with control through full range of motion"
+    ]
+  },
+  {
+    "name": "Finger Curl",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold a barbell with an overhand grip and let it roll to your fingertips",
+      "Curl your fingers to bring the bar back into your palm",
+      "Squeeze at the top and lower with control"
     ]
   },
   {
@@ -1044,141 +2666,6 @@
     "instructions": [
       "Rest bar on front delts with clean or cross grip",
       "Squat down keeping torso upright",
-      "Drive up through heels"
-    ]
-  },
-  {
-    "name": "Leg Press",
-    "aliases": [
-      "45-Degree Leg Press"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Sit in leg press with feet shoulder-width on platform",
-      "Lower platform by bending knees to 90 degrees",
-      "Press platform back up without locking knees"
-    ]
-  },
-  {
-    "name": "Leg Extension",
-    "aliases": [
-      "Machine Leg Extension"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit in machine with pad on lower shins",
-      "Extend legs to full lockout",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Hack Squat",
-    "aliases": [
-      "Machine Hack Squat"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Stand on platform with back against pad",
-      "Squat down to parallel",
-      "Drive up through heels"
-    ]
-  },
-  {
-    "name": "Goblet Squat",
-    "aliases": [],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Hold dumbbell at chest level with both hands",
-      "Squat down keeping torso upright",
-      "Drive up through heels"
-    ]
-  },
-  {
-    "name": "Bulgarian Split Squat",
-    "aliases": [
-      "Rear Foot Elevated Split Squat"
-    ],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": true,
-    "instructions": [
-      "Place rear foot on bench behind you",
-      "Hold dumbbells at sides",
-      "Descend until front thigh is parallel",
-      "Drive up through front heel"
-    ]
-  },
-  {
-    "name": "Walking Lunge",
-    "aliases": [
-      "Dumbbell Walking Lunge"
-    ],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": true,
-    "instructions": [
-      "Hold dumbbells at sides",
-      "Step forward into lunge position",
-      "Drive through front foot and step forward with other leg",
-      "Continue alternating"
-    ]
-  },
-  {
-    "name": "Step-Up",
-    "aliases": [
-      "Dumbbell Step-Up"
-    ],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": true,
-    "instructions": [
-      "Hold dumbbells at sides facing a box or bench",
-      "Step up onto platform with one foot",
-      "Drive through heel to stand fully on platform",
-      "Step down with control"
-    ]
-  },
-  {
-    "name": "Smith Machine Squat",
-    "aliases": [],
-    "equipment": "machine",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Position bar on upper back in Smith machine",
-      "Squat down to parallel",
       "Drive up through heels"
     ]
   },
@@ -1233,6 +2720,413 @@
     ]
   },
   {
+    "name": "Zercher Squat",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold barbell in crook of elbows",
+      "Squat down keeping torso upright",
+      "Drive up through heels"
+    ]
+  },
+  {
+    "name": "Sumo Squat",
+    "aliases": [
+      "Dumbbell Sumo Squat"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with wide stance holding dumbbell between legs",
+      "Squat down keeping torso upright",
+      "Drive up through heels"
+    ]
+  },
+  {
+    "name": "Overhead Squat",
+    "aliases": [
+      "OHS"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell overhead with a wide snatch grip",
+      "Squat down while keeping the bar directly overhead",
+      "Keep your chest up and core braced",
+      "Drive back up to standing"
+    ]
+  },
+  {
+    "name": "Goblet Squat",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold dumbbell at chest level with both hands",
+      "Squat down keeping torso upright",
+      "Drive up through heels"
+    ]
+  },
+  {
+    "name": "Dumbbell Squat",
+    "aliases": [
+      "DB Squat"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells at your sides",
+      "Squat down until thighs are parallel to the floor",
+      "Drive through your heels to stand back up"
+    ]
+  },
+  {
+    "name": "Dumbbell Bulgarian Split Squat",
+    "aliases": [
+      "DB Bulgarian Split Squat"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold dumbbells at your sides with one foot elevated behind you on a bench",
+      "Lower your back knee toward the floor",
+      "Drive through the front foot to return to standing"
+    ]
+  },
+  {
+    "name": "Leg Press",
+    "aliases": [
+      "45-Degree Leg Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit in leg press with feet shoulder-width on platform",
+      "Lower platform by bending knees to 90 degrees",
+      "Press platform back up without locking knees"
+    ]
+  },
+  {
+    "name": "Leg Extension",
+    "aliases": [
+      "Machine Leg Extension"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit in machine with pad on lower shins",
+      "Extend legs to full lockout",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Hack Squat",
+    "aliases": [
+      "Machine Hack Squat"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on platform with back against pad",
+      "Squat down to parallel",
+      "Drive up through heels"
+    ]
+  },
+  {
+    "name": "Pendulum Squat",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on pendulum squat machine platform",
+      "Squat down maintaining upright torso",
+      "Drive back up"
+    ]
+  },
+  {
+    "name": "Smith Machine Squat",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Position bar on upper back in Smith machine",
+      "Squat down to parallel",
+      "Drive up through heels"
+    ]
+  },
+  {
+    "name": "Belt Squat",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a weight belt to a belt squat machine or low pulley",
+      "Stand on the platform with feet shoulder-width apart",
+      "Squat down until thighs are parallel",
+      "Drive up to standing"
+    ]
+  },
+  {
+    "name": "V-Squat Machine",
+    "aliases": [
+      "V-Squat"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on the V-squat machine platform with shoulders under the pads",
+      "Squat down until thighs are parallel to the floor",
+      "Drive up to the starting position"
+    ]
+  },
+  {
+    "name": "Sissy Squat",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a support for balance",
+      "Lean back and bend knees forward",
+      "Lower until deep stretch in quads",
+      "Return to standing"
+    ]
+  },
+  {
+    "name": "Single-Leg Leg Press",
+    "aliases": [
+      "One-Leg Leg Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the leg press machine and place one foot on the platform",
+      "Lower the sled by bending your knee to 90 degrees",
+      "Press the sled back up to full extension",
+      "Complete all reps on one side before switching"
+    ]
+  },
+  {
+    "name": "Pistol Squat",
+    "aliases": [
+      "Single-Leg Squat"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one leg with the other leg extended straight in front",
+      "Squat down as deep as possible while keeping the raised leg off the floor",
+      "Drive back up to standing on one leg",
+      "Use arms for counterbalance as needed"
+    ]
+  },
+  {
+    "name": "Bodyweight Squat",
+    "aliases": [
+      "Air Squat"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Squat down until thighs are parallel to the floor",
+      "Keep your chest up and knees tracking over toes",
+      "Drive through your heels to stand back up"
+    ]
+  },
+  {
+    "name": "Jump Squat",
+    "aliases": [
+      "Squat Jump"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Squat down to parallel, then explode upward into a jump",
+      "Land softly with knees slightly bent",
+      "Immediately descend into the next rep"
+    ]
+  },
+  {
+    "name": "Wall Sit",
+    "aliases": [
+      "Wall Squat"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand with your back flat against a wall",
+      "Slide down until your thighs are parallel to the floor",
+      "Keep your back pressed against the wall and hold the position",
+      "Hold for the prescribed duration"
+    ]
+  },
+  {
+    "name": "Cyclist Squat",
+    "aliases": [
+      "Heel-Elevated Squat"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with heels elevated on small plates and feet close together",
+      "Squat straight down keeping your torso upright",
+      "Focus on quad engagement with knees traveling forward",
+      "Drive back up to standing"
+    ]
+  },
+  {
+    "name": "Split Squat",
+    "aliases": [
+      "Static Lunge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand in a staggered stance with one foot forward",
+      "Lower your back knee toward the floor",
+      "Drive through the front foot to return to standing",
+      "Keep your torso upright throughout"
+    ]
+  },
+  {
+    "name": "Cossack Squat",
+    "aliases": [
+      "Cossack Lunge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with a wide stance, toes pointed slightly outward",
+      "Shift your weight to one leg and squat down on that side",
+      "Keep the opposite leg straight with foot flat on the floor",
+      "Return to center and alternate sides"
+    ]
+  },
+  {
+    "name": "Landmine Squat",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold the end of a landmine barbell at chest height",
+      "Squat down until thighs are parallel",
+      "Drive up to standing",
+      "Keep the bar close to your chest throughout"
+    ]
+  },
+  {
+    "name": "Spanish Squat",
+    "aliases": [
+      "Banded Spanish Squat"
+    ],
+    "equipment": "band",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Loop a band behind your knees and anchor it to a fixed point",
+      "Lean back into the band and squat down",
+      "Keep your shins vertical and focus on quad engagement",
+      "Drive back up to standing"
+    ]
+  },
+  {
     "name": "Romanian Deadlift",
     "aliases": [
       "RDL",
@@ -1249,6 +3143,112 @@
       "Hinge at hips pushing butt back",
       "Lower bar along legs with slight knee bend",
       "Return to standing by driving hips forward"
+    ]
+  },
+  {
+    "name": "Good Morning",
+    "aliases": [
+      "Barbell Good Morning"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Position bar on upper back",
+      "Hinge at hips pushing butt back",
+      "Lower torso until nearly parallel",
+      "Return to standing"
+    ]
+  },
+  {
+    "name": "Stiff-Leg Deadlift",
+    "aliases": [
+      "Stiff-Legged Deadlift",
+      "SLDL"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding a barbell with an overhand grip",
+      "Hinge at the hips with legs nearly straight (slight knee bend)",
+      "Lower the bar along your legs until you feel a hamstring stretch",
+      "Drive hips forward to return to standing"
+    ]
+  },
+  {
+    "name": "Single-Leg Romanian Deadlift",
+    "aliases": [
+      "Single-Leg RDL"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one leg holding dumbbell",
+      "Hinge at hip extending other leg behind",
+      "Lower until torso is parallel to floor",
+      "Return to standing"
+    ]
+  },
+  {
+    "name": "Dumbbell Romanian Deadlift",
+    "aliases": [
+      "DB RDL"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells in front of your thighs",
+      "Hinge at the hips, pushing them back while keeping a slight knee bend",
+      "Lower the dumbbells along your legs until you feel a hamstring stretch",
+      "Drive hips forward to return to standing"
+    ]
+  },
+  {
+    "name": "Cable Pull-Through",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Face away from low cable with rope between legs",
+      "Hinge at hips reaching back",
+      "Drive hips forward to standing"
+    ]
+  },
+  {
+    "name": "Cable Romanian Deadlift",
+    "aliases": [
+      "Cable RDL"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand facing a low cable pulley with a bar attachment",
+      "Hinge at the hips, pushing them back while keeping a slight knee bend",
+      "Lower until you feel a hamstring stretch",
+      "Drive hips forward to return to standing"
     ]
   },
   {
@@ -1284,21 +3284,20 @@
     ]
   },
   {
-    "name": "Good Morning",
+    "name": "Single-Leg Leg Curl",
     "aliases": [
-      "Barbell Good Morning"
+      "One-Leg Leg Curl"
     ],
-    "equipment": "barbell",
-    "movement_pattern": "hinge",
+    "equipment": "machine",
+    "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
+    "laterality": "unilateral",
+    "is_compound": false,
     "instructions": [
-      "Position bar on upper back",
-      "Hinge at hips pushing butt back",
-      "Lower torso until nearly parallel",
-      "Return to standing"
+      "Lie face down on a leg curl machine with one leg under the pad",
+      "Curl your heel toward your glute",
+      "Lower with control and complete all reps before switching"
     ]
   },
   {
@@ -1336,21 +3335,89 @@
     ]
   },
   {
-    "name": "Single-Leg Romanian Deadlift",
+    "name": "Sliding Leg Curl",
     "aliases": [
-      "Single-Leg RDL"
+      "Slider Hamstring Curl"
     ],
-    "equipment": "dumbbell",
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with heels on sliders or a towel on a smooth floor",
+      "Bridge your hips up and slide your feet away from you",
+      "Curl your feet back toward your glutes while maintaining the bridge",
+      "Maintain hip extension throughout"
+    ]
+  },
+  {
+    "name": "Reverse Nordic Curl",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Kneel on a pad with your torso upright",
+      "Slowly lean back by extending at the knees, keeping hips extended",
+      "Go as far back as you can control",
+      "Use your quads to pull yourself back upright"
+    ]
+  },
+  {
+    "name": "Banded Good Morning",
+    "aliases": [],
+    "equipment": "band",
     "movement_pattern": "hinge",
     "force_type": "pull",
     "body_region": "lower",
-    "laterality": "unilateral",
+    "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Stand on one leg holding dumbbell",
-      "Hinge at hip extending other leg behind",
-      "Lower until torso is parallel to floor",
-      "Return to standing"
+      "Loop a band under your feet and over the back of your neck",
+      "Hinge at the hips with a slight knee bend",
+      "Push your hips back until you feel a hamstring stretch",
+      "Drive hips forward to return to standing"
+    ]
+  },
+  {
+    "name": "Hip Hinge (Band)",
+    "aliases": [
+      "Banded Hip Hinge"
+    ],
+    "equipment": "band",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Loop a band around your hips anchored behind you",
+      "Stand with feet shoulder-width apart facing away from the anchor",
+      "Hinge at the hips against the band's resistance",
+      "Drive hips forward to standing"
+    ]
+  },
+  {
+    "name": "45-Degree Back Extension",
+    "aliases": [
+      "45-Degree Hyper"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Position yourself on a 45-degree back extension bench with hips at the pad edge",
+      "Cross arms over chest or behind your head",
+      "Lower your torso toward the floor by hinging at the hips",
+      "Raise back up until your body is in line with your legs"
     ]
   },
   {
@@ -1389,42 +3456,239 @@
     ]
   },
   {
-    "name": "Cable Kickback",
+    "name": "Barbell Lunge",
     "aliases": [
-      "Glute Kickback"
+      "Forward Lunge"
     ],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
+    "equipment": "barbell",
+    "movement_pattern": "squat",
     "force_type": "push",
     "body_region": "lower",
     "laterality": "unilateral",
-    "is_compound": false,
+    "is_compound": true,
     "instructions": [
-      "Attach ankle cuff to low cable",
-      "Kick leg back keeping knee slightly bent",
-      "Squeeze glute at top",
-      "Return with control"
+      "Position barbell on upper back",
+      "Step forward into lunge",
+      "Lower until back knee nearly touches floor",
+      "Push back to standing"
     ]
   },
   {
-    "name": "Sumo Deadlift",
+    "name": "Walking Lunge",
+    "aliases": [
+      "Dumbbell Walking Lunge"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold dumbbells at sides",
+      "Step forward into lunge position",
+      "Drive through front foot and step forward with other leg",
+      "Continue alternating"
+    ]
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "aliases": [
+      "Rear Foot Elevated Split Squat"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place rear foot on bench behind you",
+      "Hold dumbbells at sides",
+      "Descend until front thigh is parallel",
+      "Drive up through front heel"
+    ]
+  },
+  {
+    "name": "Step-Up",
+    "aliases": [
+      "Dumbbell Step-Up"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold dumbbells at sides facing a box or bench",
+      "Step up onto platform with one foot",
+      "Drive through heel to stand fully on platform",
+      "Step down with control"
+    ]
+  },
+  {
+    "name": "Reverse Lunge",
+    "aliases": [
+      "Barbell Reverse Lunge"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet hip-width apart holding a barbell on your back or dumbbells at sides",
+      "Step one foot backward and lower your back knee toward the floor",
+      "Drive through the front foot to return to standing",
+      "Alternate legs or complete all reps on one side"
+    ]
+  },
+  {
+    "name": "Deficit Lunge",
     "aliases": [],
     "equipment": "barbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on a small platform or step holding dumbbells at your sides",
+      "Step forward off the platform into a lunge",
+      "Lower your back knee toward the floor for extended range of motion",
+      "Drive through the front foot to return to the platform"
+    ]
+  },
+  {
+    "name": "Curtsy Lunge",
+    "aliases": [
+      "Crossover Lunge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet hip-width apart",
+      "Step one foot behind and across your body in a curtsy motion",
+      "Lower your back knee toward the floor",
+      "Drive through the front foot to return to standing"
+    ]
+  },
+  {
+    "name": "Smith Machine Hip Thrust",
+    "aliases": [],
+    "equipment": "machine",
     "movement_pattern": "hinge",
     "force_type": "pull",
     "body_region": "lower",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Stand with wide stance, toes pointed out",
-      "Grip bar inside knees",
-      "Drive through heels and extend hips to stand",
+      "Set up a bench and position yourself under a Smith machine bar",
+      "Place the bar across your hips with a pad",
+      "Drive your hips up toward the ceiling, squeezing glutes at the top",
       "Lower with control"
     ]
   },
   {
-    "name": "Cable Pull-Through",
-    "aliases": [],
+    "name": "Dumbbell Lateral Lunge",
+    "aliases": [
+      "Side Lunge"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold dumbbells at sides",
+      "Step out wide to one side",
+      "Bend stepping leg while keeping other leg straight",
+      "Push back to start"
+    ]
+  },
+  {
+    "name": "Dumbbell Lunge",
+    "aliases": [
+      "DB Lunge"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells at your sides",
+      "Step forward into a lunge, lowering your back knee toward the floor",
+      "Drive through the front foot to return to standing",
+      "Alternate legs"
+    ]
+  },
+  {
+    "name": "Dumbbell Step-Up",
+    "aliases": [
+      "DB Step-Up"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells at your sides facing a box or bench",
+      "Step one foot onto the platform and drive up to standing",
+      "Step back down with control",
+      "Complete all reps on one side before switching"
+    ]
+  },
+  {
+    "name": "Dumbbell Hip Thrust",
+    "aliases": [
+      "DB Hip Thrust"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the floor with upper back against a bench and a dumbbell on your hips",
+      "Drive your hips up toward the ceiling, squeezing glutes at the top",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Single-Leg Hip Thrust",
+    "aliases": [
+      "One-Leg Hip Thrust"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set up as for a hip thrust with upper back on a bench",
+      "Extend one leg straight out and drive up with the working leg",
+      "Squeeze glute at the top and lower with control",
+      "Complete all reps on one side before switching"
+    ]
+  },
+  {
+    "name": "Cable Hip Extension",
+    "aliases": [
+      "Cable Glute Kickback"
+    ],
     "equipment": "cable",
     "movement_pattern": "hinge",
     "force_type": "pull",
@@ -1432,9 +3696,10 @@
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Face away from low cable with rope between legs",
-      "Hinge at hips reaching back",
-      "Drive hips forward to standing"
+      "Attach an ankle cuff to a low cable pulley",
+      "Stand facing the machine and kick the working leg straight back",
+      "Squeeze the glute at full extension",
+      "Return with control"
     ]
   },
   {
@@ -1450,6 +3715,174 @@
       "Sit in hip thrust machine with back against pad",
       "Drive hips up against resistance",
       "Squeeze glutes at top and lower"
+    ]
+  },
+  {
+    "name": "Hip Abductor Machine",
+    "aliases": [
+      "Abductor Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit in machine with pads against outer thighs",
+      "Push legs apart against resistance",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Cable Hip Abduction",
+    "aliases": [
+      "Cable Side Leg Raise"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Attach ankle cuff to low cable",
+      "Stand sideways and raise leg out to side",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Reverse Hyperextension",
+    "aliases": [
+      "Reverse Hyper"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie face down on a reverse hyper machine or high bench with hips at the edge",
+      "Let your legs hang down",
+      "Raise your legs by extending your hips until they are in line with your torso",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Glute Bridge",
+    "aliases": [
+      "Bodyweight Glute Bridge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on your back with knees bent and feet flat on the floor",
+      "Drive your hips up toward the ceiling, squeezing glutes at the top",
+      "Lower with control back to the floor"
+    ]
+  },
+  {
+    "name": "Frog Pump",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with the soles of your feet together and knees out",
+      "Drive your hips up by squeezing your glutes",
+      "Lower with control and repeat for high reps"
+    ]
+  },
+  {
+    "name": "Fire Hydrant",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips",
+      "Keeping your knee bent at 90 degrees, lift one leg out to the side",
+      "Raise until your thigh is parallel to the floor",
+      "Lower with control and repeat"
+    ]
+  },
+  {
+    "name": "Hip Adductor Machine",
+    "aliases": [
+      "Adductor Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit in machine with pads against inner thighs",
+      "Squeeze legs together against resistance",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Cable Hip Adduction",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach an ankle cuff to a low cable pulley",
+      "Stand sideways to the machine with the working leg closest to the cable",
+      "Pull the working leg across your body toward the midline",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Copenhagen Plank",
+    "aliases": [
+      "Copenhagen Adductor Plank"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your side and place the top leg on an elevated surface like a bench",
+      "Lift your body off the floor, supporting with your forearm and top leg",
+      "Hold the position, engaging your adductors",
+      "Keep your body in a straight line"
+    ]
+  },
+  {
+    "name": "Band Hip Adduction",
+    "aliases": [
+      "Banded Hip Adduction"
+    ],
+    "equipment": "band",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a band to a low anchor point and loop around one ankle",
+      "Stand sideways and pull the banded leg across your body",
+      "Control the return against the band's resistance"
     ]
   },
   {
@@ -1485,6 +3918,21 @@
     ]
   },
   {
+    "name": "Donkey Calf Raise",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Bend at hips on donkey calf machine",
+      "Rise up on toes as high as possible",
+      "Lower for full stretch"
+    ]
+  },
+  {
     "name": "Leg Press Calf Raise",
     "aliases": [],
     "equipment": "machine",
@@ -1497,6 +3945,123 @@
       "Sit in leg press with balls of feet on edge of platform",
       "Push through toes extending ankles",
       "Return with control"
+    ]
+  },
+  {
+    "name": "Smith Machine Calf Raise",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand under a Smith machine bar on a raised platform or step",
+      "Place the bar on your shoulders and rise up onto your toes",
+      "Hold briefly at the top, then lower your heels below the step",
+      "Repeat for full range of motion"
+    ]
+  },
+  {
+    "name": "Single-Leg Calf Raise",
+    "aliases": [
+      "One-Leg Calf Raise"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand on one foot on the edge of a step or platform",
+      "Rise up onto your toes as high as possible",
+      "Lower your heel below the step for a full stretch",
+      "Complete all reps before switching legs"
+    ]
+  },
+  {
+    "name": "Tibialis Raise",
+    "aliases": [
+      "Tib Raise"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand with your back against a wall and heels about a foot away",
+      "Raise your toes off the floor as high as possible",
+      "Lower with control",
+      "You can also use a tib raise machine if available"
+    ]
+  },
+  {
+    "name": "Barbell Calf Raise",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a barbell on your back with feet hip-width apart",
+      "Rise up onto your toes as high as possible",
+      "Hold briefly at the top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Dumbbell Calf Raise",
+    "aliases": [
+      "DB Calf Raise"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding dumbbells at your sides on the edge of a step",
+      "Rise up onto your toes as high as possible",
+      "Lower your heels below the step for a full stretch"
+    ]
+  },
+  {
+    "name": "Jump Rope Calf Bounce",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Jump rope staying on the balls of your feet",
+      "Keep jumps small and quick, minimizing ground contact time",
+      "Focus on calf engagement rather than height"
+    ]
+  },
+  {
+    "name": "Calf Raise (Bodyweight)",
+    "aliases": [
+      "Bodyweight Calf Raise"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand on the edge of a step or flat on the floor",
+      "Rise up onto your toes as high as possible",
+      "Lower with control and repeat"
     ]
   },
   {
@@ -1517,10 +4082,8 @@
     ]
   },
   {
-    "name": "Hanging Leg Raise",
-    "aliases": [
-      "Hanging Knee Raise"
-    ],
+    "name": "Bicycle Crunch",
+    "aliases": [],
     "equipment": "bodyweight",
     "movement_pattern": "isolation",
     "force_type": "pull",
@@ -1528,9 +4091,24 @@
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Hang from pull-up bar",
-      "Raise legs until parallel to floor or higher",
-      "Lower with control"
+      "Lie on back with hands behind head",
+      "Bring opposite elbow to knee while extending other leg",
+      "Alternate sides in pedaling motion"
+    ]
+  },
+  {
+    "name": "Decline Sit-Up",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Secure feet on decline bench",
+      "Lower torso back",
+      "Sit up contracting abs"
     ]
   },
   {
@@ -1551,37 +4129,222 @@
     ]
   },
   {
-    "name": "Ab Rollout",
+    "name": "Sit-Up",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on your back with knees bent and feet flat on the floor",
+      "Place hands behind your head or across your chest",
+      "Curl your torso all the way up to your knees",
+      "Lower with control back to the floor"
+    ]
+  },
+  {
+    "name": "V-Up",
     "aliases": [
-      "Ab Wheel Rollout"
+      "V Up"
     ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie flat on your back with arms extended overhead",
+      "Simultaneously raise your legs and torso to touch your toes at the top",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Weighted Crunch",
+    "aliases": [],
     "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with knees bent holding a weight plate on your chest",
+      "Crunch up, lifting your shoulder blades off the floor",
+      "Squeeze your abs at the top and lower with control"
+    ]
+  },
+  {
+    "name": "Machine Crunch",
+    "aliases": [
+      "Ab Crunch Machine"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit in the ab crunch machine with feet under the pads",
+      "Grip the handles and crunch your torso forward",
+      "Squeeze your abs at the bottom",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "GHD Sit-Up",
+    "aliases": [
+      "GHD Situp"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on a GHD machine with feet secured and hips at the pad edge",
+      "Lower your torso back until nearly parallel to the floor",
+      "Use your abs and hip flexors to sit back up",
+      "Touch the floor behind you for full range if possible"
+    ]
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "aliases": [
+      "Hanging Knee Raise"
+    ],
+    "equipment": "bodyweight",
     "movement_pattern": "isolation",
     "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Kneel with ab wheel or barbell in front",
-      "Roll forward extending body",
-      "Use abs to pull back to starting position"
+      "Hang from pull-up bar",
+      "Raise legs until parallel to floor or higher",
+      "Lower with control"
     ]
   },
   {
-    "name": "Plank",
+    "name": "Toes-to-Bar",
     "aliases": [
-      "Front Plank"
+      "T2B"
     ],
     "equipment": "bodyweight",
     "movement_pattern": "isolation",
-    "force_type": "static",
+    "force_type": "pull",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": false,
     "instructions": [
-      "Support body on forearms and toes",
-      "Keep body in straight line",
-      "Hold for prescribed time"
+      "Hang from pull-up bar",
+      "Raise feet up to touch the bar",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Lying Leg Raise",
+    "aliases": [
+      "Supine Leg Raise"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie flat on your back with legs straight and hands under your hips",
+      "Raise your legs until they are perpendicular to the floor",
+      "Lower with control without letting your feet touch the floor"
+    ]
+  },
+  {
+    "name": "Hanging Knee Raise",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hang from a pull-up bar with arms fully extended",
+      "Raise your knees toward your chest",
+      "Lower with control back to a dead hang"
+    ]
+  },
+  {
+    "name": "Reverse Crunch",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with knees bent at 90 degrees and feet off the floor",
+      "Curl your hips off the floor toward your chest",
+      "Lower with control back to the starting position"
+    ]
+  },
+  {
+    "name": "Flutter Kick",
+    "aliases": [
+      "Flutter Kicks"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on your back with legs extended and hands under your hips",
+      "Lift both legs slightly off the floor",
+      "Alternate kicking legs up and down in a small range of motion",
+      "Keep your lower back pressed into the floor"
+    ]
+  },
+  {
+    "name": "Scissor Kick",
+    "aliases": [
+      "Scissor Kicks"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on your back with legs extended and hands under your hips",
+      "Lift both legs slightly off the floor",
+      "Cross legs over each other in a scissoring motion",
+      "Keep your lower back pressed into the floor"
+    ]
+  },
+  {
+    "name": "Captain's Chair Leg Raise",
+    "aliases": [
+      "Captain's Chair"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Support yourself on a captain's chair with forearms on the pads",
+      "Let your legs hang straight down",
+      "Raise your legs straight up in front of you",
+      "Lower with control"
     ]
   },
   {
@@ -1597,36 +4360,6 @@
       "Sit with knees bent and feet off floor",
       "Lean back slightly",
       "Rotate torso side to side touching floor"
-    ]
-  },
-  {
-    "name": "Decline Sit-Up",
-    "aliases": [],
-    "equipment": "bodyweight",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Secure feet on decline bench",
-      "Lower torso back",
-      "Sit up contracting abs"
-    ]
-  },
-  {
-    "name": "Bicycle Crunch",
-    "aliases": [],
-    "equipment": "bodyweight",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Lie on back with hands behind head",
-      "Bring opposite elbow to knee while extending other leg",
-      "Alternate sides in pedaling motion"
     ]
   },
   {
@@ -1666,6 +4399,145 @@
     ]
   },
   {
+    "name": "Oblique Crunch",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with knees bent and feet flat",
+      "Place hands behind your head",
+      "Crunch up and rotate, bringing one elbow toward the opposite knee",
+      "Lower and alternate sides"
+    ]
+  },
+  {
+    "name": "Landmine Rotation",
+    "aliases": [
+      "Landmine Twist"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold the end of a landmine barbell at chest height with both hands",
+      "Rotate the bar from one side to the other in an arc",
+      "Keep your arms extended and rotate through your core",
+      "Control the movement through the full range"
+    ]
+  },
+  {
+    "name": "Cable Woodchop (High to Low)",
+    "aliases": [
+      "High-to-Low Woodchop"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set a cable to the highest position with a rope or handle",
+      "Stand sideways to the machine and grip with both hands",
+      "Pull the cable diagonally from high to low across your body",
+      "Control the return to the starting position"
+    ]
+  },
+  {
+    "name": "Cable Woodchop (Low to High)",
+    "aliases": [
+      "Low-to-High Woodchop"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set a cable to the lowest position with a rope or handle",
+      "Stand sideways to the machine and grip with both hands",
+      "Pull the cable diagonally from low to high across your body",
+      "Control the return to the starting position"
+    ]
+  },
+  {
+    "name": "Dumbbell Side Bend",
+    "aliases": [
+      "Side Bend"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand holding a dumbbell in one hand at your side",
+      "Bend sideways toward the weight, then contract your obliques to return upright",
+      "Complete all reps on one side before switching"
+    ]
+  },
+  {
+    "name": "Windshield Wiper",
+    "aliases": [
+      "Windshield Wipers"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on your back with arms extended to the sides for support",
+      "Raise your legs perpendicular to the floor",
+      "Rotate your legs from side to side like a windshield wiper",
+      "Keep your shoulders pressed into the floor"
+    ]
+  },
+  {
+    "name": "Ab Rollout",
+    "aliases": [
+      "Ab Wheel Rollout"
+    ],
+    "equipment": "other",
+    "movement_pattern": "isolation",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Kneel with ab wheel or barbell in front",
+      "Roll forward extending body",
+      "Use abs to pull back to starting position"
+    ]
+  },
+  {
+    "name": "Plank",
+    "aliases": [
+      "Front Plank"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "isolation",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Support body on forearms and toes",
+      "Keep body in straight line",
+      "Hold for prescribed time"
+    ]
+  },
+  {
     "name": "Side Plank",
     "aliases": [],
     "equipment": "bodyweight",
@@ -1696,6 +4568,172 @@
     ]
   },
   {
+    "name": "Hollow Hold",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with arms extended overhead and legs straight",
+      "Lift your shoulders and legs off the floor, forming a slight banana shape",
+      "Press your lower back into the floor and hold",
+      "Maintain the position for the prescribed duration"
+    ]
+  },
+  {
+    "name": "Body Saw",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in a forearm plank with feet on sliders or a towel",
+      "Shift your body forward and backward by moving through your shoulders",
+      "Maintain a rigid plank position throughout",
+      "Keep your core braced"
+    ]
+  },
+  {
+    "name": "Stir the Pot",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place your forearms on a stability ball in a plank position",
+      "Make small circles with your forearms, moving the ball",
+      "Alternate clockwise and counterclockwise",
+      "Keep your core tight and hips level"
+    ]
+  },
+  {
+    "name": "Weighted Plank",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Set up in a forearm plank position",
+      "Have a partner place a weight plate on your upper back",
+      "Hold the position for the prescribed duration",
+      "Keep your body in a straight line"
+    ]
+  },
+  {
+    "name": "Bird Dog",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips",
+      "Simultaneously extend one arm forward and the opposite leg backward",
+      "Hold briefly at full extension",
+      "Return to starting position and alternate sides"
+    ]
+  },
+  {
+    "name": "Bear Crawl",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start on all fours with knees hovering just above the floor",
+      "Move forward by stepping opposite hand and foot simultaneously",
+      "Keep your hips low and core braced",
+      "Maintain a flat back throughout"
+    ]
+  },
+  {
+    "name": "Neck Curl",
+    "aliases": [
+      "Neck Flexion"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face up on a bench with your head hanging off the end",
+      "Place a light plate or towel on your forehead for resistance",
+      "Curl your chin toward your chest by flexing your neck",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Neck Extension",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down on a bench with your head hanging off the end",
+      "Place a light plate on the back of your head for resistance",
+      "Extend your neck upward, raising your head",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Neck Lateral Flexion",
+    "aliases": [
+      "Neck Side Raise"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand or sit and place your hand against the side of your head",
+      "Press your head sideways against your hand's resistance",
+      "Perform slowly and with control",
+      "Complete all reps on one side before switching"
+    ]
+  },
+  {
+    "name": "Neck Harness Extension",
+    "aliases": [
+      "Neck Harness"
+    ],
+    "equipment": "other",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Wear a neck harness with weight attached",
+      "Bend forward at the waist and let your head hang down",
+      "Extend your neck to raise your head upward against the weight",
+      "Lower with control"
+    ]
+  },
+  {
     "name": "Deadlift",
     "aliases": [
       "Conventional Deadlift",
@@ -1712,6 +4750,51 @@
       "Hinge at hips and grip bar",
       "Drive through floor extending hips and knees simultaneously",
       "Stand fully upright then lower with control"
+    ]
+  },
+  {
+    "name": "Sumo Deadlift",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with wide stance, toes pointed out",
+      "Grip bar inside knees",
+      "Drive through heels and extend hips to stand",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Deficit Deadlift",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on a small platform or plates",
+      "Perform conventional deadlift with increased range of motion"
+    ]
+  },
+  {
+    "name": "Snatch-Grip Deadlift",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Take a very wide grip on the bar",
+      "Perform a deadlift with increased upper back demand",
+      "Stand fully upright"
     ]
   },
   {
@@ -1733,7 +4816,7 @@
     ]
   },
   {
-    "name": "Deficit Deadlift",
+    "name": "Jefferson Deadlift",
     "aliases": [],
     "equipment": "barbell",
     "movement_pattern": "hinge",
@@ -1742,8 +4825,26 @@
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Stand on a small platform or plates",
-      "Perform conventional deadlift with increased range of motion"
+      "Straddle a barbell with one foot in front and one behind",
+      "Grip the bar with one hand in front and one behind",
+      "Stand up by extending your hips and knees",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Suitcase Deadlift",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand beside a barbell or dumbbell on the floor",
+      "Grip the weight with one hand like picking up a suitcase",
+      "Stand up by extending hips and knees, keeping your torso upright",
+      "Lower with control"
     ]
   },
   {
@@ -1783,9 +4884,170 @@
     ]
   },
   {
-    "name": "Kettlebell Swing",
+    "name": "Snatch",
     "aliases": [
-      "KB Swing"
+      "Barbell Snatch"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand over a barbell with a wide grip",
+      "Pull the bar explosively from the floor to overhead in one motion",
+      "Receive the bar in an overhead squat position",
+      "Stand up to complete the lift"
+    ]
+  },
+  {
+    "name": "Clean",
+    "aliases": [
+      "Barbell Clean"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand over a barbell with a shoulder-width grip",
+      "Pull the bar explosively from the floor to the front rack position",
+      "Receive the bar on your shoulders with elbows high",
+      "Stand up to complete the lift"
+    ]
+  },
+  {
+    "name": "Hang Clean",
+    "aliases": [
+      "Barbell Hang Clean"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell at hip height in a standing position",
+      "Hinge slightly then explosively pull the bar to the front rack",
+      "Receive the bar on your shoulders with elbows high",
+      "Stand up to complete the lift"
+    ]
+  },
+  {
+    "name": "Hang Snatch",
+    "aliases": [
+      "Barbell Hang Snatch"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell at hip height with a wide snatch grip",
+      "Hinge slightly then explosively pull the bar overhead",
+      "Receive in an overhead squat position",
+      "Stand up to complete the lift"
+    ]
+  },
+  {
+    "name": "Clean and Jerk",
+    "aliases": [
+      "Barbell Clean and Jerk",
+      "C&J"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Clean the barbell to your shoulders from the floor",
+      "Dip your knees and drive the bar overhead with a split or push jerk",
+      "Lock out the bar overhead and bring feet together",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Push Jerk",
+    "aliases": [
+      "Barbell Push Jerk"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell in the front rack position at your shoulders",
+      "Dip your knees and explosively drive the bar overhead",
+      "Receive the bar with a slight re-bend of the knees",
+      "Stand up to lockout"
+    ]
+  },
+  {
+    "name": "Muscle Snatch",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a barbell with a wide snatch grip at hip height",
+      "Pull the bar overhead in a strict pressing motion without dropping under",
+      "Keep the bar close to your body throughout",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Dumbbell Snatch",
+    "aliases": [
+      "DB Snatch"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand over a dumbbell on the floor with one hand",
+      "Pull it explosively from the floor to overhead in one motion",
+      "Lock out your arm at the top",
+      "Lower with control and alternate sides"
+    ]
+  },
+  {
+    "name": "Dumbbell Clean and Press",
+    "aliases": [
+      "DB Clean and Press"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand holding dumbbells at your sides",
+      "Clean the dumbbells to your shoulders with a hip drive",
+      "Press them overhead to full lockout",
+      "Lower with control back to your sides"
+    ]
+  },
+  {
+    "name": "Kettlebell Snatch",
+    "aliases": [
+      "KB Snatch"
     ],
     "equipment": "kettlebell",
     "movement_pattern": "hinge",
@@ -1794,10 +5056,28 @@
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Stand with feet wider than shoulders",
-      "Hinge at hips and swing kettlebell between legs",
-      "Drive hips forward swinging bell to chest height",
-      "Let gravity return bell and repeat"
+      "Stand with a kettlebell between your feet",
+      "Swing the kettlebell back between your legs then explosively drive it overhead",
+      "Lock out at the top with arm fully extended",
+      "Lower with control in one fluid motion"
+    ]
+  },
+  {
+    "name": "Kettlebell Clean",
+    "aliases": [
+      "KB Clean"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with a kettlebell between your feet",
+      "Swing it back then explosively pull to the rack position at your shoulder",
+      "The kettlebell should rest on the back of your forearm",
+      "Lower with control"
     ]
   },
   {
@@ -1835,165 +5115,20 @@
     ]
   },
   {
-    "name": "Dumbbell Pullover",
+    "name": "Sled Push",
     "aliases": [
-      "Pullover"
+      "Prowler Push"
     ],
-    "equipment": "dumbbell",
-    "movement_pattern": "pull",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Lie across bench with dumbbell held over chest",
-      "Lower dumbbell behind head with slight elbow bend",
-      "Pull back over chest using lats and chest"
-    ]
-  },
-  {
-    "name": "Machine Lateral Raise",
-    "aliases": [],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
+    "equipment": "other",
+    "movement_pattern": "other",
     "force_type": "push",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit in machine with pads against outer arms",
-      "Raise arms out to sides",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Machine Preacher Curl",
-    "aliases": [],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit at preacher curl machine",
-      "Curl handle up squeezing biceps",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Cable Hip Abduction",
-    "aliases": [
-      "Cable Side Leg Raise"
-    ],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": false,
-    "instructions": [
-      "Attach ankle cuff to low cable",
-      "Stand sideways and raise leg out to side",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Sumo Squat",
-    "aliases": [
-      "Dumbbell Sumo Squat"
-    ],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
+    "body_region": "full",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Stand with wide stance holding dumbbell between legs",
-      "Squat down keeping torso upright",
-      "Drive up through heels"
-    ]
-  },
-  {
-    "name": "Barbell Lunge",
-    "aliases": [
-      "Forward Lunge"
-    ],
-    "equipment": "barbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": true,
-    "instructions": [
-      "Position barbell on upper back",
-      "Step forward into lunge",
-      "Lower until back knee nearly touches floor",
-      "Push back to standing"
-    ]
-  },
-  {
-    "name": "Pendulum Squat",
-    "aliases": [],
-    "equipment": "machine",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Stand on pendulum squat machine platform",
-      "Squat down maintaining upright torso",
-      "Drive back up"
-    ]
-  },
-  {
-    "name": "Sissy Squat",
-    "aliases": [],
-    "equipment": "bodyweight",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Stand holding a support for balance",
-      "Lean back and bend knees forward",
-      "Lower until deep stretch in quads",
-      "Return to standing"
-    ]
-  },
-  {
-    "name": "Donkey Calf Raise",
-    "aliases": [],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Bend at hips on donkey calf machine",
-      "Rise up on toes as high as possible",
-      "Lower for full stretch"
-    ]
-  },
-  {
-    "name": "Toes-to-Bar",
-    "aliases": [
-      "T2B"
-    ],
-    "equipment": "bodyweight",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Hang from pull-up bar",
-      "Raise feet up to touch the bar",
-      "Lower with control"
+      "Grip sled handles at desired height",
+      "Drive through legs pushing sled forward",
+      "Maintain forward lean"
     ]
   },
   {
@@ -2014,10 +5149,24 @@
     ]
   },
   {
-    "name": "Sled Push",
-    "aliases": [
-      "Prowler Push"
-    ],
+    "name": "Sled Pull",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a rope or straps to a loaded sled",
+      "Walk backward or pull the sled toward you hand over hand",
+      "Keep your core braced and maintain a low stance",
+      "Reset and repeat for prescribed distance or reps"
+    ]
+  },
+  {
+    "name": "Tire Flip",
+    "aliases": [],
     "equipment": "other",
     "movement_pattern": "other",
     "force_type": "push",
@@ -2025,9 +5174,222 @@
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Grip sled handles at desired height",
-      "Drive through legs pushing sled forward",
-      "Maintain forward lean"
+      "Squat down and grip the bottom edge of a heavy tire",
+      "Drive up with your legs and hips to lift the tire",
+      "As it rises, transition to pushing with your hands",
+      "Flip the tire over and repeat"
+    ]
+  },
+  {
+    "name": "Yoke Walk",
+    "aliases": [
+      "Yoke Carry"
+    ],
+    "equipment": "other",
+    "movement_pattern": "carry",
+    "force_type": "static",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Step under a loaded yoke and position the bar on your upper back",
+      "Stand up and walk forward with controlled steps",
+      "Keep your core braced and take short, quick steps",
+      "Walk for the prescribed distance"
+    ]
+  },
+  {
+    "name": "Trap Bar Carry",
+    "aliases": [
+      "Trap Bar Walk"
+    ],
+    "equipment": "other",
+    "movement_pattern": "carry",
+    "force_type": "static",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand inside a loaded trap bar and deadlift it up",
+      "Walk forward with controlled steps holding the bar at your sides",
+      "Keep your core braced and shoulders back",
+      "Walk for the prescribed distance"
+    ]
+  },
+  {
+    "name": "Kettlebell Goblet Squat",
+    "aliases": [
+      "KB Goblet Squat"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a kettlebell by the horns at chest height",
+      "Squat down until thighs are parallel or deeper",
+      "Keep your elbows inside your knees and chest up",
+      "Drive through your heels to stand"
+    ]
+  },
+  {
+    "name": "Kettlebell Press",
+    "aliases": [
+      "KB Press"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Clean a kettlebell to the rack position at your shoulder",
+      "Press it overhead to full lockout",
+      "Lower with control back to the rack position"
+    ]
+  },
+  {
+    "name": "Kettlebell Row",
+    "aliases": [
+      "KB Row"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hinge at the hips holding a kettlebell in one hand",
+      "Row the kettlebell to your hip, squeezing your back",
+      "Lower with control",
+      "Complete all reps before switching sides"
+    ]
+  },
+  {
+    "name": "Kettlebell Deadlift",
+    "aliases": [
+      "KB Deadlift"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with a kettlebell between your feet",
+      "Hinge at the hips and grip the handle with both hands",
+      "Stand up by driving your hips forward",
+      "Lower with control by hinging back"
+    ]
+  },
+  {
+    "name": "Kettlebell Thruster",
+    "aliases": [
+      "KB Thruster"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold two kettlebells in the rack position at your shoulders",
+      "Squat down, then drive up explosively and press overhead",
+      "Lower the kettlebells back to the rack and descend into the next squat"
+    ]
+  },
+  {
+    "name": "Kettlebell High Pull",
+    "aliases": [
+      "KB High Pull"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with a kettlebell between your feet",
+      "Swing it back, then explosively pull it up to chin height with elbows high",
+      "Lower with control in one fluid motion"
+    ]
+  },
+  {
+    "name": "Kettlebell Windmill",
+    "aliases": [
+      "KB Windmill"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Press a kettlebell overhead with one arm locked out",
+      "Slowly hinge at the hip, reaching your free hand toward your foot",
+      "Keep your eyes on the kettlebell and arm locked throughout",
+      "Return to standing"
+    ]
+  },
+  {
+    "name": "Kettlebell Halo",
+    "aliases": [
+      "KB Halo"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold a kettlebell upside down by the horns at chest height",
+      "Circle it around your head in one direction",
+      "Keep the kettlebell close to your head",
+      "Alternate directions each set"
+    ]
+  },
+  {
+    "name": "Double Kettlebell Swing",
+    "aliases": [
+      "Double KB Swing"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with two kettlebells between your feet",
+      "Hinge and swing both kettlebells back between your legs",
+      "Drive your hips forward explosively to swing them to chest height",
+      "Let them swing back and repeat"
+    ]
+  },
+  {
+    "name": "Kettlebell Sumo Squat",
+    "aliases": [
+      "KB Sumo Squat"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with a wide stance holding a kettlebell between your legs",
+      "Squat down, keeping the kettlebell hanging between your legs",
+      "Drive through your heels to stand back up"
     ]
   },
   {
@@ -2049,266 +5411,1200 @@
     ]
   },
   {
-    "name": "Smith Machine Bench Press",
+    "name": "Broad Jump",
+    "aliases": [
+      "Standing Long Jump"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Swing your arms back and bend your knees",
+      "Jump forward as far as possible, landing softly on both feet",
+      "Reset and repeat"
+    ]
+  },
+  {
+    "name": "Depth Jump",
     "aliases": [],
-    "equipment": "machine",
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on a box or platform",
+      "Step off the box and land on both feet",
+      "Immediately jump as high as possible upon landing",
+      "Focus on minimizing ground contact time"
+    ]
+  },
+  {
+    "name": "Jump Lunge",
+    "aliases": [
+      "Jumping Lunge",
+      "Plyometric Lunge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in a lunge position",
+      "Jump explosively and switch legs in the air",
+      "Land softly in a lunge position with the opposite leg forward",
+      "Continue alternating"
+    ]
+  },
+  {
+    "name": "Lateral Bound",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one leg",
+      "Jump laterally to the opposite foot, landing softly",
+      "Immediately bound back to the starting side",
+      "Focus on distance and soft landings"
+    ]
+  },
+  {
+    "name": "Skater Jump",
+    "aliases": [
+      "Skater"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one leg",
+      "Jump laterally to the opposite foot, swinging your arms across",
+      "Land softly and hold briefly for balance",
+      "Jump back to the other side"
+    ]
+  },
+  {
+    "name": "Tuck Jump",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Jump explosively and tuck your knees to your chest at the peak",
+      "Extend your legs and land softly",
+      "Reset and repeat"
+    ]
+  },
+  {
+    "name": "Single-Leg Box Jump",
+    "aliases": [
+      "One-Leg Box Jump"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one leg facing a box",
+      "Jump off that leg and land on top of the box",
+      "Step back down and repeat",
+      "Complete all reps before switching legs"
+    ]
+  },
+  {
+    "name": "Hurdle Hop",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set up a series of small hurdles or cones",
+      "Jump over each hurdle with both feet, landing softly",
+      "Minimize ground contact time between hurdles",
+      "Focus on height and quick rebounds"
+    ]
+  },
+  {
+    "name": "Plyo Push-Up",
+    "aliases": [
+      "Plyometric Push-Up",
+      "Clap Push-Up"
+    ],
+    "equipment": "bodyweight",
     "movement_pattern": "push",
     "force_type": "push",
     "body_region": "upper",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Lie on bench under Smith machine bar",
-      "Unrack and lower bar to chest",
-      "Press up to full extension"
+      "Start in a push-up position",
+      "Lower yourself to the floor then push up explosively",
+      "Your hands should leave the floor at the top",
+      "Land softly and immediately descend into the next rep"
     ]
   },
   {
-    "name": "Low Cable Fly",
+    "name": "Medicine Ball Slam",
     "aliases": [
-      "Low to High Cable Fly"
+      "Med Ball Slam"
     ],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
+    "equipment": "other",
+    "movement_pattern": "other",
     "force_type": "push",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Set cable pulleys low",
-      "Step forward and bring handles up and together",
-      "Squeeze upper chest at top"
-    ]
-  },
-  {
-    "name": "Bayesian Cable Curl",
-    "aliases": [],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "unilateral",
-    "is_compound": false,
-    "instructions": [
-      "Face away from low cable holding handle",
-      "Arm starts behind body for full stretch",
-      "Curl forward squeezing bicep at top"
-    ]
-  },
-  {
-    "name": "Incline Hammer Curl",
-    "aliases": [],
-    "equipment": "dumbbell",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit on incline bench with dumbbells hanging",
-      "Curl with neutral grip keeping upper arms stationary",
-      "Lower with control"
-    ]
-  },
-  {
-    "name": "Single-Arm Cable Pushdown",
-    "aliases": [],
-    "equipment": "cable",
-    "movement_pattern": "isolation",
-    "force_type": "push",
-    "body_region": "upper",
-    "laterality": "unilateral",
-    "is_compound": false,
-    "instructions": [
-      "Stand at high cable with single handle",
-      "Push down extending elbow fully",
-      "Return with control"
-    ]
-  },
-  {
-    "name": "Machine Dip",
-    "aliases": [
-      "Assisted Dip Machine"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "push",
-    "force_type": "push",
-    "body_region": "upper",
+    "body_region": "full",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Sit in dip machine and grip handles",
-      "Press down extending arms",
-      "Return with control"
+      "Hold a medicine ball overhead with both hands",
+      "Slam it down to the floor as hard as possible",
+      "Squat down to pick it up",
+      "Return to starting position and repeat"
     ]
   },
   {
-    "name": "Reverse Pec Deck",
+    "name": "Medicine Ball Chest Pass",
     "aliases": [
-      "Machine Reverse Fly"
+      "Med Ball Chest Pass"
     ],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "upper",
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
     "laterality": "bilateral",
-    "is_compound": false,
+    "is_compound": true,
     "instructions": [
-      "Sit facing the pec deck machine",
-      "Grip handles with arms extended forward",
-      "Open arms squeezing rear delts",
-      "Return with control"
+      "Hold a medicine ball at chest height",
+      "Explosively push the ball forward to a partner or wall",
+      "Catch the return and repeat",
+      "Focus on chest and arm power"
     ]
   },
   {
-    "name": "Meadows Row",
+    "name": "Medicine Ball Rotational Throw",
     "aliases": [
-      "Landmine Meadows Row"
+      "Med Ball Rotational Throw"
     ],
-    "equipment": "barbell",
+    "equipment": "other",
     "movement_pattern": "pull",
     "force_type": "pull",
     "body_region": "upper",
-    "laterality": "unilateral",
-    "is_compound": true,
+    "laterality": "bilateral",
+    "is_compound": false,
     "instructions": [
-      "Stand perpendicular to landmine bar",
-      "Hinge at hips and grip end of bar",
-      "Row bar to hip",
-      "Lower with control"
+      "Stand sideways to a wall holding a medicine ball at hip height",
+      "Rotate your core and throw the ball against the wall",
+      "Catch the rebound and rotate back",
+      "Complete all reps on one side before switching"
     ]
   },
   {
-    "name": "Snatch-Grip Deadlift",
+    "name": "Wall Ball",
+    "aliases": [
+      "Wall Ball Shot"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a medicine ball at chest height facing a wall",
+      "Squat down, then drive up and throw the ball to a target on the wall",
+      "Catch the ball as it comes down and descend into the next squat"
+    ]
+  },
+  {
+    "name": "Box Jump (Step Down)",
+    "aliases": [
+      "Step-Down Box Jump"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand facing a box with feet shoulder-width apart",
+      "Jump onto the box landing softly with both feet",
+      "Step down one foot at a time instead of jumping down",
+      "Reset and repeat"
+    ]
+  },
+  {
+    "name": "Rowing Machine",
+    "aliases": [
+      "Erg",
+      "Rower"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the rowing machine and strap your feet in",
+      "Grab the handle, drive with your legs first",
+      "Follow through by leaning back slightly and pulling to your chest",
+      "Return in reverse order: arms, body, legs"
+    ]
+  },
+  {
+    "name": "Assault Bike",
+    "aliases": [
+      "Air Bike",
+      "Fan Bike"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the bike and grip the handles",
+      "Push and pull with your arms while pedaling with your legs",
+      "Maintain a consistent pace or follow prescribed intervals"
+    ]
+  },
+  {
+    "name": "Ski Erg",
+    "aliases": [
+      "SkiErg"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand facing the Ski Erg and grip the handles overhead",
+      "Pull the handles down by hinging at the hips and driving with your arms",
+      "Return to the starting position and repeat in a rhythmic motion"
+    ]
+  },
+  {
+    "name": "Stair Climber",
+    "aliases": [
+      "Stair Master",
+      "StairMaster"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on the stair climber and grip the handles lightly",
+      "Step at a steady pace, driving through each foot",
+      "Maintain an upright posture and avoid leaning on the handles"
+    ]
+  },
+  {
+    "name": "Jump Rope",
+    "aliases": [
+      "Skipping"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold the rope handles at hip height with elbows close to your body",
+      "Swing the rope overhead and jump over it with both feet",
+      "Stay on the balls of your feet with small, quick jumps",
+      "Maintain a consistent rhythm"
+    ]
+  },
+  {
+    "name": "Burpee",
     "aliases": [],
-    "equipment": "barbell",
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart",
+      "Drop into a squat, place hands on the floor, and kick feet back to a push-up position",
+      "Perform a push-up, jump feet back to hands",
+      "Explode up into a jump with arms overhead"
+    ]
+  },
+  {
+    "name": "Mountain Climber",
+    "aliases": [
+      "Mountain Climbers"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Start in a push-up position with core tight",
+      "Drive one knee toward your chest",
+      "Quickly switch legs, driving the other knee forward",
+      "Continue alternating at a fast pace"
+    ]
+  },
+  {
+    "name": "Sprint",
+    "aliases": [
+      "Sprints"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set up at a starting line or on a track",
+      "Drive out of the start with powerful arm and leg action",
+      "Run at maximum effort for the prescribed distance",
+      "Decelerate gradually and walk back for recovery"
+    ]
+  },
+  {
+    "name": "Sled Drag",
+    "aliases": [
+      "Sled Backward Drag"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a strap to a loaded sled and hold the handles",
+      "Walk backward dragging the sled behind you",
+      "Maintain a low stance with core braced",
+      "Cover the prescribed distance"
+    ]
+  },
+  {
+    "name": "Foam Roll Quads",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie face down with a foam roller under your thighs",
+      "Roll slowly from hip to just above the knee",
+      "Pause on any tender spots for 20-30 seconds",
+      "Use your arms to control the pressure"
+    ]
+  },
+  {
+    "name": "Foam Roll IT Band",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your side with a foam roller under your outer thigh",
+      "Roll from hip to just above the knee",
+      "Pause on any tender spots for 20-30 seconds",
+      "Use your top leg to control the pressure"
+    ]
+  },
+  {
+    "name": "Foam Roll Lats",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your side with a foam roller under your armpit area",
+      "Roll along the length of your lat from armpit to mid-back",
+      "Pause on any tender spots for 20-30 seconds"
+    ]
+  },
+  {
+    "name": "Foam Roll Thoracic Spine",
+    "aliases": [
+      "Foam Roll T-Spine"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Lie on your back with a foam roller under your upper back",
+      "Cross your arms over your chest or behind your head",
+      "Roll from mid-back to upper back",
+      "Extend over the roller to mobilize the thoracic spine"
+    ]
+  },
+  {
+    "name": "Foam Roll Hamstrings",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit with a foam roller under your thighs",
+      "Roll from just below the glutes to above the knee",
+      "Pause on any tender spots for 20-30 seconds",
+      "Cross one leg over the other for more pressure"
+    ]
+  },
+  {
+    "name": "Foam Roll Calves",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit with a foam roller under your calves",
+      "Roll from ankle to just below the knee",
+      "Pause on any tender spots for 20-30 seconds",
+      "Cross one leg over the other for more pressure"
+    ]
+  },
+  {
+    "name": "Foam Roll Glutes",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit on a foam roller with one ankle crossed over the opposite knee",
+      "Lean toward the crossed side and roll over the glute",
+      "Pause on any tender spots for 20-30 seconds"
+    ]
+  },
+  {
+    "name": "Hip 90/90 Stretch",
+    "aliases": [
+      "90/90 Stretch"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit on the floor with one leg bent at 90 degrees in front and the other at 90 degrees behind",
+      "Keep your torso upright and lean forward over the front shin",
+      "Hold the stretch, then switch sides",
+      "Focus on opening through the hip"
+    ]
+  },
+  {
+    "name": "World's Greatest Stretch",
+    "aliases": [
+      "WGS"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Step into a deep lunge position",
+      "Place the hand opposite the front foot on the floor",
+      "Rotate your torso and reach the other arm toward the ceiling",
+      "Hold briefly, then switch sides"
+    ]
+  },
+  {
+    "name": "Cat-Cow",
+    "aliases": [
+      "Cat Cow"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips",
+      "Arch your back downward while lifting your head and tailbone (cow)",
+      "Round your back upward while tucking your chin and tailbone (cat)",
+      "Alternate slowly between positions"
+    ]
+  },
+  {
+    "name": "Banded Face Pull",
+    "aliases": [
+      "Band Face Pull"
+    ],
+    "equipment": "band",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a band at face height",
+      "Pull the band apart toward your face with elbows high",
+      "Squeeze your rear delts and upper back at full contraction",
+      "Return with control"
+    ]
+  },
+  {
+    "name": "Banded Lateral Walk",
+    "aliases": [
+      "Band Lateral Walk",
+      "Monster Walk"
+    ],
+    "equipment": "band",
+    "movement_pattern": "carry",
+    "force_type": "static",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Place a band around your ankles or above your knees",
+      "Stand in a quarter-squat position",
+      "Step sideways maintaining tension in the band",
+      "Complete prescribed steps in one direction, then return"
+    ]
+  },
+  {
+    "name": "Banded Squat",
+    "aliases": [
+      "Band Squat"
+    ],
+    "equipment": "band",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Loop a band under your feet and over your shoulders or hold at chest height",
+      "Squat down against the band's resistance",
+      "Drive up to standing"
+    ]
+  },
+  {
+    "name": "Banded Deadlift",
+    "aliases": [
+      "Band Deadlift"
+    ],
+    "equipment": "band",
     "movement_pattern": "hinge",
     "force_type": "pull",
     "body_region": "full",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Take a very wide grip on the bar",
-      "Perform a deadlift with increased upper back demand",
-      "Stand fully upright"
+      "Loop a band under your feet and over your hips or hold with hands",
+      "Hinge at the hips and slightly bend knees to lower",
+      "Drive hips forward to standing against band resistance"
     ]
   },
   {
-    "name": "Zercher Squat",
+    "name": "Banded Push-Up",
+    "aliases": [
+      "Band Push-Up"
+    ],
+    "equipment": "band",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Loop a resistance band across your upper back and hold the ends under your hands",
+      "Perform push-ups with the added band resistance at the top",
+      "Lower with control and press up against the band"
+    ]
+  },
+  {
+    "name": "Banded Row",
+    "aliases": [
+      "Band Row"
+    ],
+    "equipment": "band",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Attach a band to a fixed point at chest height",
+      "Pull the band toward your torso, squeezing your shoulder blades",
+      "Return with control to full arm extension"
+    ]
+  },
+  {
+    "name": "Dumbbell Squeeze Press",
+    "aliases": [
+      "Squeeze Press"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a flat bench pressing two dumbbells together with a neutral grip",
+      "Keep the dumbbells squeezed together throughout the movement",
+      "Press up to full extension maintaining inward pressure",
+      "Lower to chest while keeping dumbbells in contact"
+    ]
+  },
+  {
+    "name": "Behind-the-Neck Lat Pulldown",
+    "aliases": [
+      "BTN Pulldown"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit at a lat pulldown station with a wide grip",
+      "Pull the bar down behind your head to neck level",
+      "Control the return to full extension",
+      "Use lighter weight and ensure adequate shoulder mobility"
+    ]
+  },
+  {
+    "name": "Prone Row",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie face down on an incline bench with arms hanging down",
+      "Hold dumbbells or a barbell and row up toward the bench",
+      "Squeeze your shoulder blades at the top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Viking Press",
+    "aliases": [
+      "Landmine Viking Press"
+    ],
+    "equipment": "other",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set up landmine handles or a Viking press attachment",
+      "Stand or kneel between the handles at shoulder height",
+      "Press both handles overhead to full lockout",
+      "Lower with control to shoulders"
+    ]
+  },
+  {
+    "name": "Smith Machine Shoulder Press",
+    "aliases": [
+      "Smith Shoulder Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on a bench inside the Smith machine with the bar at shoulder height",
+      "Grip the bar slightly wider than shoulder-width",
+      "Press up to full lockout",
+      "Lower with control back to shoulders"
+    ]
+  },
+  {
+    "name": "Lateral Raise (Cable, Behind Back)",
+    "aliases": [
+      "Behind-Back Cable Lateral Raise"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Stand sideways to a low cable with the handle behind your back",
+      "Grip the handle with the far hand reaching behind you",
+      "Raise your arm out to the side to shoulder height",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "21s (Barbell Curl)",
+    "aliases": [
+      "21s",
+      "7-7-7 Curl"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Hold a barbell with an underhand grip",
+      "Perform 7 reps from the bottom to halfway up",
+      "Then 7 reps from halfway to the top",
+      "Finish with 7 full range-of-motion reps"
+    ]
+  },
+  {
+    "name": "EZ-Bar Preacher Curl",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit at a preacher bench with armpits resting on the pad",
+      "Hold an EZ-bar with an underhand grip",
+      "Curl the bar up toward your shoulders",
+      "Lower with control to full extension"
+    ]
+  },
+  {
+    "name": "Cable Concentration Curl",
+    "aliases": [],
+    "equipment": "cable",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": false,
+    "instructions": [
+      "Sit on a bench with a low cable to one side",
+      "Rest your elbow on the inside of your thigh",
+      "Curl the cable handle toward your shoulder",
+      "Lower with control and complete all reps before switching"
+    ]
+  },
+  {
+    "name": "French Press (EZ-Bar)",
+    "aliases": [
+      "EZ-Bar French Press",
+      "EZ-Bar Overhead Extension"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand or sit holding an EZ-bar overhead with arms extended",
+      "Lower the bar behind your head by bending at the elbows",
+      "Keep your upper arms close to your head",
+      "Extend back to the starting position"
+    ]
+  },
+  {
+    "name": "Jefferson Squat",
     "aliases": [],
     "equipment": "barbell",
     "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Straddle a barbell with one foot in front and one behind",
+      "Grip the bar with one hand in front and one behind",
+      "Squat down and stand back up keeping your torso upright",
+      "Alternate which foot is forward between sets"
+    ]
+  },
+  {
+    "name": "Hatfield Squat",
+    "aliases": [],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Set up a safety squat bar on your back",
+      "Lightly hold the rack or safety handles in front for balance",
+      "Squat down to depth while using your hands for minimal support",
+      "Drive up to standing"
+    ]
+  },
+  {
+    "name": "ATG Split Squat",
+    "aliases": [
+      "ATG Lunge"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand in a split squat position with one foot elevated behind",
+      "Lower your back knee all the way to the floor (ass to grass depth)",
+      "Drive through the front foot to return to standing",
+      "Focus on full range of motion through the knee"
+    ]
+  },
+  {
+    "name": "Poliquin Step-Up",
+    "aliases": [
+      "Peterson Step-Up"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand on one foot on a 4-6 inch step",
+      "Let the other foot hang off the side",
+      "Lower the hanging foot by bending the working knee",
+      "Return to standing, focusing on the VMO (inner quad)"
+    ]
+  },
+  {
+    "name": "Sled Leg Press (Vertical)",
+    "aliases": [
+      "Vertical Leg Press"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push",
+    "force_type": "push",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit in a vertical leg press machine with feet on the platform",
+      "Lower the sled by bending your knees to 90 degrees",
+      "Press the sled up to full extension",
+      "Do not lock out your knees fully"
+    ]
+  },
+  {
+    "name": "45-Degree Hip Extension",
+    "aliases": [
+      "45-Degree Hip Extension Machine"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Position yourself face down on a 45-degree hip extension machine",
+      "Cross arms over chest or behind your head",
+      "Lower your torso by hinging at the hips",
+      "Raise back up by squeezing your glutes until body is in line with legs"
+    ]
+  },
+  {
+    "name": "Banded Hip Thrust",
+    "aliases": [
+      "Band Hip Thrust"
+    ],
+    "equipment": "band",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Sit on the floor with upper back against a bench and a band across your hips",
+      "Anchor the band under your feet on each side",
+      "Drive your hips up toward the ceiling, squeezing glutes at the top",
+      "Lower with control"
+    ]
+  },
+  {
+    "name": "Smith Machine Lunge",
+    "aliases": [],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "force_type": "pull",
+    "body_region": "lower",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand under a Smith machine bar with the bar on your upper back",
+      "Step one foot forward into a lunge position",
+      "Lower your back knee toward the floor",
+      "Drive through the front foot to return to standing"
+    ]
+  },
+  {
+    "name": "Dragon Flag",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Lie on a bench and grip the edges behind your head",
+      "Raise your entire body off the bench until only your upper back/shoulders remain on the bench",
+      "Lower your body slowly as one rigid unit",
+      "Do not let your hips bend or sag"
+    ]
+  },
+  {
+    "name": "L-Sit",
+    "aliases": [
+      "L Sit"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Support yourself on parallel bars or dip handles with arms straight",
+      "Raise your legs until they are parallel to the floor",
+      "Hold the position with legs straight and core engaged",
+      "Maintain for the prescribed duration"
+    ]
+  },
+  {
+    "name": "Suitcase Carry",
+    "aliases": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "carry",
+    "force_type": "static",
+    "body_region": "upper",
+    "laterality": "unilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hold a heavy dumbbell or kettlebell in one hand at your side",
+      "Walk forward maintaining an upright posture",
+      "Resist leaning to the weighted side",
+      "Walk for the prescribed distance, then switch hands"
+    ]
+  },
+  {
+    "name": "Ab Wheel (Kneeling)",
+    "aliases": [
+      "Kneeling Ab Wheel",
+      "Ab Wheel Rollout"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Kneel on the floor holding an ab wheel in front of you",
+      "Roll the wheel forward, extending your body toward the floor",
+      "Go as far as you can without your body touching the floor",
+      "Use your abs to pull yourself back to the starting position"
+    ]
+  },
+  {
+    "name": "Hanging Windshield Wiper",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "other",
+    "force_type": "pull",
+    "body_region": "upper",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Hang from a pull-up bar and raise your legs up",
+      "Rotate your legs from side to side like a windshield wiper",
+      "Keep the movement controlled and your shoulders stable",
+      "Alternate sides"
+    ]
+  },
+  {
+    "name": "Man Maker",
+    "aliases": [
+      "Manmaker"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "other",
     "force_type": "push",
     "body_region": "full",
     "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Hold barbell in crook of elbows",
-      "Squat down keeping torso upright",
-      "Drive up through heels"
+      "Start in a push-up position gripping two dumbbells",
+      "Perform a push-up, then row each dumbbell",
+      "Jump your feet to your hands and clean the dumbbells to your shoulders",
+      "Press overhead, then lower and repeat"
     ]
   },
   {
-    "name": "Hip Abductor Machine",
-    "aliases": [
-      "Abductor Machine"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit in machine with pads against outer thighs",
-      "Push legs apart against resistance",
-      "Return with control"
-    ]
-  },
-  {
-    "name": "Hip Adductor Machine",
-    "aliases": [
-      "Adductor Machine"
-    ],
-    "equipment": "machine",
-    "movement_pattern": "isolation",
-    "force_type": "pull",
-    "body_region": "lower",
-    "laterality": "bilateral",
-    "is_compound": false,
-    "instructions": [
-      "Sit in machine with pads against inner thighs",
-      "Squeeze legs together against resistance",
-      "Return with control"
-    ]
-  },
-  {
-    "name": "Lat Pulldown (Close Grip)",
-    "aliases": [
-      "Close-Grip Pulldown",
-      "V-Bar Pulldown"
-    ],
-    "equipment": "cable",
-    "movement_pattern": "pull",
-    "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "bilateral",
-    "is_compound": true,
-    "instructions": [
-      "Attach close-grip or V-bar handle",
-      "Pull down to upper chest",
-      "Squeeze lats at bottom",
-      "Return with control"
-    ]
-  },
-  {
-    "name": "Dumbbell Lateral Lunge",
-    "aliases": [
-      "Side Lunge"
-    ],
-    "equipment": "dumbbell",
-    "movement_pattern": "squat",
-    "force_type": "push",
-    "body_region": "lower",
-    "laterality": "unilateral",
-    "is_compound": true,
-    "instructions": [
-      "Hold dumbbells at sides",
-      "Step out wide to one side",
-      "Bend stepping leg while keeping other leg straight",
-      "Push back to start"
-    ]
-  },
-  {
-    "name": "Landmine Press",
+    "name": "Devil Press",
     "aliases": [],
-    "equipment": "barbell",
+    "equipment": "dumbbell",
     "movement_pattern": "push",
     "force_type": "push",
-    "body_region": "upper",
-    "laterality": "unilateral",
+    "body_region": "full",
+    "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Hold end of landmine bar at shoulder",
-      "Press up and forward at an angle",
-      "Lower with control"
+      "Start standing with dumbbells at your sides",
+      "Perform a burpee with hands on the dumbbells",
+      "From the bottom, swing the dumbbells between your legs and overhead in one motion",
+      "Lower and repeat"
     ]
   },
   {
-    "name": "Cable Lateral Pulldown",
-    "aliases": [
-      "Single-Arm Lat Pulldown"
-    ],
-    "equipment": "cable",
-    "movement_pattern": "pull",
+    "name": "Sandbag Clean",
+    "aliases": [],
+    "equipment": "other",
+    "movement_pattern": "hinge",
     "force_type": "pull",
-    "body_region": "upper",
-    "laterality": "unilateral",
+    "body_region": "full",
+    "laterality": "bilateral",
     "is_compound": true,
     "instructions": [
-      "Sit at lat pulldown with single handle",
-      "Pull handle down to shoulder",
-      "Squeeze lat and return with control"
+      "Stand over a sandbag with feet shoulder-width apart",
+      "Squat down and grip the sandbag",
+      "Explosively lift it to your chest/shoulder position",
+      "Lower with control and repeat"
+    ]
+  },
+  {
+    "name": "Rope Climb",
+    "aliases": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Grip a climbing rope with both hands above your head",
+      "Wrap the rope around one foot for a footlock",
+      "Pull yourself up hand over hand, stepping up with your feet",
+      "Descend with control, lowering hand over hand"
+    ]
+  },
+  {
+    "name": "Prowler Push",
+    "aliases": [
+      "Prowler"
+    ],
+    "equipment": "other",
+    "movement_pattern": "other",
+    "force_type": "push",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Load the prowler sled and grip the high handles",
+      "Drive forward with powerful leg strides",
+      "Keep your body at a forward lean with arms extended",
+      "Push for the prescribed distance"
+    ]
+  },
+  {
+    "name": "Sledgehammer Swing",
+    "aliases": [
+      "Sledgehammer Tire Hit"
+    ],
+    "equipment": "other",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand next to a large tire holding a sledgehammer",
+      "Raise the hammer overhead",
+      "Swing it down forcefully onto the tire",
+      "Control the rebound and repeat"
+    ]
+  },
+  {
+    "name": "Kettlebell Swing",
+    "aliases": [
+      "KB Swing",
+      "Russian Swing"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "hinge",
+    "force_type": "pull",
+    "body_region": "full",
+    "laterality": "bilateral",
+    "is_compound": true,
+    "instructions": [
+      "Stand with feet shoulder-width apart, kettlebell on the floor ahead",
+      "Hinge at the hips and grip the kettlebell with both hands",
+      "Hike the bell back between your legs then drive hips forward explosively",
+      "Swing the bell to chest or shoulder height, arms straight",
+      "Control the descent and repeat in a continuous motion"
     ]
   }
 ]

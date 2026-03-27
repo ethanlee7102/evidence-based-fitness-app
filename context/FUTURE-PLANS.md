@@ -121,6 +121,36 @@ All 14 priorities complete. 195 papers, ~8,284 chunks across 10 categories. All 
 
 ---
 
+## Exercise Library & Muscle Data Overhaul
+
+### Context
+MC-Oruc/FitnessApp (source for muscle activation mappings) is an unsourced weekend project by a game developer — no EMG studies, no kinesiology references. Our 137 exercises need proper EMG-backed muscle activation research. Expanding library from 137 → ~200 exercises.
+
+### Muscle Groups: 33 → 36
+Adding 3 new muscle groups (requires DB migration):
+- **Hip Adductors** — new "Adductors" category. Fixes broken Hip Adductor Machine mapping; enables sumo/lateral lunge adductor tracking.
+- **Neck** — new "Neck" category. Enables neck curl/extension exercises (currently unmappable).
+- **Rotator Cuff** — under "Shoulders" category. Enables external rotation, face pull prehab tracking.
+
+### Exercise Library: 137 → ~200
+Source: free-exercise-db (874 exercises, public domain). Pick ~63 additional common gym exercises. All ~200 need EMG-researched muscle activation mappings with real sources.
+
+### Volume Tracking per Muscle
+Aggregate sub-groups by category for display (e.g., Upper Chest + Mid Chest + Lower Chest → "Chest" weekly volume). Keep granular 36 groups for mapping accuracy.
+
+### Exercise Video URLs
+No free, open-source, commercially-usable video library exists at scale. Options researched:
+- **YouTube links** — link to curated videos (free, don't control content)
+- **YMove** — $29/mo, 636 exercises, royalty-free commercial HD video. Best paid option.
+- **wger** — CC-BY-SA 3.0, only 78 videos (too sparse)
+- **exercemus** — YouTube URLs available, MIT license with per-exercise attribution
+- **MuscleWiki** — 7,300 videos but **non-commercial only**
+- **Create own** — record/commission for top exercises
+
+Decision deferred. Text instructions available from free-exercise-db (public domain) and wrkout (2,500+, public domain).
+
+---
+
 ## Phase 3: Workout Logging — Polish & Remaining Work
 
 ### Bugs to Fix
