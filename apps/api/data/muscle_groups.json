@@ -31,5 +31,8 @@
   {"name": "Tibialis Anterior", "category": "Calves", "display_order": 30},
   {"name": "Upper Abs", "category": "Abs", "display_order": 31},
   {"name": "Lower Abs", "category": "Abs", "display_order": 32},
-  {"name": "Obliques", "category": "Abs", "display_order": 33}
+  {"name": "Obliques", "category": "Abs", "display_order": 33},
+  {"name": "Hip Adductors", "category": "Adductors", "display_order": 34},
+  {"name": "Neck", "category": "Neck", "display_order": 35},
+  {"name": "Rotator Cuff", "category": "Shoulders", "display_order": 36}
 ]

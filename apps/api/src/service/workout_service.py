@@ -56,7 +56,7 @@ class WorkoutService:
         q: Optional[str] = None,
         equipment: Optional[str] = None,
         muscle_category: Optional[str] = None,
-        limit: int = 200,
+        limit: int = 400,
     ) -> list[dict[str, Any]]:
         """Search exercises visible to user (global + own custom)."""
         query = (
