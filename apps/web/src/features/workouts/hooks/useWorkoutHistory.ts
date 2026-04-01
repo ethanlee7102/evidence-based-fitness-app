@@ -1,9 +1,45 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { listWorkouts, deleteWorkout as deleteWorkoutApi } from '../services/workoutService'
-import type { WorkoutSummary } from '../types'
+import type { WorkoutSummary, WorkoutFilters, DatePreset } from '../types'
 
 const PAGE_SIZE = 20
+
+const DEFAULT_FILTERS: WorkoutFilters = {
+  datePreset: 'all',
+  dateFrom: null,
+  dateTo: null,
+  minRating: null,
+  exerciseId: null,
+  exerciseName: null,
+}
+
+function computeDateRange(filters: WorkoutFilters): {
+  date_from?: string
+  date_to?: string
+} {
+  if (filters.datePreset === 'week' || filters.datePreset === 'month' || filters.datePreset === '3months') {
+    const now = new Date()
+    let from: Date
+    if (filters.datePreset === 'week') {
+      from = new Date(now)
+      from.setDate(now.getDate() - 7)
+    } else if (filters.datePreset === 'month') {
+      from = new Date(now)
+      from.setMonth(now.getMonth() - 1)
+    } else {
+      from = new Date(now)
+      from.setMonth(now.getMonth() - 3)
+    }
+    return { date_from: from.toISOString().split('T')[0] }
+  }
+
+  // 'all' preset or custom range — check for explicit date bounds
+  const result: { date_from?: string; date_to?: string } = {}
+  if (filters.dateFrom) result.date_from = filters.dateFrom
+  if (filters.dateTo) result.date_to = filters.dateTo
+  return result
+}
 
 export function useWorkoutHistory() {
   const { session: authSession } = useAuth()
@@ -14,13 +50,47 @@ export function useWorkoutHistory() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<WorkoutFilters>(DEFAULT_FILTERS)
+
+  // Serialize filter values that affect the API query for dependency tracking
+  const filterKey = useMemo(
+    () =>
+      JSON.stringify({
+        ...computeDateRange(filters),
+        min_rating: filters.minRating,
+        exercise_id: filters.exerciseId,
+      }),
+    [filters],
+  )
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (filters.datePreset !== 'all' || filters.dateFrom || filters.dateTo) count++
+    if (filters.minRating) count++
+    if (filters.exerciseId) count++
+    return count
+  }, [filters])
+
+  const buildParams = useCallback(
+    (offset: number) => {
+      const dateRange = computeDateRange(filters)
+      return {
+        limit: PAGE_SIZE,
+        offset,
+        ...dateRange,
+        ...(filters.minRating ? { min_rating: filters.minRating } : {}),
+        ...(filters.exerciseId ? { exercise_id: filters.exerciseId } : {}),
+      }
+    },
+    [filters],
+  )
 
   const loadWorkouts = useCallback(async () => {
     if (!token) return
     try {
       setIsLoading(true)
       setError(null)
-      const history = await listWorkouts(token, { limit: PAGE_SIZE, offset: 0 })
+      const history = await listWorkouts(token, buildParams(0))
       setWorkouts(history)
       setHasMore(history.length >= PAGE_SIZE)
     } catch (e) {
@@ -28,16 +98,13 @@ export function useWorkoutHistory() {
     } finally {
       setIsLoading(false)
     }
-  }, [token])
+  }, [token, buildParams])
 
   const loadMore = useCallback(async () => {
     if (!token || isLoadingMore || !hasMore) return
     try {
       setIsLoadingMore(true)
-      const more = await listWorkouts(token, {
-        limit: PAGE_SIZE,
-        offset: workouts.length,
-      })
+      const more = await listWorkouts(token, buildParams(workouts.length))
       setWorkouts((prev) => [...prev, ...more])
       setHasMore(more.length >= PAGE_SIZE)
     } catch (e) {
@@ -45,23 +112,23 @@ export function useWorkoutHistory() {
     } finally {
       setIsLoadingMore(false)
     }
-  }, [token, isLoadingMore, hasMore, workouts.length])
+  }, [token, isLoadingMore, hasMore, workouts.length, buildParams])
 
   const deleteWorkout = useCallback(
     async (workoutId: string) => {
       if (!token) return
-      // Optimistic removal
       setWorkouts((prev) => prev.filter((w) => w.id !== workoutId))
       try {
         await deleteWorkoutApi(token, workoutId)
       } catch (e) {
         console.error('Failed to delete workout:', e)
-        loadWorkouts() // Re-fetch on error
+        loadWorkouts()
       }
     },
     [token, loadWorkouts],
   )
 
+  // Re-fetch when token or filters change
   useEffect(() => {
     loadWorkouts()
   }, [loadWorkouts])
@@ -72,6 +139,9 @@ export function useWorkoutHistory() {
     isLoadingMore,
     hasMore,
     error,
+    filters,
+    setFilters,
+    activeFilterCount,
     loadWorkouts,
     loadMore,
     deleteWorkout,

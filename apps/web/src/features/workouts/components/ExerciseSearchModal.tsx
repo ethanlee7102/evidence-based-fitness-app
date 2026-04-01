@@ -1,7 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
-import { useAuth } from '../../auth/hooks/useAuth'
-import { searchExercises, getRecentExercises } from '../services/workoutService'
-import type { Exercise } from '../types'
+import { useCallback, useEffect, useRef } from 'react'
+import { useExerciseSearch } from '../hooks/useExerciseSearch'
 import { MUSCLE_CATEGORIES, EQUIPMENT_OPTIONS } from '../types'
 
 interface ExerciseSearchModalProps {
@@ -10,62 +8,29 @@ interface ExerciseSearchModalProps {
   onCreateCustom: () => void
 }
 
+import type { Exercise } from '../types'
+
 export function ExerciseSearchModal({
   onSelect,
   onClose,
   onCreateCustom,
 }: ExerciseSearchModalProps) {
-  const { session: authSession } = useAuth()
-  const token = authSession?.access_token
+  const {
+    query, setQuery,
+    equipment, setEquipment,
+    muscleCategory, setMuscleCategory,
+    results,
+    recentExercises,
+    isLoading,
+    hasActiveFilters,
+  } = useExerciseSearch()
 
-  const [query, setQuery] = useState('')
-  const [equipment, setEquipment] = useState<string>('')
-  const [muscleCategory, setMuscleCategory] = useState<string>('')
-  const [results, setResults] = useState<Exercise[]>([])
-  const [recentExercises, setRecentExercises] = useState<Exercise[]>([])
-  const [isLoading, setIsLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   // Focus search input on mount
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
-
-  // Fetch recent exercises on mount
-  useEffect(() => {
-    if (!token) return
-    getRecentExercises(token, 10)
-      .then(setRecentExercises)
-      .catch(() => {})
-  }, [token])
-
-  // Search with debounce
-  useEffect(() => {
-    if (!token) return
-
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    debounceRef.current = setTimeout(async () => {
-      setIsLoading(true)
-      try {
-        const data = await searchExercises(token, {
-          q: query || undefined,
-          equipment: equipment || undefined,
-          muscle_category: muscleCategory || undefined,
-        })
-        setResults(data)
-      } catch (e) {
-        console.error('Search failed:', e)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 300)
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [token, query, equipment, muscleCategory])
 
   const handleSelect = useCallback(
     (exercise: Exercise) => {
@@ -137,7 +102,7 @@ export function ExerciseSearchModal({
       {/* Results */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full">
         {/* Recent exercises — shown when no search/filters active */}
-        {!query && !equipment && !muscleCategory && recentExercises.length > 0 && !isLoading && (
+        {!hasActiveFilters && recentExercises.length > 0 && !isLoading && (
           <div className="mb-4">
             <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Recent</h3>
             <div className="space-y-1">

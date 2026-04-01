@@ -1,30 +1,72 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { BookOpen, ClipboardList } from 'lucide-react'
 import { Button } from '../../../shared/components/Button'
+import { useAuth } from '../../auth/hooks/useAuth'
 import { useWorkoutHistory } from '../hooks/useWorkoutHistory'
 import { WorkoutHistoryList } from '../components/WorkoutHistoryList'
 import { ActiveWorkoutModal } from '../components/ActiveWorkoutModal'
 import { WorkoutDetailModal } from '../components/WorkoutDetailModal'
+import { StartWorkoutChoiceModal } from '../components/StartWorkoutChoiceModal'
+import { listRoutines, startWorkoutFromRoutine } from '../services/workoutService'
+import type { RoutineSummary } from '../types'
+
+const RECENT_LIMIT = 3
 
 export function WorkoutsScreen() {
+  const { session: authSession } = useAuth()
+  const token = authSession?.access_token
+
   const {
     workouts,
     isLoading,
-    isLoadingMore,
-    hasMore,
     error,
     loadWorkouts,
-    loadMore,
     deleteWorkout,
   } = useWorkoutHistory()
 
   const [showActiveWorkout, setShowActiveWorkout] = useState(false)
   const [resumeWorkoutId, setResumeWorkoutId] = useState<string | null>(null)
   const [viewWorkoutId, setViewWorkoutId] = useState<string | null>(null)
+  const [routines, setRoutines] = useState<RoutineSummary[]>([])
+  const [showStartChoice, setShowStartChoice] = useState(false)
+  const [isStartingFromRoutine, setIsStartingFromRoutine] = useState(false)
+
+  // Load routines for start-workout choice
+  useEffect(() => {
+    if (!token) return
+    listRoutines(token).then(setRoutines).catch(() => {})
+  }, [token])
 
   const handleStartWorkout = useCallback(() => {
+    if (routines.length > 0) {
+      setShowStartChoice(true)
+    } else {
+      setResumeWorkoutId(null)
+      setShowActiveWorkout(true)
+    }
+  }, [routines.length])
+
+  const handleStartEmpty = useCallback(() => {
+    setShowStartChoice(false)
     setResumeWorkoutId(null)
     setShowActiveWorkout(true)
   }, [])
+
+  const handleStartFromRoutine = useCallback(async (routineId: string) => {
+    if (!token) return
+    try {
+      setIsStartingFromRoutine(true)
+      const workout = await startWorkoutFromRoutine(token, routineId)
+      setShowStartChoice(false)
+      setResumeWorkoutId(workout.id)
+      setShowActiveWorkout(true)
+    } catch (e) {
+      console.error('Failed to start workout from routine:', e)
+    } finally {
+      setIsStartingFromRoutine(false)
+    }
+  }, [token])
 
   const handleResumeWorkout = useCallback((workoutId: string) => {
     setResumeWorkoutId(workoutId)
@@ -35,7 +77,9 @@ export function WorkoutsScreen() {
     setShowActiveWorkout(false)
     setResumeWorkoutId(null)
     loadWorkouts()
-  }, [loadWorkouts])
+    // Refresh routines (usage stats may have changed)
+    if (token) listRoutines(token).then(setRoutines).catch(() => {})
+  }, [loadWorkouts, token])
 
   const handleCloseWorkout = useCallback(() => {
     setShowActiveWorkout(false)
@@ -100,16 +144,59 @@ export function WorkoutsScreen() {
         </div>
       )}
 
-      {/* Workout history */}
+      {/* Recent workouts (top 3) */}
       <WorkoutHistoryList
-        workouts={workouts}
-        isLoadingMore={isLoadingMore}
-        hasMore={hasMore}
-        onLoadMore={loadMore}
+        workouts={workouts.slice(0, RECENT_LIMIT)}
+        isLoadingMore={false}
+        hasMore={false}
+        onLoadMore={() => {}}
         onView={handleViewWorkout}
         onResume={handleResumeWorkout}
         onDelete={handleDeleteWorkout}
       />
+
+      {workouts.length > RECENT_LIMIT && (
+        <div className="text-center pt-3">
+          <Link
+            to="/dashboard/workouts/history"
+            className="text-sm text-flame-400 hover:text-flame-300 font-medium"
+          >
+            See All History
+          </Link>
+        </div>
+      )}
+
+      {/* Quick access tiles */}
+      <div className="grid grid-cols-2 gap-4 mt-8">
+        <Link
+          to="/dashboard/workouts/exercises"
+          className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:bg-gray-800 hover:border-gray-600 transition-colors group aspect-[2/1] flex flex-col items-center justify-center text-center"
+        >
+          <BookOpen className="w-10 h-10 text-flame-400 mb-3 group-hover:text-flame-300 transition-colors" />
+          <h3 className="font-semibold text-lg mb-1">Exercise Library</h3>
+          <p className="text-sm text-gray-500">Browse all exercises</p>
+        </Link>
+
+        <Link
+          to="/dashboard/workouts/routines"
+          className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:bg-gray-800 hover:border-gray-600 transition-colors group aspect-[2/1] flex flex-col items-center justify-center text-center"
+        >
+          <ClipboardList className="w-10 h-10 text-flame-400 mb-3 group-hover:text-flame-300 transition-colors" />
+          <h3 className="font-semibold text-lg mb-1">Routines</h3>
+          <p className="text-sm text-gray-500">Manage workout templates</p>
+        </Link>
+      </div>
+
+      {/* Start workout choice modal */}
+      {showStartChoice && (
+        <StartWorkoutChoiceModal
+          routines={routines}
+          isStarting={isStartingFromRoutine}
+          onStartEmpty={handleStartEmpty}
+          onStartFromRoutine={handleStartFromRoutine}
+          onClose={() => setShowStartChoice(false)}
+        />
+      )}
 
       {/* Active workout modal */}
       {showActiveWorkout && (

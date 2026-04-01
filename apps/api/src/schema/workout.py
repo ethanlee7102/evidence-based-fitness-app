@@ -173,3 +173,29 @@ class PreviousSetData(BaseModel):
     set_number: int
     weight_kg: Optional[float] = None
     reps: Optional[int] = None
+
+
+# --- Exercise Stats ---
+
+class ExerciseSetHistory(BaseModel):
+    """A single completed set for the exercise stats table."""
+    date: str
+    weight_kg: Optional[float] = None
+    reps: Optional[int] = None
+    rpe: Optional[float] = None
+    set_type: SetType = "normal"
+    volume: float = 0
+
+
+class ExerciseVolumePoint(BaseModel):
+    """Per-session total volume for the volume chart."""
+    date: str
+    volume: float
+    sets: int
+
+
+class ExerciseStatsResponse(BaseModel):
+    """Stats for a single exercise."""
+    exercise_id: str
+    recent_sets: list[ExerciseSetHistory] = []
+    volume_history: list[ExerciseVolumePoint] = []
