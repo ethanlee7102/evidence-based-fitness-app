@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { ClipboardList } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { getWorkout } from '../services/workoutService'
 import { formatDuration, formatVolume, displayWeight, weightUnit } from '../utils/unitConversion'
 import { useProfile } from '../../onboarding/hooks/useProfile'
+import { SaveAsRoutineModal } from './SaveAsRoutineModal'
 import type { Workout } from '../types'
 
 interface WorkoutDetailModalProps {
@@ -19,6 +21,8 @@ export function WorkoutDetailModal({ workoutId, onClose }: WorkoutDetailModalPro
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showSaveAsRoutine, setShowSaveAsRoutine] = useState(false)
+  const [savedAsRoutine, setSavedAsRoutine] = useState(false)
 
   useEffect(() => {
     if (!token) return
@@ -94,7 +98,18 @@ export function WorkoutDetailModal({ workoutId, onClose }: WorkoutDetailModalPro
           <h2 className="font-semibold">{dateStr}</h2>
           <p className="text-sm text-gray-400">{timeStr}</p>
         </div>
-        <div className="w-6" />
+        {workout?.completed_at && (
+          <button
+            type="button"
+            onClick={() => setShowSaveAsRoutine(true)}
+            className="flex items-center gap-1 text-sm text-flame-400 hover:text-flame-300 transition-colors"
+            title="Save as Routine"
+          >
+            <ClipboardList className="w-4 h-4" />
+            <span className="hidden sm:inline">{savedAsRoutine ? 'Saved!' : 'Save as Routine'}</span>
+          </button>
+        )}
+        {!workout?.completed_at && <div className="w-6" />}
       </div>
 
       {/* Content */}
@@ -217,6 +232,17 @@ export function WorkoutDetailModal({ workoutId, onClose }: WorkoutDetailModalPro
           )
         })}
       </div>
+
+      {showSaveAsRoutine && (
+        <SaveAsRoutineModal
+          workoutId={workoutId}
+          onSaved={() => {
+            setShowSaveAsRoutine(false)
+            setSavedAsRoutine(true)
+          }}
+          onClose={() => setShowSaveAsRoutine(false)}
+        />
+      )}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { HomeScreen, HomeDashboardScreen } from '../features/home'
 import { LoginScreen, SignupScreen } from '../features/auth'
 import { OnboardingScreen } from '../features/onboarding'
 import { DashboardLayout } from '../features/dashboard'
-import { WorkoutsScreen } from '../features/workouts'
+import { WorkoutsScreen, WorkoutHistoryScreen, ExerciseLibraryScreen, RoutinesScreen } from '../features/workouts'
 import { AnalysisScreen } from '../features/analysis'
 import { ChatScreen } from '../features/chat'
 import { ProfileScreen } from '../features/profile'
@@ -41,6 +41,9 @@ export function AppRouter() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<HomeDashboardScreen />} />
         <Route path="workouts" element={<WorkoutsScreen />} />
+        <Route path="workouts/history" element={<WorkoutHistoryScreen />} />
+        <Route path="workouts/exercises" element={<ExerciseLibraryScreen />} />
+        <Route path="workouts/routines" element={<RoutinesScreen />} />
         <Route path="analysis" element={<AnalysisScreen />} />
         <Route path="chat" element={<ChatScreen />} />
         <Route path="profile" element={<ProfileScreen />} />

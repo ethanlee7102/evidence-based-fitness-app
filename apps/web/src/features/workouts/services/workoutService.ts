@@ -2,9 +2,13 @@ import { apiRequest } from '../../../lib/api'
 import type {
   CreateExerciseRequest,
   Exercise,
+  ExerciseStats,
   FinishWorkoutRequest,
   MuscleGroup,
   PreviousSetData,
+  Routine,
+  RoutineExerciseInput,
+  RoutineSummary,
   Workout,
   WorkoutSet,
   WorkoutSummary,
@@ -52,6 +56,13 @@ export async function getPreviousSets(
   return apiRequest<PreviousSetData[]>(`/workouts/exercises/${exerciseId}/previous`, { token })
 }
 
+export async function getExerciseStats(
+  token: string,
+  exerciseId: string,
+): Promise<ExerciseStats> {
+  return apiRequest<ExerciseStats>(`/workouts/exercises/${exerciseId}/stats`, { token })
+}
+
 export async function getRecentExercises(
   token: string,
   limit: number = 10,
@@ -67,11 +78,22 @@ export async function startWorkout(token: string): Promise<Workout> {
 
 export async function listWorkouts(
   token: string,
-  params?: { limit?: number; offset?: number },
+  params?: {
+    limit?: number
+    offset?: number
+    date_from?: string
+    date_to?: string
+    min_rating?: number
+    exercise_id?: string
+  },
 ): Promise<WorkoutSummary[]> {
   const searchParams = new URLSearchParams()
   if (params?.limit) searchParams.set('limit', String(params.limit))
   if (params?.offset) searchParams.set('offset', String(params.offset))
+  if (params?.date_from) searchParams.set('date_from', params.date_from)
+  if (params?.date_to) searchParams.set('date_to', params.date_to)
+  if (params?.min_rating) searchParams.set('min_rating', String(params.min_rating))
+  if (params?.exercise_id) searchParams.set('exercise_id', params.exercise_id)
   const qs = searchParams.toString()
   return apiRequest<WorkoutSummary[]>(`/workouts${qs ? `?${qs}` : ''}`, { token })
 }
@@ -191,4 +213,64 @@ export async function deleteSet(
   setId: string,
 ): Promise<void> {
   await apiRequest(`/workouts/${workoutId}/sets/${setId}`, { method: 'DELETE', token })
+}
+
+// --- Routines ---
+
+export async function listRoutines(token: string): Promise<RoutineSummary[]> {
+  return apiRequest<RoutineSummary[]>('/routines', { token })
+}
+
+export async function getRoutine(token: string, routineId: string): Promise<Routine> {
+  return apiRequest<Routine>(`/routines/${routineId}`, { token })
+}
+
+export async function createRoutine(
+  token: string,
+  data: { name: string; exercises: Omit<RoutineExerciseInput, 'exercise'>[] },
+): Promise<Routine> {
+  return apiRequest<Routine>('/routines', {
+    method: 'POST',
+    token,
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updateRoutine(
+  token: string,
+  routineId: string,
+  data: { name: string; exercises: Omit<RoutineExerciseInput, 'exercise'>[] },
+): Promise<Routine> {
+  return apiRequest<Routine>(`/routines/${routineId}`, {
+    method: 'PUT',
+    token,
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteRoutine(token: string, routineId: string): Promise<void> {
+  await apiRequest(`/routines/${routineId}`, { method: 'DELETE', token })
+}
+
+export async function duplicateRoutine(token: string, routineId: string): Promise<Routine> {
+  return apiRequest<Routine>(`/routines/${routineId}/duplicate`, { method: 'POST', token })
+}
+
+export async function startWorkoutFromRoutine(
+  token: string,
+  routineId: string,
+): Promise<Workout> {
+  return apiRequest<Workout>(`/routines/${routineId}/start-workout`, { method: 'POST', token })
+}
+
+export async function saveWorkoutAsRoutine(
+  token: string,
+  workoutId: string,
+  name: string,
+): Promise<Routine> {
+  return apiRequest<Routine>(`/routines/from-workout/${workoutId}`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ name }),
+  })
 }

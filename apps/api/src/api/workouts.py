@@ -11,6 +11,7 @@ from src.schema.workout import (
     CreateSetRequest,
     ExerciseMuscleResponse,
     ExerciseResponse,
+    ExerciseStatsResponse,
     FinishWorkoutRequest,
     MuscleGroupResponse,
     PreviousSetData,
@@ -188,6 +189,16 @@ async def create_exercise(
     return _format_exercise(full) if full else ex
 
 
+@router.get("/exercises/{exercise_id}/stats", response_model=ExerciseStatsResponse)
+async def get_exercise_stats(
+    exercise_id: str,
+    user_id: str = Depends(get_current_user),
+):
+    """Get user's stats for a specific exercise (recent sets + volume history)."""
+    svc = _get_service()
+    return svc.get_exercise_stats(user_id, exercise_id)
+
+
 @router.get("/exercises/{exercise_id}/previous", response_model=list[PreviousSetData])
 async def get_previous_sets(
     exercise_id: str,
@@ -212,11 +223,23 @@ async def start_workout(user_id: str = Depends(get_current_user)):
 async def list_workouts(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None),
+    min_rating: Optional[int] = Query(None, ge=1, le=5),
+    exercise_id: Optional[str] = Query(None),
     user_id: str = Depends(get_current_user),
 ):
-    """List workout history (paginated)."""
+    """List workout history (paginated, with optional filters)."""
     svc = _get_service()
-    return svc.list_workouts(user_id, limit=limit, offset=offset)
+    return svc.list_workouts(
+        user_id,
+        limit=limit,
+        offset=offset,
+        date_from=date_from,
+        date_to=date_to,
+        min_rating=min_rating,
+        exercise_id=exercise_id,
+    )
 
 
 @router.get("/in-progress", response_model=Optional[WorkoutResponse])

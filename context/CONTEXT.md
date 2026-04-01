@@ -144,12 +144,30 @@ Key components: `ActiveWorkoutModal`, `ExerciseCard`, `SetRow`, `ExerciseSearchM
 3. **React Strict Mode double workout** — `initRef` guard on `useActiveWorkout` mount.
 4. **Exercise search truncated at E** — Default `limit=50`; increased to 400.
 
+### Workout History & Filters (2026-03-26)
+- WorkoutsScreen shows top 3 recent workouts with "See All History" link
+- Dedicated `/dashboard/workouts/history` route (`WorkoutHistoryScreen`) with full paginated list
+- Server-side filters (AND-combined): date range (presets + custom), min star rating, exercise
+- Backend: `GET /workouts` accepts `date_from`, `date_to`, `min_rating`, `exercise_id` query params
+- Exercise filter uses two-step query (workout_exercises lookup → `.in_("id", ids)`)
+- `WorkoutFilterBar` component: collapsible panel, reuses `ExerciseSearchModal` for exercise picker
+- Filter bar stays mounted during loading (spinner only replaces list area)
+
+### Exercise Library & Stats (2026-03-26)
+- Two tile buttons on WorkoutsScreen (Exercise Library + Routines placeholder)
+- `/dashboard/workouts/exercises` route — full exercise library with search, filters, recent section (top 5)
+- `ExerciseDetailModal` — fullscreen modal with metadata grid, muscles by activation level (color-coded), instructions, stats
+- `GET /workouts/exercises/{id}/stats` endpoint — returns recent sets + per-session volume history
+- Stats: recent sets table (5 most recent) + volume progression line chart (recharts)
+- `useExerciseSearch` hook extracted from `ExerciseSearchModal` — shared by library screen and workout add-exercise modal
+- Search results prioritize name-starts-with matches (client-side sort)
+
 ### Remaining (Phase 3)
 - Exercise video URLs (field exists, data not sourced)
 - Superset grouping UI (DB field exists)
 - Set type selector UI (warmup/dropset/failure exist in DB)
 - Exercise notes during workout (DB field exists)
-- Templates/routines (deferred to v2)
+- Routines/templates (tile placeholder exists, deferred to v2)
 
 ---
 

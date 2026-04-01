@@ -178,7 +178,7 @@ cd apps/api && pytest tests/eval/ -m eval -v
 - Skill: `/ingest-papers` for corpus expansion workflow
 - **Phase 3 (Workout Logging) — code complete, in testing**
   - Migration 011: 6 workout tables with RLS
-  - Backend: 17 API endpoints on `/workouts` (WorkoutService + FastAPI routes)
+  - Backend: 18 API endpoints on `/workouts` (WorkoutService + FastAPI routes, includes exercise stats)
   - Seed data: 137 exercises, 33 muscle groups, 478 muscle activation mappings
   - Frontend: Full Liftoff-style workout modal (useReducer state, optimistic updates, debounced sync)
   - History screen with resume in-progress banner, paginated history
@@ -194,7 +194,8 @@ cd apps/api && pytest tests/eval/ -m eval -v
 - **Routes**: Nested under `/dashboard` with `<Outlet />`
   - `/dashboard` → redirects to `/dashboard/home`
   - `/dashboard/home` → HomeDashboardScreen (welcome, quick stats)
-  - `/dashboard/workouts` → WorkoutsScreen (logging + history)
+  - `/dashboard/workouts` → WorkoutsScreen (logging + history + library/routines tiles)
+  - `/dashboard/workouts/exercises` → ExerciseLibraryScreen (browse + detail modal)
   - `/dashboard/analysis` → AnalysisScreen (AI trends, charts)
   - `/dashboard/chat` → ChatScreen (AI assistant)
   - `/dashboard/profile` → ProfileScreen (user settings)

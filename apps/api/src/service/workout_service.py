@@ -7,7 +7,7 @@ enforces user_id in every query.
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from src.db import get_supabase
@@ -195,14 +195,46 @@ class WorkoutService:
         user_id: str,
         limit: int = 20,
         offset: int = 0,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        min_rating: Optional[int] = None,
+        exercise_id: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         """List workouts with summary info (exercise count, set count, volume)."""
-        response = (
+        # Exercise filter: two-step lookup for workout IDs containing this exercise
+        workout_id_filter: list[str] | None = None
+        if exercise_id:
+            we_resp = (
+                self.supabase.table("workout_exercises")
+                .select("workout_id")
+                .eq("exercise_id", exercise_id)
+                .execute()
+            )
+            workout_id_filter = list({r["workout_id"] for r in we_resp.data})
+            if not workout_id_filter:
+                return []
+
+        query = (
             self.supabase.table("workouts")
             .select(
                 "*, workout_exercises(id, exercises(name), workout_sets(weight_kg, reps, completed))"
             )
             .eq("user_id", user_id)
+        )
+
+        if date_from:
+            query = query.gte("started_at", date_from)
+        if date_to:
+            # Make end date inclusive of the full day
+            end = datetime.fromisoformat(date_to) + timedelta(days=1)
+            query = query.lt("started_at", end.isoformat())
+        if min_rating:
+            query = query.gte("rating", min_rating)
+        if workout_id_filter is not None:
+            query = query.in_("id", workout_id_filter)
+
+        response = (
+            query
             .order("started_at", desc=True)
             .range(offset, offset + limit - 1)
             .execute()
@@ -569,6 +601,76 @@ class WorkoutService:
                 break
 
         return results
+
+    # --- Exercise Stats ---
+
+    def get_exercise_stats(
+        self,
+        user_id: str,
+        exercise_id: str,
+        recent_limit: int = 5,
+    ) -> dict[str, Any]:
+        """Get exercise stats: recent sets and per-session volume history."""
+        # Fetch all completed sets for this exercise by this user
+        response = (
+            self.supabase.table("workout_exercises")
+            .select(
+                "exercise_id, "
+                "workouts!inner(user_id, completed_at, started_at), "
+                "workout_sets(weight_kg, reps, rpe, set_type, completed, completed_at)"
+            )
+            .eq("exercise_id", exercise_id)
+            .eq("workouts.user_id", user_id)
+            .not_.is_("workouts.completed_at", "null")
+            .order("workouts(started_at)", desc=True)
+            .execute()
+        )
+
+        # Build recent sets (flat list, newest first) and volume history (per session)
+        recent_sets: list[dict[str, Any]] = []
+        volume_history: list[dict[str, Any]] = []
+
+        for we in response.data:
+            workout = we.get("workouts", {})
+            date = (workout.get("completed_at") or workout.get("started_at", ""))[:10]
+            sets = we.get("workout_sets", [])
+
+            session_volume = 0.0
+            session_set_count = 0
+
+            for s in sets:
+                if not s.get("completed"):
+                    continue
+                weight = s.get("weight_kg") or 0
+                reps = s.get("reps") or 0
+                volume = weight * reps
+                session_volume += volume
+                session_set_count += 1
+
+                recent_sets.append({
+                    "date": date,
+                    "weight_kg": s.get("weight_kg"),
+                    "reps": s.get("reps"),
+                    "rpe": s.get("rpe"),
+                    "set_type": s.get("set_type", "normal"),
+                    "volume": round(volume, 1),
+                })
+
+            if session_set_count > 0:
+                volume_history.append({
+                    "date": date,
+                    "volume": round(session_volume, 1),
+                    "sets": session_set_count,
+                })
+
+        # Volume history should be chronological (oldest first) for charting
+        volume_history.reverse()
+
+        return {
+            "exercise_id": exercise_id,
+            "recent_sets": recent_sets[:recent_limit],
+            "volume_history": volume_history,
+        }
 
     # --- Helpers ---
 

@@ -121,6 +121,29 @@ export interface FinishWorkoutRequest {
   duration_seconds?: number | null
 }
 
+// --- Exercise Stats ---
+
+export interface ExerciseSetHistory {
+  date: string
+  weight_kg: number | null
+  reps: number | null
+  rpe: number | null
+  set_type: SetType
+  volume: number
+}
+
+export interface ExerciseVolumePoint {
+  date: string
+  volume: number
+  sets: number
+}
+
+export interface ExerciseStats {
+  exercise_id: string
+  recent_sets: ExerciseSetHistory[]
+  volume_history: ExerciseVolumePoint[]
+}
+
 // Muscle categories for filters
 export const MUSCLE_CATEGORIES = [
   'Chest',
@@ -146,3 +169,71 @@ export const EQUIPMENT_OPTIONS: Equipment[] = [
   'kettlebell',
   'other',
 ]
+
+// --- Routines ---
+
+export interface RoutineSet {
+  id: string
+  routine_exercise_id: string
+  set_number: number
+  target_reps: number | null
+  set_type: SetType
+}
+
+export interface RoutineExercise {
+  id: string
+  routine_id: string
+  exercise_id: string
+  exercise: Exercise
+  sort_order: number
+  rest_timer_seconds: number | null
+  notes: string | null
+  sets: RoutineSet[]
+}
+
+export interface Routine {
+  id: string
+  user_id: string
+  name: string
+  last_used_at: string | null
+  use_count: number
+  created_at: string
+  updated_at: string
+  exercises: RoutineExercise[]
+}
+
+export interface RoutineSummary {
+  id: string
+  name: string
+  exercise_count: number
+  total_sets: number
+  last_used_at: string | null
+  use_count: number
+}
+
+export interface RoutineExerciseInput {
+  exercise_id: string
+  exercise: Exercise
+  sort_order: number
+  rest_timer_seconds: number | null
+  notes: string | null
+  sets: RoutineSetInput[]
+}
+
+export interface RoutineSetInput {
+  set_number: number
+  target_reps: number | null
+  set_type: SetType
+}
+
+// Workout history filter types
+export type DatePreset = 'week' | 'month' | '3months' | 'all'
+
+export interface WorkoutFilters {
+  datePreset: DatePreset
+  dateFrom: string | null
+  dateTo: string | null
+  minRating: number | null
+  exerciseId: string | null
+  exerciseName: string | null
+}
