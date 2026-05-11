@@ -1,5 +1,11 @@
+### Context Folder Conventions
+
+When catching up at session start, read the active files in `context/` (this file, `ROADMAP.md`, `PORTFOLIO-NARRATIVE.md`, `CONTEXT.md`, `PLAN.md`, `EVAL-PLAN.md`, `FUTURE-PLANS.md`). **Skip `context/archive/` unless explicitly directed to specific files there, or unless working on a task whose active doc points at an archived file.** Archive contents are deep-reference material (implementation walkthroughs, recall-failure forensics, retrieval target chunks) — useful when you need them, wasteful to load every session.
+
+Active files point at archive files where relevant — e.g., ROADMAP decision #11 (reranking) points at `archive/RETRIEVAL-TARGET-CHUNKS.md` as the success metric for Phase 2 retrieval work.
+
 ### Implementation Plan
-Refer to `PLAN.md` for the full implementation plan, phase statuses, and file manifest. Update phase statuses in PLAN.md as work is completed.
+Refer to `PLAN.md` for the priority summary and `ROADMAP.md` for the authoritative build order and decision log. Update `ROADMAP.md` as decisions are made.
 
 ### Teaching Mode
 After completing each implementation task, pause and explain:
@@ -17,7 +23,12 @@ summarize it first, then ask if I want to go deeper on any part. If I ask "just 
 # Flame Fitness - Project Context
 
 ## Overview
-Flame Fitness is a workout logging app with AI-powered trend analysis. Users log workouts, track progress, and receive insights to optimize their training.
+
+**This is a portfolio builder for jump #1 in a job search at 1 YOE.** Realistic target list (apply broadly): **Junior AI Engineer / AI Engineer roles** at Series A/B AI-first startups, **Software Engineer / Backend Engineer doing AI work** at Series A/B/C AI-using companies, or mid-sized tech companies with AI work. Comp range $110-150k base in major markets. Not targeting frontier labs, Tier 1 stable companies, or Senior-level destination titles — those are jump #2 territory. Full calibration in `context/PORTFOLIO-NARRATIVE.md`.
+
+**Important: realistic hiring level ≠ reduced work quality.** This portfolio is built to senior-quality depth — that's *exactly* what differentiates a 1-YOE applicant from the typical Junior/Mid pool. The calibration is about realistic interview positioning, not about cutting corners.
+
+The technical focus is a RAG / LLM / agentic AI system; the workout logging app is the substrate that makes the AI features non-toy (real user training data, rich domain literature). The headline portfolio story is the AI system; the working full-stack app is the proof of general engineering competence.
 
 ## Tech Stack
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS
@@ -69,7 +80,7 @@ flame-fitness/
 │       ├── scripts/
 │       │   ├── ingest_paper.py   # Single paper CLI ingestion
 │       │   ├── ingest_batch.py   # Batch ingestion from manifest.json
-│       │   ├── reingest_all.py   # Delete all + re-ingest all 24 papers
+│       │   ├── reingest_all.py   # Delete all + re-ingest all papers from manifest
 │       │   ├── evaluate_rag.py   # RAG evaluation CLI (--combined, --dry-run, --verbose)
 │       │   ├── test_retrieval.py # CLI retrieval testing
 │       │   └── test_rag_pipeline.py # CLI end-to-end RAG testing
@@ -110,12 +121,15 @@ flame-fitness/
   - `units_preference`, `experience_level`, `goal`
   - `workout_days_per_week`, `preferred_days`, `injuries_limitations`
   - `onboarding_completed`, `onboarding_completed_at`
-- `muscle_groups` - 33 reference rows (name, category, display_order). 11 categories: Chest, Back, Shoulders, Biceps, Triceps, Forearms, Quads, Hamstrings, Glutes, Calves, Abs
-- `exercises` - global library (137 seeded) + user custom. Fields: name, aliases, equipment, movement_pattern, force_type, body_region, laterality, is_compound, instructions, video_url, is_global, created_by
+- `muscle_groups` - 36 reference rows (name, category, display_order). 13 categories: Chest, Back, Shoulders, Biceps, Triceps, Forearms, Quads, Hamstrings, Glutes, Calves, Abs, Adductors, Neck (Rotator Cuff is under Shoulders)
+- `exercises` - global library (386 seeded) + user custom. Fields: name, aliases, equipment, movement_pattern, force_type, body_region, laterality, is_compound, instructions, video_url, is_global, created_by
 - `exercise_muscles` - junction table (exercise_id, muscle_group_id, activation_level: maximum/high/medium/partial)
 - `workouts` - workout sessions (user_id, started_at, completed_at, duration_seconds, body_weight_kg, rating 1-5, notes)
 - `workout_exercises` - exercises within a workout (workout_id, exercise_id, sort_order, superset_group, rest_timer_seconds, notes)
 - `workout_sets` - individual sets (workout_exercise_id, set_number, weight_kg, reps, rpe, set_type, duration_seconds, rest_seconds, is_to_failure, completed, completed_at)
+- `routines` - reusable workout templates (user_id, name, last_used_at, use_count, created_at, updated_at)
+- `routine_exercises` - exercises within a routine (routine_id, exercise_id, sort_order, rest_timer_seconds, notes)
+- `routine_sets` - target sets within a routine exercise (routine_exercise_id, set_number, target_reps, set_type)
 - RAG tables: `papers`, `chunks` (pgvector HNSW), `chat_sessions`, `chat_messages`, `rag_traces`
 
 ## Commands
@@ -176,12 +190,12 @@ cd apps/api && pytest tests/eval/ -m eval -v
 - RAG Phases 1-8 complete — full pipeline from PDF ingestion to frontend chat UI + automated evaluation
 - Corpus: 195 papers (~8284 chunks), all CC-BY. Post-expansion eval: 4.57/5
 - Skill: `/ingest-papers` for corpus expansion workflow
-- **Phase 3 (Workout Logging) — code complete, in testing**
-  - Migration 011: 6 workout tables with RLS
-  - Backend: 18 API endpoints on `/workouts` (WorkoutService + FastAPI routes, includes exercise stats)
-  - Seed data: 137 exercises, 33 muscle groups, 478 muscle activation mappings
+- **Phase 3 (Workout Logging) — complete**
+  - Migrations 011-014: 9 workout/routine tables with RLS (011 base tables, 012 fixes, 013 added muscle groups, 014 routines)
+  - Backend: 20 endpoints on `/workouts` + 8 endpoints on `/routines`
+  - Seed data: 386 exercises, 36 muscle groups, 2,890 muscle activation mappings
   - Frontend: Full Liftoff-style workout modal (useReducer state, optimistic updates, debounced sync)
-  - History screen with resume in-progress banner, paginated history
+  - History screen with filters, exercise library, routines/templates
 
 ## Onboarding Flow
 - **Route**: `/onboarding` (after login, before dashboard access)
@@ -196,16 +210,22 @@ cd apps/api && pytest tests/eval/ -m eval -v
   - `/dashboard/home` → HomeDashboardScreen (welcome, quick stats)
   - `/dashboard/workouts` → WorkoutsScreen (logging + history + library/routines tiles)
   - `/dashboard/workouts/exercises` → ExerciseLibraryScreen (browse + detail modal)
+  - `/dashboard/workouts/routines` → RoutinesScreen (create/edit/manage routine templates)
+  - `/dashboard/workouts/history` → WorkoutHistoryScreen (paginated + filtered)
   - `/dashboard/analysis` → AnalysisScreen (AI trends, charts)
   - `/dashboard/chat` → ChatScreen (AI assistant)
   - `/dashboard/profile` → ProfileScreen (user settings)
 - **Icons**: Using `lucide-react` (Home, Dumbbell, BarChart3, MessageCircle, User)
 
 ## Next Steps
-1. **Phase 3 polish** — Exercise video URLs, workout detail view, superset UI
-2. **Phase 4: Progress tracking** — Historical data visualization (volume per muscle, strength curves, training frequency)
-3. **Phase 5: AI insights** — Agentic RAG v2 with workout data analysis (router: literature path + SQL query path)
-4. **Templates/routines** — Save and reuse workout templates (deferred from Phase 3)
+
+The authoritative build order is in `context/ROADMAP.md` decision #18. Summary:
+
+1. **Phase 1 — Eval baseline & cross-validation** (~3-4 days): judge JSON retry + fresh baseline rerun + Anthropic provider + Run A (custom + Haiku 4.5) + Ragas integration + Run B + analysis writeup
+2. **Phase 2 — Retrieval improvements** (~3-4 days): per-paper diversification → top_k bump → cross-encoder reranking (FlashRank) → re-eval against target chunks → noise cleanup
+3. **Phase 3 — v2 agentic RAG with LangGraph**: router (literature / workout data / exercise info branches) + judge node + retry — see `context/FUTURE-PLANS.md` for 10 open design questions
+
+Lower priority / deferred: Phase 3 remaining items (exercise video URLs, superset UI, set type selector), Phase 4 progress tracking visualizations, Phase 6 flame visualization. These don't show up in interview demos of the RAG chatbot.
 
 
 ## AI Chatbot (Exercise Science RAG)   
@@ -226,156 +246,31 @@ cd apps/api && pytest tests/eval/ -m eval -v
   - Categories (nutrition, hypertrophy, strength) handled via metadata tags, not separate agents
   - Vector search naturally handles topic matching; metadata enables filtering + citations
 
-  ### Learning Progress
-  - [x] Big picture overview of RAG
-  - [x] Ingestion pipeline walkthrough (with code snippets from Kruiz)
-  - [x] Weaknesses in reference codebase identified (9 major ones)
-  - [x] Simple RAG vs Agentic RAG distinction
-  - [x] Video: RAG end-to-end (ingestion pipeline, retrieval, agentic RAG)
-  - [x] Embeddings & vector search deep dive
-  - [x] Chunking strategies advanced
-  - [x] Vector databases comparison
-  - [x] Retrieval & re-ranking
-  - [x] Prompt engineering for citations — implemented in Phase 5 (system prompt + source block format)
-  - [x] RAG evaluation (DeepEval/RAGAS metrics)
-  - [ ] Agents & routing — deferred to v2
+  ### Implementation Details
 
-  ### Key Kruiz Weaknesses to Avoid
-  1. No chunking strategy — need section-aware chunking (RecursiveCharacterTextSplitter within sections, with overlap)
-  2. Missing embedding pipeline — build end-to-end: chunk → embed → store
-  3. Metadata discarded at retrieval — keep full metadata for citations
-  4. No re-ranking — add cross-encoder for v2
-  5. Silent error handling — raise errors, don't return empty strings
-  6. Raw SQL everywhere — use pgvector in Supabase with RPC functions
-  7. Synchronous embedding calls — use async
-  8. No embedding versioning — track model version
-  9. Delete-and-reinsert pattern — use upserts
-  10. Without systematic evaluation, you have no way to know:
-    - Did changing your chunk size make retrieval better or worse?
-    - Is your embedding model good enough for scientific text?
-    - What's your hallucination rate?
+  Detailed RAG implementation walkthroughs (ingestion pipeline, retrieval pipeline, metadata schema, prompt templates, Phase-by-phase gotchas) moved to `context/archive/IMPLEMENTATION-HISTORY.md`. Load that file only when working on a specific subsystem or debugging something. The summary below is sufficient for catching up.
 
-  ## RAG Chatbot Implementation Context
+  **RAG v1 implementation summary**: PDF papers → IBM Docling extraction (with pymupdf bbox header detection) → section-aware chunking (RecursiveCharacterTextSplitter, 3200 chars ~800 tokens, 200 char overlap) → Voyage embeddings (`voyage-4-large`, 1024 dims, `document` for ingestion / `query` for retrieval) → pgvector storage (HNSW index). At query time: embed query → match_chunks RPC (cosine similarity, top-k) → format with `[Author, Year, p. X]` citation prompt → Gemini 2.5 Flash generates (temperature 0.3, max_tokens 8192). License-aware (all CC-BY). Streaming via SSE.
 
-  ### What We're Building
+  **Eval metrics (5 core)**: contextual relevancy, contextual recall, contextual precision, answer relevancy, faithfulness. Custom LLM-as-judge (primary, hand-written prompts). Cross-validated against Ragas (committed in ROADMAP Phase 1).
 
-  An exercise science chatbot that lives at `/features/chat` in the Flame Fitness app.                                                                                                                            
-  Users ask questions like "What rep range is best for hypertrophy?" and get answers                                                                                                                               
-  with cited research papers (author, year, journal).
+  **v2 architecture summary**: LangGraph router classifies intent → routes to one or more of three branches (literature/workout-data/exercise-info) → judge node verifies → retry or return. Full architecture + 10 open design questions in `context/FUTURE-PLANS.md`.
 
-  ### v1 Architecture (Simple RAG — build this first)
+  ## Build vs Buy Philosophy
+  ------------------------
 
-  PDF papers → Load → Chunk (with overlap) → Embed → Store in vector DB (with metadata)
+  This project is a *selective* build-from-primitives approach, not "reject all frameworks." The decision framework:
 
-  User question → Embed → Vector search → Top-k chunks returned
-  → Stuff into prompt with citation instructions → LLM generates cited answer
+  **Built custom where the value is in understanding or in tight fit:**
+  - v1 RAG orchestration (retrieve + generate as ~50 lines of direct httpx; no LangChain abstractions to hide what's happening)
+  - LLM-as-judge eval (5 metrics, hand-written prompts; the only way to understand RAG quality measurement is to write the judge yourself)
+  - Trace storage schema (rag_traces table tied to specific latency split + grounded flag + rewritten query — built to my system's failure modes, not generic)
+  - Ingestion pipeline (Docling + pymupdf hybrid header detection — domain-specific, not standard)
 
-  #### Ingestion Pipeline (offline, run once per paper)
-  1. Load PDFs using IBM Docling (DocLayNet ML model) — automatic layout analysis for columns, headers, tables
-  2. Section-aware chunking — RecursiveCharacterTextSplitter within sections (never across), with fixed-size fallback if no headers detected
-  3. Attach metadata to every chunk: title, authors, year, journal, DOI, category, license, section, chunk_index
-  4. Embed each chunk using Voyage AI `voyage-4-large` (1024-dim), `input_type: "document"`, batched in groups of ~200
-  5. Store chunk text + embedding + metadata in pgvector (Supabase)
-  6. SHA-256 content hash for deduplication (skip re-processing unchanged papers)
+  **Used frameworks where they solve real problems:**
+  - LangChain text splitters (chunking is solved; reinventing it would teach nothing new)
+  - LangGraph for v2 agentic flow (4-5 node state machine; matches day-job stack; abstractions earn their keep at this complexity)
+  - LangSmith for trace UI (building one would be wasted effort; native LangGraph integration is free; screenshot-worthy)
+  - Ragas for eval cross-validation (canonical reference implementation; the right tool for "validate my custom judge against the industry standard")
 
-  #### Retrieval Pipeline (online, every user query)
-  1. Embed the user's question with the SAME embedding model used for ingestion, `input_type: "query"`
-  2. Vector similarity search (cosine distance) to find top-k most relevant chunks
-  3. Return chunks WITH full metadata (needed for citations)
-  4. Format into prompt: "Answer using ONLY these sources. Cite as [Author, Year]."
-  5. LLM generates answer with citations
-  6. Handle "I don't know" — if no relevant chunks found, say so instead of hallucinating
-
-  #### Key Decisions
-  - **License-aware corpus**: Each paper tracks its CC license. For commercial use, filter to CC-BY/CC0 only. LLM synthesizes answers in its own words (never displays verbatim chunks) — most defensible RAG architecture for copyright.
-  - ONE vector database (pgvector in Supabase), not separate DBs per category
-  - Categories (nutrition, hypertrophy, strength) = metadata tags, not separate collections
-  - Vector search naturally handles topic matching across categories
-  - Direct API calls via httpx — no LangChain orchestration (only `langchain_text_splitters` standalone for chunking)
-  - Use async for embedding calls
-  - Voyage AI `input_type` param: `"document"` for ingestion, `"query"` for retrieval (improves retrieval quality)
-  - Batch embedding limit: ~200 chunks per call (120K token limit for voyage-4-large)
-  - LLM provider swappable via env var (Gemini 2.5 Flash default, OpenAI as alternative)
-  - Gemini auth: API key as query param (not Bearer header). Endpoint: `generativelanguage.googleapis.com/v1beta/models/{model}`
-  - System prompt via `system_instruction` field (separate from `contents` array)
-  - Two SSE hops for streaming: Gemini → backend (Gemini SSE) → browser (our SSE endpoint)
-  - `generate()` for eval (non-streaming, full response), `generate_stream()` for chat UI (streaming, real-time typing)
-  - Shared httpx AsyncClient per provider (module-level, cleaned up via FastAPI `lifespan` hook)
-
-  #### Metadata Schema Per Chunk
-  ```python
-  {
-      "text": "the actual chunk text...",
-      "metadata": {
-          "title": "Hypertrophic Effects of Rep Ranges",
-          "authors": "Schoenfeld et al.",
-          "year": 2017,
-          "journal": "Journal of Strength & Conditioning",
-          "doi": "10.1234/example",
-          "category": "hypertrophy",  # or "nutrition", "strength", etc.
-          "study_type": "meta-analysis",  # or "RCT", "review", etc.
-          "license": "CC-BY",  # CC0, CC-BY, CC-BY-NC, unknown, etc.
-          "section": "Results",
-          "chunk_index": 3,
-          "total_chunks": 12
-      }
-  }
-
-  Prompt Template Pattern
-
-  Answer the following question using ONLY the provided sources.
-  For every claim, cite the source as [Author, Year].
-  If the sources don't contain enough information, say
-  "I don't have enough research to answer this confidently."
-  Do NOT make up information.
-
-  Sources:
-  [1] Schoenfeld et al., 2017 (Journal of Strength & Conditioning):
-  "8-12 reps per set at 60-80% 1RM maximizes hypertrophic response..."
-
-  [2] Krieger, 2010 (Journal of Sports Medicine):
-  "Multiple sets produced 40% greater hypertrophy than single sets..."
-
-  Question: {user_question}
-
-  v2 Architecture (Agentic RAG — build after v1 works)
-
-  User question
-        │
-        ▼
-     Router (LLM classifies intent)
-        │
-        ├── "literature question"  →  RAG Pipeline (from v1)
-        │
-        ├── "workout data question" →  SQL query against workout tables
-        │                              (workouts, exercises, workout_sets)
-        │
-        └── "both" →  Run both, combine
-                       ("Research says 10-20 sets/week. You're doing 14.")
-
-  - Literature = unstructured text → vector search (same as v1)
-  - Workout data = structured numbers → SQL queries (different retrieval method)
-  - This is why a router is justified — fundamentally different data types
-
-  RAG Evaluation (How to Know It's Working)
-
-  5 core metrics to measure:
-  - Contextual Relevancy: Are retrieved chunks relevant to the question?
-  - Contextual Recall: Do retrieved chunks contain all needed info?
-  - Contextual Precision: Are more relevant chunks ranked higher?
-  - Answer Relevancy: Does the answer address the actual question?
-  - Faithfulness: Does the answer only use info from retrieved chunks (no hallucination)?
-
-  Custom eval pipeline with LLM-as-judge (no DeepEval/RAGAS dependency — fully custom for learning).
-
-  Tech Stack (Finalized)
-
-  - Backend: FastAPI (already in Flame Fitness)
-  - Vector DB: pgvector in Supabase (already using PostgreSQL)
-  - Embedding model: Voyage AI `voyage-4-large` (1024 dims)
-  - LLM: Gemini 2.5 Flash (cheapest, swappable via env var + wrapper)
-  - PDF loading: IBM Docling (DocLayNet ML model)
-  - Chunking: `langchain_text_splitters` (standalone, no LangChain orchestration)
-  - Observability: Custom TraceLogger → Supabase `rag_traces` table
-  - Streaming: SSE from FastAPI
-  - No LangChain orchestration, no LangSmith — fully custom for learning
+  **The narrative this supports:** every component choice has a defensible reason. Custom where understanding matters or where the system needs a tight fit. Frameworks where they're battle-tested and reinventing would just be reinventing. This is the kind of decision-making that lands a 1-YOE engineer at mid-level (Junior AI Engineer at Series A/B AI-first startups, or Software Engineer doing AI work at larger companies) — it signals trajectory, not "senior already."
