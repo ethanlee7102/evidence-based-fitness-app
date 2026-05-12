@@ -6,7 +6,9 @@ user_invocable: true
 
 # Ingest Papers — RAG Corpus Expansion
 
-This skill walks through the full pipeline for finding CC-BY research papers on PMC, ingesting them into the RAG vector database, and verifying quality. The workflow has natural pause points where the user needs to act (approving papers, downloading PDFs).
+This skill walks through the full pipeline for finding research papers on PMC, ingesting them into the RAG vector database, and verifying quality. The workflow has natural pause points where the user needs to act (approving papers, downloading PDFs).
+
+**License policy**: target CC-BY by default (keeps the corpus commercial-ready). Non-CC-BY Creative Commons papers (CC-BY-NC, CC-BY-NC-ND, etc.) MAY be ingested opportunistically when (a) the paper is high-value and (b) no CC-BY equivalent exists. The `license` column on `papers` must be populated with the exact CC variant — commercial-mode queries can then filter via `WHERE license IN ('CC0', 'CC-BY', 'CC-BY-SA', 'CC-BY-ND')`. Schema accepts: CC0, CC-BY, CC-BY-SA, CC-BY-ND, CC-BY-NC, CC-BY-NC-SA, CC-BY-NC-ND, other, unknown.
 
 ## Overview
 
@@ -37,11 +39,11 @@ Check what the user wants to expand. If they reference priorities, read `context
 
 Think about additional sub-topics the user might not have listed — common gym-goer questions that the chatbot should be able to answer in this category.
 
-### Step 2: Search PMC for CC-BY Papers
+### Step 2: Search PMC for Papers
 
 Use `WebSearch` to find papers on PMC. Run multiple searches in parallel across different topics.
 
-Search pattern:
+Primary search pattern (CC-BY target):
 ```
 PMC "<topic keyword>" resistance training review CC-BY site:pmc.ncbi.nlm.nih.gov
 ```
@@ -54,22 +56,74 @@ Aim for 6-15 papers per expansion batch depending on how many papers you see fit
 
 Before proceeding, cross-reference candidates against `apps/api/papers/manifest.json` to avoid suggesting papers already in the corpus. Check by DOI or title.
 
-### Step 3: Verify Licenses
+#### Author/Institution Quality Heuristic (soft preference, tiebreaker only)
 
-For each candidate paper, fetch the PMC page with `WebFetch` and confirm:
-- License is **CC-BY** (not CC-BY-NC, CC-BY-NC-ND, etc.)
-- Extract: exact title, authors (last name et al.), year, journal, DOI, PMC URL
+When two candidate papers cover similar ground, prefer the one from a researcher/group with established reputation in that sub-domain. This is a **tiebreaker, not a filter** — a strong paper from an unknown group still gets included.
+
+Trusted contemporary researchers by sub-domain (non-exhaustive):
+
+- **Hypertrophy / RT**: Brad Schoenfeld (CUNY Lehman), James Krieger, Stuart Phillips (McMaster), Michael Roberts / Daniel Plotkin (Auburn), Eric Helms (AUT), Andrew Vigotsky
+- **Strength / power / plyometrics**: G. Gregory Haff (Edith Cowan), Robert Newton (ECU), Rodrigo Ramirez-Campillo, Greg Nuckols / Eric Trexler (MASS)
+- **Nutrition**: Stuart Phillips, Bill Campbell (USF), Eric Helms. ⚠️ Jose Antonio (ISSN) is prolific but ISSN has industry funding — fine to include with awareness.
+- **Endurance**: Stephen Seiler, Iñigo San Millán
+- **Recovery**: Shona Halson (ACU)
+- **Mobility / flexibility**: David Behm (Memorial Newfoundland)
+- **Aging / sarcopenia**: Stuart Phillips, Roger Fielding
+
+Top institutions (treat as a positive signal): McMaster, CUNY Lehman, Auburn, AUT NZ, Edith Cowan, ACU, Liverpool John Moores.
+
+**Quality red flags** (these aren't auto-rejections, but warrant scrutiny):
+- Single-author papers in low-impact journals
+- Industry-funded supplement studies with no conflict disclosure
+- N<10 RCTs presenting as definitive
+- Hypertrophy/strength papers placed in off-topic outlets (e.g., a training study in *IJERPH* rather than *Sports Medicine* or *JSCR*)
+- Very recent (last ~12 months) primary studies with no citation history — usually better to wait for the meta-analysis that will integrate them
+
+These are heuristics, not gates. Domain-appropriate journals matter more than author names for unfamiliar topics, and a no-name group can produce excellent work — especially in less-studied sub-domains where the "top" researchers haven't published.
+
+#### Journal Quality Tiers (stronger signal than author heuristic — use this first)
+
+Journals carry more reliable quality signal than first-author names for our corpus, because most "trusted" authors appear as senior (last) authors and aren't visible from PMC search results without opening the paper. Journal tier is visible at a glance.
+
+**Tier 1 — Gold standard** (mostly paywalled, rare in PMC OA): *Medicine & Science in Sports & Exercise*, *Journal of Applied Physiology*, *Journal of Strength and Conditioning Research*, *International Journal of Sports Physiology and Performance*, *British Journal of Sports Medicine*, *American Journal of Sports Medicine*. Always accept on the rare occasion one is CC-BY in PMC.
+
+**Tier 2 — High quality, CC-BY available in PMC OA** (the sweet spot — prefer these): *Sports Medicine* (Springer), *Sports Medicine - Open*, *European Journal of Applied Physiology* (when CC-BY, not CC-BY-NC-ND), *BMC Sports Science, Medicine and Rehabilitation*, *Translational Sports Medicine*, *BMJ Open Sport & Exercise Medicine*, *Journal of Cachexia, Sarcopenia and Muscle*.
+
+**Tier 3 — Solid open-access workhorses** (always acceptable, the bulk of any OA corpus): *Frontiers in Physiology*, *Frontiers in Nutrition*, *Frontiers in Sports and Active Living*, *PeerJ*, *PLOS One*, *Journal of the International Society of Sports Nutrition* (⚠️ industry-tied — read funding disclosures on supplement papers), *Nutrition Reviews*.
+
+**Tier 4 — MDPI (variable quality — scrutinize per-paper)**: *Nutrients*, *Sports*, *Journal of Functional Morphology and Kinesiology*, *Healthcare*, *Journal of Clinical Medicine*, *Life*, *Cells*, *Biology*. Acceptable when the paper itself is rigorous (proper methodology, recent meta-analysis, sensible journal-topic fit) but check more carefully than Tier 1-3.
+
+**Tier 5 — Red flags (default-avoid)**:
+- ***International Journal of Environmental Research and Public Health*** (IJERPH) — delisted from Clarivate's Journal Citation Reports in 2023 over citation gaming. Avoid for new ingestion unless no alternative exists on the topic.
+- ***Cureus*** — low-bar peer review reputation; broad scope. Sanity-check methodology before accepting.
+
+**Specialty journals not in tiers above** (mostly fine for their niche): *European Heart Journal* (cardiology), *JAMA Network Open*, *Calcified Tissue International* (bone), *Bone Reports*, *Sleep & Breathing*, *Scientific Reports*, *Journal of Cachexia, Sarcopenia and Muscle* (aging). Accept on a per-paper basis when the topic fits.
+
+**Journal-topic fit also matters**: a hypertrophy meta-analysis in *Sports Medicine* is more credible than the same paper in a broad-scope outlet like *IJERPH* or *Healthcare*. Treat off-topic placement as a yellow flag even in Tier 4.
+
+### Step 3: Verify and Record Licenses
+
+For each candidate paper, fetch the PMC page with `WebFetch` and capture:
+- **Exact CC license string** — CC-BY, CC-BY-SA, CC-BY-ND, CC-BY-NC, CC-BY-NC-SA, CC-BY-NC-ND, CC0. Read it off the PMC copyright/license block; do not infer from the journal.
+- Exact title, authors (last name et al.), year, journal, DOI, PMC URL
 
 Run these in parallel (6+ at a time is fine).
 
-**Reject any paper that is not CC-BY.** No exceptions.
+**Acceptance rules:**
+- **CC-BY (and CC0, CC-BY-SA, CC-BY-ND)**: always accept if the paper is otherwise a good fit. These are the commercial-safe defaults.
+- **CC-BY-NC variants (CC-BY-NC, CC-BY-NC-SA, CC-BY-NC-ND)**: accept opportunistically when the paper is high-value AND no recent CC-BY equivalent exists on the topic. Flag these explicitly in the curated list (Step 4) so the user can confirm. Mark them as non-commercial in the manifest.
+- **Anything else** (custom license, all-rights-reserved, no machine-readable license): reject.
+
+When considering a non-CC-BY paper, briefly note in the curated list *why* it's worth ingesting despite the license (e.g., "only recent meta-analysis on this sub-topic" or "seminal paper, no CC-BY replacement").
 
 ### Step 4: Present Curated List
 
-Show the user a table with all verified papers:
+Show the user a table with all verified papers. Include the License column so non-CC-BY entries are obvious at a glance:
 
-| # | Category | Authors | Year | Title | Journal | PMC URL |
-|---|----------|---------|------|-------|---------|---------|
+| # | Category | Authors | Year | Title | Journal | License | PMC URL |
+|---|----------|---------|------|-------|---------|---------|---------|
+
+If any paper has a non-CC-BY license, add a short note below the table explaining why it's worth including despite the license (per Step 3 acceptance rules) so the user can confirm.
 
 Then provide the PMC URLs as a simple numbered list so the user can click through and download the PDFs.
 
@@ -112,6 +166,8 @@ Read the current `apps/api/papers/manifest.json` and append the new entries. Mat
 ```
 
 **Critical:** `study_type` must be lowercase (`"rct"` not `"RCT"`). Pydantic validation will reject uppercase.
+
+**Critical:** `license` must be the exact CC variant captured in Step 3 — one of `CC-BY`, `CC-BY-SA`, `CC-BY-ND`, `CC-BY-NC`, `CC-BY-NC-SA`, `CC-BY-NC-ND`, `CC0`. Do not default every paper to `CC-BY` without verifying. The commercial-mode query filter depends on this being accurate.
 
 ### Step 7: Run Ingestion
 
