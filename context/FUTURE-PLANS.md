@@ -91,6 +91,42 @@ When v2 work begins, discuss **#3 and #2 together first** — they interlock. Te
 
 ---
 
+## Corpus Quality Audits (added 2026-05-12)
+
+A journal-tier analysis of the 192-paper corpus surfaced specific quality concerns worth addressing. Not urgent — none of these papers are *broken*, but the corpus narrative is cleaner if low-tier sources are either replaced or explicitly flagged. Full tier list and current distribution snapshot in `MEMORY.md` "Journal Quality Tiers" section and `.claude/skills/ingest-papers/SKILL.md` Step 2.
+
+### Audit 1 — IJERPH papers (9 papers, highest priority)
+
+The *International Journal of Environmental Research and Public Health* was delisted from Clarivate's Journal Citation Reports in 2023 over citation patterns and impact-factor manipulation. 9 of our 192 papers come from it (~5% of corpus).
+
+**Action plan:**
+1. Pull the 9 papers from `manifest.json` with `journal == "International Journal of Environmental Research and Public Health"`. For each, capture: topic, category, study type, year, role in corpus (only/best source on a sub-topic, or one of many on a well-covered topic).
+2. For each paper, search PMC for a comparable CC-BY paper in a Tier 1-3 journal covering the same topic. Use the same recency + study-type bias as the standard ingestion workflow.
+3. Classify each:
+   - **Swap candidate** — a clearly-better CC-BY replacement exists. Action: ingest replacement, delete the IJERPH paper from corpus.
+   - **Load-bearing** — IJERPH paper is the only/best CC-BY source on a sub-topic. Action: keep, but add a `quality_flag: "tier5-journal"` field to its manifest entry so a future commercial-mode filter or eval analysis can isolate them.
+   - **Drop candidate** — paper is redundant (other papers in corpus cover the same ground from higher-tier sources). Action: delete from corpus.
+4. Re-run eval after swaps. Expect movement on `expected_papers` matching for any test cases that referenced swapped papers — these will need updates in `tests/eval/test_dataset.json`.
+
+**Cost:** ~2-3 hours search + ~1 hour ingestion + eval re-run. Low API cost (Voyage embedding only for replacements).
+
+### Audit 2 — Cureus papers (2 papers, medium priority)
+
+*Cureus* has a low-bar peer review reputation. 2 papers in the current corpus. Same triage approach as Audit 1 — likely both turn out to be drop or swap candidates. ~30 min of work.
+
+### Audit 3 — JISSN supplement papers (4 papers, low priority)
+
+*Journal of the International Society of Sports Nutrition* is Tier 3 (acceptable) but has industry-funding ties on supplement-focused papers. Action: read the funding disclosures on the 4 papers. If any have material conflicts of interest on a supplement they're evaluating, add `quality_flag: "industry-disclosure"` to its manifest entry. No swap needed — JISSN is acceptable; this is just transparency for the commercial-mode case. ~20 min.
+
+### Trigger
+
+Best done together as a single corpus-cleanup pass. Lowest priority of any active ROADMAP work — sequence: after Phase 2 retrieval improvements land (so eval re-run captures both retrieval + corpus quality effects in one pass). Could also be done opportunistically during the noise-chunk-cleanup step (Phase 2 step 12 in ROADMAP).
+
+### Prerequisites
+- Migration to add optional `quality_flag` column to `papers` table — only if we go with the flagging approach for load-bearing IJERPH papers. Alternative: add to manifest only and re-ingest if we want the flag in the DB.
+
+---
+
 ## Deferred Ideas (Low Priority, Reopen Only If Specific Trigger)
 
 These are documented future-possibility ideas. Not committed; revisit only if a specific need arises.

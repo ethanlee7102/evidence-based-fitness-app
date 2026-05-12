@@ -6,7 +6,7 @@ This file is intentionally short. It holds **current-state pointers** only. Impl
 
 ## Current State Snapshot
 
-- **RAG v1**: complete. 195 papers, ~8284 chunks, post-expansion eval **4.57/5** (pre-test-cleanup, scored 2026-03-19).
+- **RAG v1**: complete. 195 papers, ~8284 chunks, post-expansion eval **4.57/5** (pre-test-cleanup, scored 2026-03-19). All currently-ingested papers are CC-BY; license policy (updated 2026-05-12) now allows opportunistic non-CC-BY ingestion when a paper is high-value AND no CC-BY equivalent exists, with the exact CC variant recorded on the `papers.license` column. Commercial-mode queries filter via `WHERE license IN ('CC0', 'CC-BY', 'CC-BY-SA', 'CC-BY-ND')`.
 - **Test dataset**: cleaned 2026-05-10. 5 cases edited to remove test-authoring issues. Backup at `apps/api/tests/eval/test_dataset.json.bak.2026-05-10`. A fresh baseline rerun is in ROADMAP Phase 1.
 - **Workout logging**: complete (Phase 3). 9 tables, 28 API endpoints, full frontend (active workout modal, history, routines, exercise library).
 - **Exercise library**: complete. 386 EMG-backed exercises, 36 muscle groups (13 categories), 2,890 activation mappings.
