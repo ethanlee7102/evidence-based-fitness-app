@@ -18,9 +18,24 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from src.core.llm_provider import generate
+from src.core import anthropic_provider, llm_provider
+from src.utils.config import config
 
 logger = logging.getLogger(__name__)
+
+
+def _is_retryable_error(err: str) -> bool:
+    """True if a provider RuntimeError string carries a retryable HTTP status.
+
+    Both providers raise `RuntimeError("... API error <code>: <body>")`. Retry
+    on 429 (rate limit) and any 5xx — notably Anthropic's 529 (overloaded),
+    which the old `"503" in err` check silently missed.
+    """
+    match = re.search(r"API error (\d{3})", err)
+    if not match:
+        return False
+    code = int(match.group(1))
+    return code == 429 or code >= 500
 
 
 class JudgeParseError(ValueError):
@@ -363,28 +378,39 @@ async def _generate_with_retry(
     max_retries: int = 3,
     temperature: float = 0.0,
 ) -> str:
-    """Generate with retry on 429/503 transport errors.
+    """Generate with retry on transient transport errors (429 + 5xx).
 
     Backoff: 2s, 5s, 10s.
 
-    Note: `judge_model` is accepted for forward-compatibility but is not yet
-    wired through — `generate()` reads the model from `config.LLM_MODEL`.
-    Cross-model dispatch (Gemini vs Claude by model-ID prefix) lands in the
-    Anthropic-provider step of the eval cross-validation work.
+    Dispatches by `judge_model` prefix: `claude-*` routes to the Anthropic
+    provider, anything else to Gemini (the model is threaded into Gemini's
+    `generate` so a specific variant is actually used). `judge_model=None`
+    falls back to `config.LLM_MODEL` (the default Gemini judge).
     """
     delays = [2.0, 5.0, 10.0]
+    model = judge_model or config.LLM_MODEL
+    use_claude = model.startswith("claude-")
 
     for attempt in range(max_retries):
         try:
-            return await generate(
+            if use_claude:
+                return await anthropic_provider.generate(
+                    prompt=prompt,
+                    system=system,
+                    temperature=temperature,
+                    max_tokens=8192,
+                    model=model,
+                )
+            return await llm_provider.generate(
                 prompt=prompt,
                 system=system,
                 temperature=temperature,
                 max_tokens=8192,
+                model=model,
             )
         except RuntimeError as e:
             err = str(e)
-            if ("429" in err or "503" in err) and attempt < max_retries - 1:
+            if _is_retryable_error(err) and attempt < max_retries - 1:
                 delay = delays[attempt]
                 logger.warning(
                     f"Judge retryable error (attempt {attempt + 1}/{max_retries}), "

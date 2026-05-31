@@ -14,9 +14,9 @@ GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 client = httpx.AsyncClient(timeout=60.0)
 
 
-def _gemini_url(stream: bool = False) -> str:
+def _gemini_url(stream: bool = False, model: str | None = None) -> str:
     """Build the Gemini endpoint URL with API key."""
-    model = config.LLM_MODEL
+    model = model or config.LLM_MODEL
     if stream:
         return (
             f"{GEMINI_BASE_URL}/{model}:streamGenerateContent"
@@ -89,10 +89,15 @@ async def generate(
     temperature: float = 0.7,
     max_tokens: int = 2048,
     messages: list[dict] | None = None,
+    model: str | None = None,
 ) -> str:
     """Generate a full response (non-streaming).
 
     Used by the eval pipeline where we just need the final answer.
+
+    `model` overrides `config.LLM_MODEL` for a single call — used by the eval
+    judge dispatcher to select a specific Gemini variant. Cross-family judging
+    (Claude) is routed to `anthropic_provider.generate` upstream, not here.
     """
     if config.LLM_PROVIDER != "google":
         raise NotImplementedError(f"LLM provider '{config.LLM_PROVIDER}' not yet supported")
@@ -101,7 +106,7 @@ async def generate(
         raise ValueError("GOOGLE_API_KEY not configured")
 
     response = await client.post(
-        _gemini_url(stream=False),
+        _gemini_url(stream=False, model=model),
         headers={"Content-Type": "application/json"},
         json=_build_gemini_payload(prompt, system, temperature, max_tokens, messages),
     )

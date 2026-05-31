@@ -23,6 +23,9 @@ class Config:
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "google")
     LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 
+    # Anthropic (eval cross-validation judge only — lazy, never required at startup)
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+
     # RAG pipeline
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "800"))
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
