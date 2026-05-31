@@ -9,6 +9,58 @@ This diagnostic went through three rounds:
 
 Post-edit state: the eval test dataset now contains expected facts that are grounded in the source papers, so future eval runs will reflect pure retrieval performance rather than test-authoring artifacts.
 
+> **⚠️ 2026-05-30 — this diagnostic has been SUPERSEDED in scope by a full recall≤3 sweep.** The original analysis covered only the 9 recall=2 cases from the 2026-03-19 run. We have since classified **all 20 recall≤3 cases** against the fresh clean baseline (`run0_baseline_clean.json`) by reading every expected paper end-to-end (parallel sub-agent verification). See the new section **"Full recall≤3 classification (2026-05-30)"** below — it is now the authoritative classification. Headline change: **~7 of 20 cases are TEST-BOUND** (expected fact contradicts/ungrounded in source), far more than the original 5 — reranking cannot fix these.
+
+---
+
+## Full recall≤3 classification (2026-05-30) — AUTHORITATIVE
+
+Every test case scoring Contextual Recall ≤3 in `results/run0_baseline_clean.json` (20 cases), classified by reading each expected paper's full chunk set and cross-referencing live top-20 retrieval. Method: per-case sub-agent reads all expected-paper chunks end-to-end, locates the chunk that substantively supports each expected fact, and looks up that chunk's retrieval rank. Verified target chunks for the retrieval-fixable cases live in `RETRIEVAL-TARGET-CHUNKS.md`.
+
+**Summary: ~11 retrieval-fixable · 3 judge-bound · ~7 test-bound** (PROG-006 spans retrieval + test).
+
+### Retrieval-fixable (reranking / diversification will help — target chunks recorded)
+| Case | Class | Note |
+|---|---|---|
+| BC-010 | retrieval-bound | [orig 6] Ruiz-Castellano missing |
+| GEN-004 | retrieval-bound | [orig 6] Refalo/James missing (worst, rec=1) |
+| CVD-001 | retrieval-bound | [orig 6] Correia missing |
+| BFR-004 | retrieval-bound | [orig 6] Patterson missing |
+| STR-010 | chunk-miss | [orig 6] Thapa ch4 / Wang ch1 |
+| **GEN-001** | retrieval-bound | Tøien {14,9} + Govindasamy {2,3} entirely missing from top-20 |
+| **NUT-014** | chunk-miss | top-5 polluted by 4 reference-list chunks; answer chunks Williamson 6 (r11), Keenan 31 (r15), Ho 21 (deep) |
+| **NUT-022** | chunk-miss + saturation | Wicinski 4 ("56% inadequacy") & 10 (deficient-respond-more) deep-miss; Han fills 11/20 slots |
+| **BC-004** | chunk-miss | Ruiz ch7 (protein 2.3-3.1 g/kg FFM) + Lahav "only modality" ch8/10 deep-miss; Xie saturates top-13 |
+| **BFR-001** | chunk-miss | all mechanism chunks (Davids 7-13) + Patterson 5/8 (20-40% 1RM) outside top-20; def/ref chunks fill top-20 |
+| **PROG-006** | retrieval (facts 1-2) | Fonseca ch1 (technique list), ch0/78 (equivalence) — also has test issues, see below |
+
+### Judge-bound (answer chunk already in top-5; judge under-credited — needs judge work, not retrieval)
+| Case | Note |
+|---|---|
+| INJ-009 | [orig] Wu ch24 in top-5 |
+| **STR-014** | Shi facts in top-5 (ch1, 30); only the "accommodates strength curve" chunk 2 sits at rank 7. Minor: fact 1 over-claims "force" (paper finds velocity/power only, no force diff) |
+| **BC-006** | Slater facts in top-5 (ch25, 6, 5); only the "trained need modest surplus" nuance (ch24) at rank 16 |
+
+### Test-bound (expected fact contradicts or isn't grounded in the source — REQUIRES TEST EDIT; reranking cannot fix)
+| Case | Defective fact(s) | What the paper actually says |
+|---|---|---|
+| PROG-003 | [orig] both facts | Paoli 2017 doesn't claim either |
+| **BH-001** | fact 1 ("improves BMD at lumbar spine **and femoral neck**") | Massini 2022: positive at hip (0.64%) & spine (0.62%) **but NOT femoral neck (−0.22%)**; "preventive at best." Chang (the missing paper) is weak (no lumbar/FN data, never says "mechanostat", OVX-mice + running evidence) |
+| **STR-013** | fact 2 ("plyometrics produce greater sprint/jump improvements") | Morris 2022: WLT and PLYO produce **similar** improvements; PLYO only *speculatively* better at 40-100m. Fact 3 (WLT RFD advantage) weakly grounded |
+| **NUT-004** | fact 2 ("protein reduces DOMS") | Pearson 2023: protein had **no effect on soreness** ("unlikely beneficial"); Cintineo treats DOMS as unreliable marker. Fact 3 (timing/dose matters) contradicted by Pearson ("unaffected by type, timing, frequency, dose") |
+| **BH-002** | fact 3 ("NMA: high-load > low-load") + fact 4 ("weight-bearing > non-weight-bearing") | Wang 2023 NMA: **moderate (65-80% 1RM) is optimal, superior to high**. Kemmler 2020: effect "largely independent of type"; fact 4 ungrounded. Fact 2 contradicted by Kemmler |
+| **BH-007** | fact 1 ("both jumping **and resistance exercise** improve BMC") | Miao 2025: high-impact jumping improved BMC; **resistance exercise did NOT** (LS p=0.19, FN p=0.25) — jumping "significantly outperformed resistance exercise" |
+| **PROG-006** | fact 2 ("similar **or slightly greater** hypertrophy") + fact 3 ("time-efficient") | Fonseca 2023: **no difference** ("ADV does not induce superior hypertrophy"); "slightly greater" contradicted. Time-efficiency rationale **not in the paper** (it argues plateau-breaking) |
+
+### Status — 6 test edits APPLIED & re-scored (2026-05-30)
+The 6 test-bound cases in the table above (BH-001, STR-013, NUT-004, BH-002, BH-007, PROG-006) were edited to match their source papers — full treatment preserved (`_original_expected_facts`, `_edit_reason`, `_edited_date`); backup at `tests/eval/test_dataset.json.bak.2026-05-30`. Only those 6 cases were re-scored (the other 94 were unchanged from the same-day same-judge run0) and spliced back into `run0_baseline_clean.json`. **All 6 recall scores recovered: STR-013 3→4, NUT-004 3→4, PROG-006 3→5, BH-001 3→4, BH-002 3→4, BH-007 3→5** — confirming they were test-authoring artifacts, not retrieval failures (recall rose with zero retrieval changes). Baseline overall 4.57→**4.58**; Contextual Recall mean 4.1→**4.16**.
+- **PROG-006 now decoupled (like NUT-016):** recall = 5 with edited facts, but its ideal Fonseca chunks (1/0/78) are still outside top-5 — so judge it by the chunk metric in Phase 2, not recall. (PROG-003, the older test-bound case, remains unedited — folded into a future batch.)
+
+### Implications
+- **Test-quality is a bigger lever than the original diagnostic implied.** ~7 of 20 recall≤3 cases have defective expected facts. Fixing them is independent of Phase 2 and would itself raise Contextual Recall — AND prevents them from masking/diluting Phase 2's measured effect (e.g. BH-001/BH-007 will never improve under reranking because their facts contradict the corpus).
+- **The retrieval-fixable set grew from 6 → ~11.** New target chunks for GEN-001, NUT-014, NUT-022, BC-004, BFR-001 (+PROG-006 facts 1-2) are recorded in `RETRIEVAL-TARGET-CHUNKS.md` and added to `scripts/measure_target_chunks.py`.
+- **A recurring retrieval anti-pattern surfaced: reference-list chunk pollution.** NUT-014 had 4 of its top-5 slots occupied by reference-list/back-matter chunks (one mislabeled "AUTHOR CONTRIBUTIONS"). This is direct evidence for ROADMAP Phase 2 noise-chunk cleanup (decision #10) — it's not just diversification/reranking.
+
 ---
 
 ## Headline Results
@@ -27,6 +79,20 @@ Post-edit state: the eval test dataset now contains expected facts that are grou
 | **Test-authoring issues (resolved)** | — | NUT-016 fact 3, BC-010 fact 3, GEN-004 facts 2&3, CVD-003 fact 2, STR-010 fact 4 | **Resolved 2026-05-10** — facts rewritten or removed |
 | **Test-bound (unresolved)** | 1 | PROG-003 | Paoli 2017 doesn't claim either expected fact. Separate decision needed: rewrite or swap source paper. |
 | **Corpus gap** | 0 | — | — |
+
+---
+
+## Re-verification — 2026-05-30 (fresh clean baseline + live retrieval)
+
+This diagnostic was written against `post_expansion.json` (2026-03-19). It was re-verified against the fresh clean baseline (`run0_baseline_clean.json`, 4.57/5) plus a live `measure_target_chunks.py` retrieval run. **The classifications still hold.** Findings:
+
+- **Single-paper saturation is unchanged.** Live retrieval still returns 5/5 top-5 chunks from the single dominant paper for NUT-016 (Kazeminasab), GEN-004 (Nuckols), CVD-001 (Edwards), BFR-004 (Nascimento); BC-010 still 2 Berg + 3 Willoughby. **0/15 primary target chunks reach top-5; only 3/15 reach top-20.** Full snapshot: `RETRIEVAL-TARGET-CHUNKS.md` § Baseline Measurement + `results/target_chunks_baseline.json`.
+- **Chunk indices are stable** (no reingestion drift): STR-010's prediction reproduced exactly — Wang ch1 at rank 6 (top-20, not top-5), Thapa ch4 absent from top-20.
+- **Fresh per-case recall** (vs the recall=2 these all had on 2026-03-19): NUT-016 **4**, BC-010 **2**, GEN-004 **1**, CVD-001 **3**, BFR-004 **3**, STR-010 **2**. The corpus-wide Contextual Recall mean held at **4.1**.
+- **⚠️ NUT-016 decoupling**: recall rose 2→4 from the *test edit* (removed contradicted VO2max fact), NOT from retrieval — saturation persists (0/2 targets). Measure NUT-016 by the chunk metric in Phase 2, not the recall score (no headroom left). See `RETRIEVAL-TARGET-CHUNKS.md` for the full note.
+- **Saturation extends into recall=3**: CVD-001 and BFR-004 are now recall=3 (were 2) but retrieval is identically saturated — confirming the "What This Diagnostic Does Not Cover" caveat below that the pattern reaches recall=3 cases.
+
+Bottom line: the 6 retrieval-bound cases are confirmed retrieval-bound against current code. Phase 2 (diversification + reranking) starts from a measured `0/15` and is judged against `RETRIEVAL-TARGET-CHUNKS.md`.
 
 ---
 

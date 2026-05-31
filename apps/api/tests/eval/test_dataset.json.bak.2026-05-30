@@ -382,8 +382,8 @@
     "category": "strength",
     "expected_facts": [
       "Weightlifting, traditional RT, and plyometrics all improve strength, power, and speed but with different magnitudes",
-      "Weightlifting and plyometrics produce similar improvements in sprint speed and jump performance, with plyometrics potentially more effective only over longer sprint distances",
-      "Weightlifting may offer advantages for velocity and speed-strength qualities due to the high load and high-velocity nature of the movements"
+      "Plyometrics tend to produce greater improvements in sprint speed and jump performance",
+      "Weightlifting may offer advantages for rate of force development due to the high-velocity nature of the movements"
     ],
     "expected_papers": [
       "Morris 2022"
@@ -395,14 +395,7 @@
       "plyometrics",
       "power",
       "comparison"
-    ],
-    "_original_expected_facts": [
-      "Weightlifting, traditional RT, and plyometrics all improve strength, power, and speed but with different magnitudes",
-      "Plyometrics tend to produce greater improvements in sprint speed and jump performance",
-      "Weightlifting may offer advantages for rate of force development due to the high-velocity nature of the movements"
-    ],
-    "_edit_reason": "Fact 1 contradicted Morris 2022 (WLT and PLYO produced SIMILAR sprint/jump improvements, not PLYO superior; PLYO only speculatively better at 40-100m). Fact 2 RFD framed as comparative outcome but paper only describes velocity/speed-strength advantage. Rewrote both.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "STR-014",
@@ -474,9 +467,9 @@
     "question": "Does protein supplementation help with recovery from exercise-induced muscle damage?",
     "category": "nutrition",
     "expected_facts": [
-      "Protein supplementation may attenuate markers of muscle damage (e.g. creatine kinase) after resistance exercise",
-      "Protein supplementation does not reliably reduce delayed-onset muscle soreness (DOMS)",
-      "Once total daily protein intake is adequate, the timing and dose of protein have little additional effect on recovery from muscle damage"
+      "Protein supplementation may attenuate markers of muscle damage after resistance exercise",
+      "Protein can help reduce delayed-onset muscle soreness (DOMS)",
+      "The timing and amount of protein may influence recovery outcomes"
     ],
     "expected_papers": [
       "Pearson 2023",
@@ -488,14 +481,7 @@
       "protein",
       "recovery",
       "multi-paper"
-    ],
-    "_original_expected_facts": [
-      "Protein supplementation may attenuate markers of muscle damage after resistance exercise",
-      "Protein can help reduce delayed-onset muscle soreness (DOMS)",
-      "The timing and amount of protein may influence recovery outcomes"
-    ],
-    "_edit_reason": "Fact 1 contradicted both Pearson 2023 (\"protein had no effect on muscle soreness\", \"unlikely beneficial\") and Cintineo 2018. Fact 2 contradicted by Pearson (\"unaffected by type, timing, frequency, dose\"). Rewrote to match findings; fact 0 (CK attenuation) is supported and kept.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "NUT-005",
@@ -628,7 +614,7 @@
     ],
     "expected_papers": [
       "Kazeminasab 2025",
-      "Conde-Pipó 2024",
+      "Conde-Pip\u00f3 2024",
       "Aragon 2022"
     ],
     "difficulty": "medium",
@@ -639,7 +625,7 @@
       "fat-loss",
       "multi-paper"
     ],
-    "_edit_reason": "Fact 3 (VO2max reduced) contradicted by Conde-Pipó 2024 ch20 conclusion which says IF does NOT negatively affect aerobic performance. Rewrote to match paper finding.",
+    "_edit_reason": "Fact 3 (VO2max reduced) contradicted by Conde-Pip\u00f3 2024 ch20 conclusion which says IF does NOT negatively affect aerobic performance. Rewrote to match paper finding.",
     "_edited_date": "2026-05-10",
     "_original_expected_facts": [
       "IF generally does not significantly impair strength and anaerobic exercise performance",
@@ -767,7 +753,7 @@
     "expected_facts": [
       "Iron deficiency impairs oxygen transport (hemoglobin) and energy metabolism, reducing aerobic capacity and endurance",
       "Female athletes are at higher risk due to menstrual blood losses, with prevalence of iron deficiency reported at 40-50%+",
-      "Oral iron supplementation can improve serum ferritin levels, with greatest benefit when baseline ferritin is very low (≤12 μg/L)"
+      "Oral iron supplementation can improve serum ferritin levels, with greatest benefit when baseline ferritin is very low (\u226412 \u03bcg/L)"
     ],
     "expected_papers": [
       "Smid 2024",
@@ -859,7 +845,7 @@
       "The negative effects on hypertrophy may be due to blunting of the inflammatory signaling needed for adaptation"
     ],
     "expected_papers": [
-      "Piñero 2024",
+      "Pi\u00f1ero 2024",
       "Moore 2022"
     ],
     "difficulty": "medium",
@@ -876,7 +862,7 @@
     "expected_facts": [
       "Sleep deprivation negatively impacts physical performance, with an average decrease of roughly 7-8%",
       "Strength and power output can be impaired by acute sleep loss",
-      "The pattern of sleep loss matters — total deprivation is worse than partial restriction"
+      "The pattern of sleep loss matters \u2014 total deprivation is worse than partial restriction"
     ],
     "expected_papers": [
       "Craven 2022",
@@ -940,7 +926,7 @@
       "Higher doses of alcohol have more detrimental effects on recovery than moderate doses"
     ],
     "expected_papers": [
-      "Lakićević 2019"
+      "Laki\u0107evi\u0107 2019"
     ],
     "difficulty": "easy",
     "tags": [
@@ -1147,7 +1133,7 @@
   },
   {
     "id": "MOB-003",
-    "question": "What type of stretching is best for improving range of motion — static, dynamic, PNF, or ballistic?",
+    "question": "What type of stretching is best for improving range of motion \u2014 static, dynamic, PNF, or ballistic?",
     "category": "mobility",
     "expected_facts": [
       "Static stretching, dynamic stretching, and PNF stretching all acutely increase range of motion",
@@ -1258,7 +1244,7 @@
     ],
     "expected_papers": [
       "Delaire 2025",
-      "Tøien 2025",
+      "T\u00f8ien 2025",
       "Govindasamy 2025"
     ],
     "difficulty": "medium",
@@ -1724,8 +1710,8 @@
     "category": "programming",
     "expected_facts": [
       "Advanced techniques include drop sets, rest-pause, supersets, forced reps, and pre-exhaustion",
-      "These techniques produce similar hypertrophy compared to traditional training, with no significant additional benefit shown in trained individuals",
-      "They are primarily used to add training variety and break through plateaus rather than for proven superior hypertrophy outcomes"
+      "These techniques can produce similar or slightly greater hypertrophy compared to traditional methods",
+      "They are particularly useful for time-efficient training as they allow more work in less time"
     ],
     "expected_papers": [
       "Krzysztofik 2019",
@@ -1738,14 +1724,7 @@
       "drop-sets",
       "rest-pause",
       "multi-paper"
-    ],
-    "_original_expected_facts": [
-      "Advanced techniques include drop sets, rest-pause, supersets, forced reps, and pre-exhaustion",
-      "These techniques can produce similar or slightly greater hypertrophy compared to traditional methods",
-      "They are particularly useful for time-efficient training as they allow more work in less time"
-    ],
-    "_edit_reason": "Fact 1 over-claimed: Fonseca 2023 found NO difference (\"ADV does not induce superior hypertrophy\"), so \"slightly greater\" contradicted. Fact 2 (time-efficiency) not in Fonseca — its rationale is plateau-breaking/stimulus variation. Rewrote both; fact 0 (technique list) kept.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "PROG-008",
@@ -1918,9 +1897,9 @@
     "question": "Does resistance training improve bone mineral density?",
     "category": "injury",
     "expected_facts": [
-      "Resistance training produces small positive effects on bone mineral density at the hip and lumbar spine, but not consistently at the femoral neck; the effect is best characterized as preventive against age-related bone loss",
-      "The mechanical loading from resistance exercise stimulates bone formation through mechanotransduction (osteocytes sensing mechanical strain)",
-      "RT is effective for both older adults and postmenopausal women in maintaining or modestly increasing BMD"
+      "Resistance training significantly improves bone mineral density at the lumbar spine and femoral neck",
+      "The mechanical loading from resistance exercise stimulates bone formation through the mechanostat mechanism",
+      "RT is effective for both older adults and postmenopausal women in maintaining or increasing BMD"
     ],
     "expected_papers": [
       "Massini 2022",
@@ -1932,24 +1911,17 @@
       "resistance-training",
       "BMD",
       "multi-paper"
-    ],
-    "_original_expected_facts": [
-      "Resistance training significantly improves bone mineral density at the lumbar spine and femoral neck",
-      "The mechanical loading from resistance exercise stimulates bone formation through the mechanostat mechanism",
-      "RT is effective for both older adults and postmenopausal women in maintaining or increasing BMD"
-    ],
-    "_edit_reason": "Fact 0 contradicted Massini 2022 (RT improved hip 0.64% + spine 0.62% but NOT femoral neck -0.22%; \"preventive at best\"). Fact 1 \"mechanostat\" term not used by either paper (they describe mechanotransduction). Rewrote to match.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "BH-002",
     "question": "What exercise types and resistance training protocols are most effective for improving bone density in postmenopausal women?",
     "category": "injury",
     "expected_facts": [
-      "High-intensity resistance training and high-impact exercises are among the most effective approaches for improving BMD",
-      "Combining resistance and impact training is commonly recommended, though evidence that it outperforms either alone is mixed",
-      "A network meta-analysis found moderate-intensity resistance training (65-80% 1RM) to be the optimal protocol for improving BMD, superior to high-intensity",
-      "Exercise benefits on BMD appear largely independent of the specific exercise type, though weight-bearing and impact loading are commonly recommended"
+      "High-intensity resistance training and high-impact exercises are most effective for improving BMD",
+      "Combined resistance and impact training produces better results than either alone",
+      "Network meta-analysis shows high-load RT protocols produce greater BMD improvements than low-load",
+      "Weight-bearing exercise is superior to non-weight-bearing activities for bone health"
     ],
     "expected_papers": [
       "Kemmler 2020",
@@ -1963,15 +1935,7 @@
       "exercise-types",
       "RT-protocols",
       "multi-paper"
-    ],
-    "_original_expected_facts": [
-      "High-intensity resistance training and high-impact exercises are most effective for improving BMD",
-      "Combined resistance and impact training produces better results than either alone",
-      "Network meta-analysis shows high-load RT protocols produce greater BMD improvements than low-load",
-      "Weight-bearing exercise is superior to non-weight-bearing activities for bone health"
-    ],
-    "_edit_reason": "Fact 2 inverted Wang 2023 NMA (found MODERATE intensity 65-80% 1RM optimal, superior to high — not high>low). Fact 3 (WB>non-WB) ungrounded; Kemmler 2020 found effects \"largely independent of exercise type\". Fact 1 (\"combined > either alone\") contradicted by Kemmler. Rewrote 1-3; fact 0 (Manaye) kept.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "BH-003",
@@ -2021,7 +1985,7 @@
     "question": "Is high-impact exercise like jumping better than weight training for bone health in young people?",
     "category": "injury",
     "expected_facts": [
-      "High-impact jumping improves bone mineral content at the lumbar spine and femoral neck, whereas resistance exercise did not produce significant BMC gains in this analysis",
+      "Both high-impact jumping and resistance exercise improve bone mineral content in children and adolescents",
       "Jumping exercises may be particularly effective for lower-body skeletal sites",
       "Building peak bone mass during youth through exercise is important for lifelong fracture prevention"
     ],
@@ -2034,14 +1998,7 @@
       "youth",
       "jumping",
       "impact-training"
-    ],
-    "_original_expected_facts": [
-      "Both high-impact jumping and resistance exercise improve bone mineral content in children and adolescents",
-      "Jumping exercises may be particularly effective for lower-body skeletal sites",
-      "Building peak bone mass during youth through exercise is important for lifelong fracture prevention"
-    ],
-    "_edit_reason": "Fact 0 contradicted Miao 2025: high-impact jumping improved BMC but resistance exercise did NOT (LS p=0.19, FN p=0.25); jumping \"significantly outperformed resistance exercise\". Rewrote fact 0; facts 1-2 supported and kept.",
-    "_edited_date": "2026-05-30"
+    ]
   },
   {
     "id": "BFR-001",
@@ -2088,7 +2045,7 @@
   },
   {
     "id": "BFR-003",
-    "question": "What are the recommended protocols for blood flow restriction training — pressure, sets, reps, and frequency?",
+    "question": "What are the recommended protocols for blood flow restriction training \u2014 pressure, sets, reps, and frequency?",
     "category": "hypertrophy",
     "expected_facts": [
       "Cuff pressure is typically set at 40-80% of limb occlusion pressure, with wider cuffs requiring lower pressures",

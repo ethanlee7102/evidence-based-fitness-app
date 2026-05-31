@@ -19,9 +19,16 @@ import re
 from dataclasses import dataclass, field
 
 from src.core.llm_provider import generate
-from src.utils.config import config
 
 logger = logging.getLogger(__name__)
+
+
+class JudgeParseError(ValueError):
+    """Raised when a judge response cannot be parsed into a valid score.
+
+    Distinct from transport errors (429/503). Triggers a regenerate-and-retry
+    in `_generate_and_parse` rather than the old silent fall-through to score 3.
+    """
 
 
 # --- Dataclasses ---
@@ -255,194 +262,62 @@ def _format_chunks_for_judge(chunks: list) -> str:
     return "\n\n".join(parts)
 
 
-def extract_score(response: str) -> tuple[int, str, dict]:
-    """Extract score, reasoning, and extras from judge response.
+def _extract_json_block(text: str) -> str:
+    """Return the JSON object substring from a model response.
 
-    Tries JSON parsing first, falls back to regex for 'Score: X' pattern.
-    Returns (score, reasoning, extra_dict).
+    Strips markdown code fences (```json ... ```), then grabs the first
+    `{...}` block. Raises JudgeParseError if none is present.
+    """
+    cleaned = re.sub(r"```(?:json)?", "", text)
+    match = re.search(r"\{[\s\S]*\}", cleaned)
+    if not match:
+        raise JudgeParseError("No JSON object found in response")
+    return match.group()
+
+
+def _parse_single_score(response: str) -> MetricScore:
+    """Parse a single-metric judge response into a MetricScore.
+
+    Tries JSON first, then a 'Score: X' regex fallback. Raises JudgeParseError
+    only when both fail — that signal is what drives a regenerate retry.
     """
     # Try JSON parsing first
     try:
-        # Find JSON in response (may have surrounding text)
-        json_match = re.search(r"\{[\s\S]*\}", response)
-        if json_match:
-            data = json.loads(json_match.group())
-            score = int(data.get("score", 0))
+        data = json.loads(_extract_json_block(response))
+        score = int(data.get("score"))
+        if 1 <= score <= 5:
             reasoning = data.get("reasoning", "")
             extra = {
-                k: v
-                for k, v in data.items()
-                if k not in ("score", "reasoning")
+                k: v for k, v in data.items() if k not in ("score", "reasoning")
             }
-            if 1 <= score <= 5:
-                return score, reasoning, extra
-    except (json.JSONDecodeError, ValueError, KeyError):
+            return MetricScore(score=score, reasoning=reasoning, extra=extra)
+    except (JudgeParseError, json.JSONDecodeError, ValueError, TypeError, KeyError):
         pass
 
-    # Regex fallback
+    # Regex fallback: bare 'Score: X'
     score_match = re.search(r"[Ss]core:\s*(\d)", response)
     if score_match:
         score = int(score_match.group(1))
         if 1 <= score <= 5:
-            return score, response, {}
+            return MetricScore(score=score, reasoning=response, extra={})
 
-    logger.warning(f"Could not extract score from response: {response[:200]}")
-    return 3, f"Score extraction failed. Raw: {response[:500]}", {}
+    raise JudgeParseError(
+        f"Could not extract a 1-5 score from response: {response[:200]}"
+    )
 
 
-async def _generate_with_retry(
-    prompt: str,
-    system: str,
-    judge_model: str | None = None,
-    max_retries: int = 3,
-) -> str:
-    """Generate with retry on 429/503 errors.
+def _parse_combined_response(response: str) -> JudgeResult:
+    """Parse a combined (all-5-metric) judge response into a JudgeResult.
 
-    Backoff: 2s, 5s, 10s.
+    Raises JudgeParseError if the response has no parseable JSON object — that
+    is the STR-007/PROG-008 failure mode and is what triggers a retry. A parsed
+    object that is merely missing an individual metric key degrades that one
+    metric to 3 (a regenerate is unlikely to help a structurally-valid reply).
     """
-    delays = [2.0, 5.0, 10.0]
-    model = judge_model or config.LLM_MODEL
-
-    for attempt in range(max_retries):
-        try:
-            return await generate(
-                prompt=prompt,
-                system=system,
-                temperature=0.0,
-                max_tokens=8192,
-            )
-        except RuntimeError as e:
-            err = str(e)
-            if ("429" in err or "503" in err) and attempt < max_retries - 1:
-                delay = delays[attempt]
-                logger.warning(
-                    f"Judge retryable error (attempt {attempt + 1}/{max_retries}), "
-                    f"retrying in {delay}s..."
-                )
-                await asyncio.sleep(delay)
-            else:
-                raise
-
-    # Should not reach here, but just in case
-    raise RuntimeError("Max retries exceeded for judge generation")
-
-
-# --- Individual Judge Functions ---
-
-
-async def judge_contextual_relevancy(
-    question: str,
-    chunks: list,
-    judge_model: str | None = None,
-) -> MetricScore:
-    """Score how relevant the retrieved chunks are to the question."""
-    prompt = CONTEXTUAL_RELEVANCY_PROMPT.format(
-        question=question,
-        chunks=_format_chunks_for_judge(chunks),
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    score, reasoning, extra = extract_score(response)
-    return MetricScore(score=score, reasoning=reasoning, extra=extra)
-
-
-async def judge_contextual_recall(
-    expected_facts: list[str],
-    chunks: list,
-    judge_model: str | None = None,
-) -> MetricScore:
-    """Score whether chunks contain the expected facts."""
-    facts_text = "\n".join(f"- {fact}" for fact in expected_facts)
-    prompt = CONTEXTUAL_RECALL_PROMPT.format(
-        expected_facts=facts_text,
-        chunks=_format_chunks_for_judge(chunks),
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    score, reasoning, extra = extract_score(response)
-    return MetricScore(score=score, reasoning=reasoning, extra=extra)
-
-
-async def judge_contextual_precision(
-    question: str,
-    chunks: list,
-    judge_model: str | None = None,
-) -> MetricScore:
-    """Score whether the most relevant chunks are ranked highest."""
-    prompt = CONTEXTUAL_PRECISION_PROMPT.format(
-        question=question,
-        chunks=_format_chunks_for_judge(chunks),
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    score, reasoning, extra = extract_score(response)
-    return MetricScore(score=score, reasoning=reasoning, extra=extra)
-
-
-async def judge_answer_relevancy(
-    question: str,
-    answer: str,
-    judge_model: str | None = None,
-) -> MetricScore:
-    """Score how well the answer addresses the question."""
-    prompt = ANSWER_RELEVANCY_PROMPT.format(
-        question=question,
-        answer=answer,
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    score, reasoning, extra = extract_score(response)
-    return MetricScore(score=score, reasoning=reasoning, extra=extra)
-
-
-async def judge_faithfulness(
-    chunks: list,
-    answer: str,
-    judge_model: str | None = None,
-) -> MetricScore:
-    """Score whether the answer is faithful to the chunks (no hallucination)."""
-    prompt = FAITHFULNESS_PROMPT.format(
-        chunks=_format_chunks_for_judge(chunks),
-        answer=answer,
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    score, reasoning, extra = extract_score(response)
-    return MetricScore(score=score, reasoning=reasoning, extra=extra)
-
-
-# --- Combined Judge ---
-
-
-async def judge_combined(
-    question: str,
-    expected_facts: list[str],
-    chunks: list,
-    answer: str,
-    judge_model: str | None = None,
-) -> JudgeResult:
-    """Score all 5 metrics in a single LLM call."""
-    facts_text = "\n".join(f"- {fact}" for fact in expected_facts)
-    prompt = COMBINED_PROMPT.format(
-        question=question,
-        expected_facts=facts_text,
-        chunks=_format_chunks_for_judge(chunks),
-        answer=answer,
-    )
-    response = await _generate_with_retry(prompt, JUDGE_SYSTEM, judge_model)
-    logger.debug(f"Combined judge raw response: {response[:500]}")
-
-    # Parse the combined JSON response
     try:
-        json_match = re.search(r"\{[\s\S]*\}", response)
-        if not json_match:
-            raise ValueError("No JSON found in combined response")
-        data = json.loads(json_match.group())
+        data = json.loads(_extract_json_block(response))
     except (json.JSONDecodeError, ValueError) as e:
-        logger.warning(f"Combined judge parse failed: {e}. Using fallback scores.")
-        fallback = MetricScore(score=3, reasoning=f"Parse failed: {str(e)}")
-        return JudgeResult(
-            contextual_relevancy=fallback,
-            contextual_recall=fallback,
-            contextual_precision=fallback,
-            answer_relevancy=fallback,
-            faithfulness=fallback,
-        )
+        raise JudgeParseError(f"Invalid combined JSON: {e}") from e
 
     def _parse_metric(key: str) -> MetricScore:
         metric_data = data.get(key, {})
@@ -465,6 +340,231 @@ async def judge_combined(
         answer_relevancy=_parse_metric("answer_relevancy"),
         faithfulness=_parse_metric("faithfulness"),
     )
+
+
+def extract_score(response: str) -> tuple[int, str, dict]:
+    """Extract score, reasoning, and extras from a single-metric judge response.
+
+    Backward-compatible wrapper around `_parse_single_score`. Non-raising:
+    falls back to (3, ...) when the response is unparseable.
+    """
+    try:
+        ms = _parse_single_score(response)
+        return ms.score, ms.reasoning, ms.extra
+    except JudgeParseError:
+        logger.warning(f"Could not extract score from response: {response[:200]}")
+        return 3, f"Score extraction failed. Raw: {response[:500]}", {}
+
+
+async def _generate_with_retry(
+    prompt: str,
+    system: str,
+    judge_model: str | None = None,
+    max_retries: int = 3,
+    temperature: float = 0.0,
+) -> str:
+    """Generate with retry on 429/503 transport errors.
+
+    Backoff: 2s, 5s, 10s.
+
+    Note: `judge_model` is accepted for forward-compatibility but is not yet
+    wired through — `generate()` reads the model from `config.LLM_MODEL`.
+    Cross-model dispatch (Gemini vs Claude by model-ID prefix) lands in the
+    Anthropic-provider step of the eval cross-validation work.
+    """
+    delays = [2.0, 5.0, 10.0]
+
+    for attempt in range(max_retries):
+        try:
+            return await generate(
+                prompt=prompt,
+                system=system,
+                temperature=temperature,
+                max_tokens=8192,
+            )
+        except RuntimeError as e:
+            err = str(e)
+            if ("429" in err or "503" in err) and attempt < max_retries - 1:
+                delay = delays[attempt]
+                logger.warning(
+                    f"Judge retryable error (attempt {attempt + 1}/{max_retries}), "
+                    f"retrying in {delay}s..."
+                )
+                await asyncio.sleep(delay)
+            else:
+                raise
+
+    # Should not reach here, but just in case
+    raise RuntimeError("Max retries exceeded for judge generation")
+
+
+# Temperatures used across parse-retry attempts. The judge runs at 0.0 for
+# determinism, but Gemini at temp 0 tends to reproduce an identical (and
+# identically-malformed) reply — so each retry nudges temperature up to sample
+# a genuinely different response that has a chance of parsing.
+_PARSE_RETRY_TEMPERATURES = [0.0, 0.3, 0.6]
+
+
+async def _generate_and_parse(
+    prompt: str,
+    system: str,
+    parse_fn,
+    judge_model: str | None = None,
+):
+    """Generate a judge response and parse it, regenerating on parse failure.
+
+    Transport errors (429/503) are retried inside `_generate_with_retry`.
+    `JudgeParseError` (malformed/truncated JSON) triggers a fresh generation at
+    a higher temperature. After all attempts are exhausted the final
+    JudgeParseError propagates so the caller can apply its own fallback.
+
+    `parse_fn` maps a raw response string to the parsed result and must raise
+    `JudgeParseError` when the response is unusable.
+    """
+    last_err: JudgeParseError | None = None
+    for attempt, temperature in enumerate(_PARSE_RETRY_TEMPERATURES):
+        response = await _generate_with_retry(
+            prompt, system, judge_model, temperature=temperature
+        )
+        try:
+            return parse_fn(response)
+        except JudgeParseError as e:
+            last_err = e
+            logger.warning(
+                f"Judge parse failed (attempt {attempt + 1}/"
+                f"{len(_PARSE_RETRY_TEMPERATURES)}, temp={temperature}): {e}"
+            )
+            if attempt < len(_PARSE_RETRY_TEMPERATURES) - 1:
+                await asyncio.sleep(2.0)
+
+    assert last_err is not None
+    raise last_err
+
+
+# --- Individual Judge Functions ---
+
+
+async def _run_single_judge(
+    prompt: str,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Generate + parse a single-metric judge call, with regenerate-on-parse-fail.
+
+    Falls back to score 3 only after the regenerate retries are exhausted —
+    not on the first malformed reply.
+    """
+    try:
+        return await _generate_and_parse(
+            prompt, JUDGE_SYSTEM, _parse_single_score, judge_model
+        )
+    except JudgeParseError as e:
+        logger.warning(f"Single judge parse failed after retries: {e}")
+        return MetricScore(
+            score=3, reasoning=f"Score extraction failed after retries: {e}"
+        )
+
+
+async def judge_contextual_relevancy(
+    question: str,
+    chunks: list,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Score how relevant the retrieved chunks are to the question."""
+    prompt = CONTEXTUAL_RELEVANCY_PROMPT.format(
+        question=question,
+        chunks=_format_chunks_for_judge(chunks),
+    )
+    return await _run_single_judge(prompt, judge_model)
+
+
+async def judge_contextual_recall(
+    expected_facts: list[str],
+    chunks: list,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Score whether chunks contain the expected facts."""
+    facts_text = "\n".join(f"- {fact}" for fact in expected_facts)
+    prompt = CONTEXTUAL_RECALL_PROMPT.format(
+        expected_facts=facts_text,
+        chunks=_format_chunks_for_judge(chunks),
+    )
+    return await _run_single_judge(prompt, judge_model)
+
+
+async def judge_contextual_precision(
+    question: str,
+    chunks: list,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Score whether the most relevant chunks are ranked highest."""
+    prompt = CONTEXTUAL_PRECISION_PROMPT.format(
+        question=question,
+        chunks=_format_chunks_for_judge(chunks),
+    )
+    return await _run_single_judge(prompt, judge_model)
+
+
+async def judge_answer_relevancy(
+    question: str,
+    answer: str,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Score how well the answer addresses the question."""
+    prompt = ANSWER_RELEVANCY_PROMPT.format(
+        question=question,
+        answer=answer,
+    )
+    return await _run_single_judge(prompt, judge_model)
+
+
+async def judge_faithfulness(
+    chunks: list,
+    answer: str,
+    judge_model: str | None = None,
+) -> MetricScore:
+    """Score whether the answer is faithful to the chunks (no hallucination)."""
+    prompt = FAITHFULNESS_PROMPT.format(
+        chunks=_format_chunks_for_judge(chunks),
+        answer=answer,
+    )
+    return await _run_single_judge(prompt, judge_model)
+
+
+# --- Combined Judge ---
+
+
+async def judge_combined(
+    question: str,
+    expected_facts: list[str],
+    chunks: list,
+    answer: str,
+    judge_model: str | None = None,
+) -> JudgeResult:
+    """Score all 5 metrics in a single LLM call."""
+    facts_text = "\n".join(f"- {fact}" for fact in expected_facts)
+    prompt = COMBINED_PROMPT.format(
+        question=question,
+        expected_facts=facts_text,
+        chunks=_format_chunks_for_judge(chunks),
+        answer=answer,
+    )
+
+    try:
+        return await _generate_and_parse(
+            prompt, JUDGE_SYSTEM, _parse_combined_response, judge_model
+        )
+    except JudgeParseError as e:
+        logger.warning(
+            f"Combined judge parse failed after retries: {e}. Using fallback scores."
+        )
+        fallback = MetricScore(score=3, reasoning=f"Parse failed after retries: {e}")
+        return JudgeResult(
+            contextual_relevancy=fallback,
+            contextual_recall=fallback,
+            contextual_precision=fallback,
+            answer_relevancy=fallback,
+            faithfulness=fallback,
+        )
 
 
 # --- Dispatcher ---

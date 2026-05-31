@@ -36,13 +36,15 @@ Two runs on the **same 100 test cases**, with one optional third:
 
 ### 1. Add Claude provider for judge calls
 
-Current state: `src/core/eval/judge.py:21` imports `generate` from `src/core/llm_provider.py`, which is Gemini-only. The `--judge-model` flag currently only swaps Gemini variants.
+Current state: `src/core/eval/judge.py` imports `generate` from `src/core/llm_provider.py`, which is Gemini-only. **⚠️ Bug found 2026-05-30 (must fix here): `generate()` has NO `model` parameter — it reads the model from `config.LLM_MODEL` internally. So `_generate_with_retry`'s `judge_model` arg is currently accepted but SILENTLY IGNORED, and `--judge-model` does nothing (it never even swapped Gemini variants — that earlier note was wrong).** Any cross-model work must first make the model actually selectable.
 
 Changes:
 - Add `src/core/anthropic_provider.py` — `generate()` mirroring the Gemini provider signature (`prompt`, `system`, `temperature`, `max_tokens`). Shared `httpx.AsyncClient`, cleaned up in `app.py` lifespan hook. Retry on 429/500/503 with exponential backoff.
-- Refactor `_generate_with_retry` in `judge.py` to dispatch based on model ID prefix (`gemini-*` → Gemini, `claude-*` → Anthropic). Keep the existing retry/backoff wrapper.
+- **First make the model selectable**: add a `model` param to `llm_provider.generate()` (defaulting to `config.LLM_MODEL`) and pass it through `_get_gemini_url`. Without this, dispatch can't work.
+- Refactor `_generate_with_retry` in `judge.py` to dispatch based on model ID prefix (`gemini-*` → Gemini `generate`, `claude-*` → Anthropic `generate`), threading `judge_model` through. Keep the existing retry/backoff + the parse-retry wrapper (`_generate_and_parse`) already in place.
 - Add `ANTHROPIC_API_KEY` to `config.py` (lazy validation — only required when a Claude judge is invoked).
 - Update `--judge-model` help text in `evaluate_rag.py`.
+- Verify after wiring: `--judge-model gemini-2.5-pro` (or any non-default Gemini) on one case actually changes which model is called (confirms the dispatch works before spending on Run A).
 
 ### 2. Run A — custom + Claude (the high-ROI run)
 

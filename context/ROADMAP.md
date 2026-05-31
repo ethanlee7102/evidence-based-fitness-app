@@ -155,9 +155,9 @@ The cleanest experimental design holds one axis constant while measuring the oth
 
 **Phase 1 — Eval baseline & cross-validation (~3-4 days, ~$2-4):**
 
-1. **Priority E — Judge JSON parse retry** (decision #13). Trivial wrap of existing parse logic. Do this first because every eval rerun depends on stable judging.
-2. **Fresh baseline rerun**: current RAG against the cleaned test dataset (post 2026-05-10 edits) with Gemini judge. ~1 hour, $0. New reference point for the 5 edited cases; superseded `post_expansion.json`.
-3. **Anthropic provider build** for the eval pipeline (~0.5 day). Required for Run A.
+1. ✅ **DONE (2026-05-30) — Priority E, Judge JSON parse retry** (decision #13). `judge.py` now regenerates on a new `JudgeParseError` with escalating temperature `[0.0, 0.3, 0.6]` before falling back to score 3; robust parser strips markdown fences. Unit-verified; 0 spurious retries across the 100-case run.
+2. ✅ **DONE (2026-05-30) — Fresh baseline rerun** → `results/run0_baseline_clean.json`, **4.58/5** (supersedes `post_expansion.json`). Includes a 2nd test-cleanup round: a full recall≤3 sweep found 6 more test-bound cases (BH-001, STR-013, NUT-004, BH-002, BH-007, PROG-006), edited + re-scored, recall 4.1→4.16. Full classification in `archive/RECALL-FAILURE-DIAGNOSTIC.md`; target-chunk baseline `0/35` in `results/target_chunks_baseline.json`.
+3. ⏳ **NEXT — Anthropic provider build** for the eval pipeline (~0.5 day). Required for Run A. **NOTE (found 2026-05-30): `generate()` in `llm_provider.py` has NO `model` param, so `judge_model`/`--judge-model` is currently silently IGNORED (always uses `config.LLM_MODEL`=Gemini). The dispatch refactor must add a `model` param to (or thread it through) `generate()`, not just branch in `judge.py`.** See `EVAL-PLAN.md` §1.
 4. **Run A — custom + Claude judge** (decision #1). Cross-model validation. ~1.5 hours unattended, ~$5-8.
 5. **Ragas integration** (~1-1.5 days). New module + CLI script parallel to existing eval.
 6. **Run B — Ragas + Gemini** (decision #2). Cross-implementation validation. ~1.5 hours unattended, $0.
@@ -168,7 +168,7 @@ The cleanest experimental design holds one axis constant while measuring the oth
 8. **Per-paper diversification** (new — not in original FUTURE-PLANS). Modify `match_chunks` RPC or add a post-filter capping chunks-per-paper at ~2 in the candidate pool. Cheap; quick win for the 5 saturation cases.
 9. **Priority A — top_k bump 5 → ~20 candidate pool** (decision #9). Config change. Becomes the input to reranker.
 10. **Priority C — Cross-encoder reranking with FlashRank** (decision #11). ~1 day. Sits on top of #8 and #9; retrieves 20 candidates, reranks to top-5. The big lever.
-11. **Re-run eval** (custom judge, Gemini) on the improved RAG and verify against `RETRIEVAL-TARGET-CHUNKS.md` primary targets. Independent success metric: `(primary chunks in top-5) / (total primary chunks)`.
+11. **Re-run eval** (custom judge, Gemini) on the improved RAG and verify against `archive/RETRIEVAL-TARGET-CHUNKS.md` primary targets. Independent success metric: `(primary chunks in top-5) / (total primary chunks)`, automated by `apps/api/scripts/measure_target_chunks.py` — diff each run against the pre-Phase-2 baseline `results/target_chunks_baseline.json` (**`0/35` in top-5**; core 6 = 0/15, extended 5 = 0/20). Classification of all 20 recall≤3 cases (retrieval-fixable / judge-bound / test-bound) is in `archive/RECALL-FAILURE-DIAGNOSTIC.md`.
 12. **Priority B — Noise chunk cleanup** (decision #10). Done late because it requires inspecting chunks before deleting (Frontiers back-matter bleed risk).
 13. **Post-improvement cross-checks**: optional Run A2 (custom + Claude) and Run B2 (Ragas + Gemini) on the improved RAG. Confirms improvements aren't a judge artifact. Skippable if Phase 1 already showed high cross-judge agreement.
 
