@@ -165,6 +165,8 @@ The cleanest experimental design holds one axis constant while measuring the oth
 
 **Phase 2 — Retrieval improvements (~3-4 days):**
 
+0. **FIRST — Engineering workflow setup (decision #21).** Do this as the **first `branch → PR → CI-green → merge`** so Phase 2 also demonstrates the workflow. Add GitHub Actions CI: API = `ruff` lint + `pytest -m "not eval"` (EXCLUDE the LLM eval suite — cost/API-keys/non-determinism); web = `tsc`/eslint + `vite build`. Add a CI badge to the README. From here, substantive Phase 2/3 work goes through a feature branch → PR (PR body carries the before/after target-chunk numbers as an artifact) → merge. **Do NOT** rewrite existing main-only history, add branch-protection theater, or build CD (skip unless a live demo gets deployed). Right-sized tooling = the same build-vs-buy judgment the project already argues.
+
 8. **Per-paper diversification** (new — not in original FUTURE-PLANS). Modify `match_chunks` RPC or add a post-filter capping chunks-per-paper at ~2 in the candidate pool. Cheap; quick win for the 5 saturation cases.
 9. **Priority A — top_k bump 5 → ~20 candidate pool** (decision #9). Config change. Becomes the input to reranker.
 10. **Priority C — Cross-encoder reranking with FlashRank** (decision #11). ~1 day. Sits on top of #8 and #9; retrieves 20 candidates, reranks to top-5. The big lever.
@@ -190,6 +192,10 @@ The cleanest experimental design holds one axis constant while measuring the oth
 - **Options:** unlimited until "done" / cap at ~4-6 more weekends / cap tighter (~2-3 weekends, ship MVP and pivot)
 - **Recommendation:** cap at ~4-6 more weekends. Run A + retrieval improvements (#9/#10/#11/#13) + LangSmith + README writeup + one blog post fits in that. After that, the marginal portfolio polish is worth less than the marginal application sent.
 - **Decision: COMMITTED — cap at ~4-6 more weekends.** Scope: Phase 1 (eval baseline + Run A + Ragas Run B + analysis) + Phase 2 (retrieval improvements + re-eval) + Phase 3 MVP (agentic v2 with router/judge/retry, even if not all 10 design questions are fully resolved) + public artifacts (README "Tools Considered", interview notes, one blog post). After that, marginal portfolio polish is worth less than the marginal application sent. Maintain only critical fixes during job search.
+
+### 21. Engineering workflow — CI + PRs (vs direct-to-main)
+- **Question:** keep committing straight to main, or adopt PR + CI/CD?
+- **Decision: COMMITTED — add CI + use real PRs for substantive work; skip CD/heavy infra.** Rationale: a hiring manager opening the repo reads CI (green checks + badge) as professional discipline, and its *absence* quietly counts against the SWE-doing-AI framing; PRs turn Phase 2/3 units into screenshot-worthy artifacts (PR body = before/after eval numbers). But the senior signal is *right-sized* process — a solo repo with self-approved PR theater, multi-env CD, or k8s reads as cargo-cult and time mismanagement (the inverse signal). So: **CI yes** (lint + fast tests, eval suite excluded), **PRs yes for substantive work going forward** (no history rewrite), **CD no** unless a live demo is deployed (a live demo is itself a bigger lever than any pipeline). Scoped as the first action of Phase 2 (step 0 above). Commit quality is already strong (scoped, descriptive) — that's the most important piece and stays.
 
 ---
 
