@@ -1,6 +1,7 @@
 import asyncio
-import httpx
 import logging
+
+import httpx
 
 from src.utils.config import config
 

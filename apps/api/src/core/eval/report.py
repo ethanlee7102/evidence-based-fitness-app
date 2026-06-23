@@ -149,7 +149,7 @@ def print_summary(report: dict) -> None:
     # By category
     by_cat = report.get("by_category", {})
     if by_cat:
-        print(f"\nBY CATEGORY")
+        print("\nBY CATEGORY")
         for cat, cat_agg in by_cat.items():
             parts = [
                 f"{METRIC_SHORT.get(m, m[:3])}={cat_agg[m]}"
@@ -161,7 +161,7 @@ def print_summary(report: dict) -> None:
     # By difficulty
     by_diff = report.get("by_difficulty", {})
     if by_diff:
-        print(f"\nBY DIFFICULTY")
+        print("\nBY DIFFICULTY")
         for diff, diff_agg in by_diff.items():
             parts = [
                 f"{METRIC_SHORT.get(m, m[:3])}={diff_agg[m]}"
@@ -177,7 +177,7 @@ def print_summary(report: dict) -> None:
     ]
     if scored:
         worst = sorted(scored, key=lambda r: r["overall_score"])[:3]
-        print(f"\nWORST PERFORMERS (bottom 3)")
+        print("\nWORST PERFORMERS (bottom 3)")
         for i, r in enumerate(worst, 1):
             low_metrics = []
             if r.get("scores"):

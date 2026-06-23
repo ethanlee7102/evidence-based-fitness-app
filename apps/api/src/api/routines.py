@@ -6,9 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.workouts import _format_exercise, _format_workout_response
 from src.schema.routine import (
-    RoutineExerciseResponse,
     RoutineResponse,
-    RoutineSetResponse,
     RoutineSummaryResponse,
     SaveAsRoutineRequest,
     SaveRoutineFullRequest,

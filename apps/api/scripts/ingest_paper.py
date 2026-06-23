@@ -102,7 +102,7 @@ async def main() -> None:
 
     result = await ingest_paper(str(pdf_path), metadata)
 
-    print(f"\nDone!")
+    print("\nDone!")
     print(f"  Paper ID: {result.id}")
     print(f"  Chunks: {result.total_chunks}")
     print(f"  Embedding model: {result.embedding_model}")

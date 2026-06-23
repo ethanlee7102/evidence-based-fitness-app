@@ -1,0 +1,16 @@
+# Conservative, explicit ruff config — kept narrow so CI is deterministic.
+#
+# We enforce correctness + import hygiene (pyflakes `F`, import sorting `I`,
+# pycodestyle errors/warnings `E`/`W`) but NOT line length (`E501`): there is no
+# autoformatter wired into the pipeline, so a hard wrap limit would be 200+ lines
+# of cosmetic churn for no correctness gain. Re-enable E501 if/when a formatter
+# (black/ruff format) is added.
+line-length = 100
+
+# `data/` holds one-shot generation/parse scripts (not maintained app code) —
+# excluded from linting. Everything else (src/, app.py, scripts/, tests/) is linted.
+extend-exclude = ["venv", "venv-ragas", ".pytest_cache", "data"]
+
+[lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]  # line length — no formatter in the pipeline yet
