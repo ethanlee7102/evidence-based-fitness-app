@@ -10,7 +10,6 @@ import time
 from dataclasses import dataclass
 
 from src.core.eval.judge import JudgeResult, judge_all
-from src.core.rag_pipeline import rag_query
 from src.schema.rag import ChunkResponse, RAGResult
 from src.utils.config import config
 
@@ -38,6 +37,11 @@ async def _rag_query_with_retry(
     max_retries: int = 3,
 ) -> RAGResult:
     """Wrap rag_query with retry logic for 429/503 errors."""
+    # Imported lazily so that importing the eval package (e.g. the offline judge
+    # unit tests) doesn't pull in the full RAG pipeline -> retrieval -> supabase
+    # chain, which isn't installed in the lean CI environment.
+    from src.core.rag_pipeline import rag_query
+
     delays = [2.0, 5.0, 10.0]
 
     for attempt in range(max_retries):
