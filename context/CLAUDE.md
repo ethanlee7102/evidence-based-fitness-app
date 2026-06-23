@@ -4,6 +4,8 @@ When catching up at session start, read the active files in `context/` (this fil
 
 Active files point at archive files where relevant — e.g., ROADMAP decision #11 (reranking) points at `archive/RETRIEVAL-TARGET-CHUNKS.md` as the success metric for Phase 2 retrieval work.
 
+**Interview talking points — keep current:** `archive/INTERVIEW-TALKING-POINTS.md` collects the project's strongest interview material, tiered 1–3 by impact against `PORTFOLIO-NARRATIVE.md` (Tier 1 = headline decision-making/measurement stories; Tier 2 = rigor/real-world-tradeoff depth; Tier 3 = texture). **Whenever a notable decision, tradeoff, measurement result, or real-world engineering judgment emerges in a session, add it there** (and assign a tier using that file's tiering rule) — decision-making and "what I measured / what I fixed" stories rank highest. This is a standing instruction, not a one-time task.
+
 ### Implementation Plan
 Refer to `PLAN.md` for the priority summary and `ROADMAP.md` for the authoritative build order and decision log. Update `ROADMAP.md` as decisions are made.
 

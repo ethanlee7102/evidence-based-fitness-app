@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 from src.core.eval.judge import JudgeResult, judge_all
 from src.core.rag_pipeline import rag_query
-from src.schema.rag import RAGResult
+from src.schema.rag import ChunkResponse, RAGResult
 from src.utils.config import config
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,28 @@ async def _rag_query_with_retry(
     raise RuntimeError("Max retries exceeded for rag_query")
 
 
+def _rag_result_from_fixture(entry: dict, query: str) -> RAGResult:
+    """Rebuild a RAGResult from a frozen fixture entry (no live rag_query).
+
+    Lets the custom judge score the exact same RAG outputs as the Ragas
+    runner. `prompt_sent` / `embedding_time_ms` aren't persisted in the
+    fixture and aren't needed for judging, so they're zeroed.
+    """
+    chunks = [ChunkResponse(**c) for c in entry.get("chunks", [])]
+    return RAGResult(
+        answer=entry.get("answer", ""),
+        chunks=chunks,
+        query=query,
+        rewritten_query=entry.get("rewritten_query"),
+        prompt_sent="",
+        retrieval_time_ms=entry.get("retrieval_time_ms", 0.0),
+        embedding_time_ms=0.0,
+        generation_time_ms=entry.get("generation_time_ms", 0.0),
+        model=entry.get("model", config.LLM_MODEL),
+        grounded=entry.get("grounded", len(chunks) > 0),
+    )
+
+
 def _rag_result_to_dict(result: RAGResult) -> dict:
     """Extract serializable metadata from RAGResult."""
     return {
@@ -85,6 +107,7 @@ class EvalRunner:
         inter_call_delay: float = 5.0,
         judge_model: str | None = None,
         metrics: str | None = None,
+        fixture_map: dict | None = None,
     ):
         self.min_delay = min_delay
         self.verbose = verbose
@@ -92,6 +115,9 @@ class EvalRunner:
         self.inter_call_delay = inter_call_delay
         self.judge_model = judge_model
         self.metrics = metrics  # "retrieval", "generation", or None (all)
+        # {case_id: fixture_entry} — when set, judge frozen RAG outputs
+        # instead of calling rag_query live.
+        self.fixture_map = fixture_map
 
     async def evaluate_single(self, test_case: dict) -> EvalTestResult:
         """Evaluate a single test case: RAG query + judge scoring."""
@@ -107,8 +133,12 @@ class EvalRunner:
             print(f"  [{case_id}] {question[:60]}...")
 
         try:
-            # 1. Run RAG query
-            rag_result = await _rag_query_with_retry(question, category)
+            # 1. Get RAG outputs — frozen fixture if provided, else live query
+            fixture_entry = self.fixture_map.get(case_id) if self.fixture_map else None
+            if fixture_entry is not None:
+                rag_result = _rag_result_from_fixture(fixture_entry, query=question)
+            else:
+                rag_result = await _rag_query_with_retry(question, category)
             rag_dict = _rag_result_to_dict(rag_result)
 
             # For out-of-scope questions, just check grounded flag
@@ -233,6 +263,7 @@ class EvalRunner:
                 "total_cases": len(dataset),
                 "failed_cases": sum(1 for r in results if r.error),
                 "metrics_filter": self.metrics,
+                "from_fixture": self.fixture_map is not None,
             },
             "results": [
                 {

@@ -262,3 +262,43 @@ These three are flagged separately because retrieval improvements cannot fix the
 - CVD-003: small-to-moderate improvement (judge connection + rewritten fact aligns with retrieved chunk)
 - PROG-003: hold or improve only if test rewritten separately
 - **Overall Contextual Recall mean: 4.1 → projected ~4.4-4.6**
+
+---
+
+## Cases 13-15 — added 2026-05-31 (Ragas-surfaced recall divergences, Run B)
+
+These 3 were NOT in the original recall≤3 sweep — the **custom Gemini judge scored them recall=4/5 (a pass), but Ragas's claim-decomposed `LLMContextRecall` scored them low** (MOB-003=0.33, STR-003=0.50, STR-007=0.50). Chunk-level verification (parallel sub-agents reading every expected-paper chunk + live top-20 retrieval) confirmed each is a **real retrieval defect the holistic custom judge was too generous on**, plus a test-authoring component in each. Column note: the raw `chunks` table text column is `text` (the `match_chunks` RPC aliases it to `chunk_text`). NOT yet in `target_chunks_baseline.json` — add when re-running `measure_target_chunks.py` in Phase 2.
+
+### Case 13: MOB-003 — Best stretching type for ROM (Behm 2023, mobility)
+Behm et al. 2023, "Acute Effects of Various Stretching Techniques on ROM: SR & Meta-analysis" (`546af370-...`, 38 chunks).
+- **Failure mode: REFERENCE-POLLUTION.** 3 of 5 top-5 are Behm back-matter (idx **28/29/35** = section "Supplementary Information" = bibliography). Only idx 4 (rank 1) is real content.
+- PRIMARY targets (facts 1 & 3): **idx 22** (Discussion — "all four forms… can increase joint ROM", rank 9), **idx 26** (Conclusions, rank 7), **idx 20/21** (Results Table 2 subgroup ES — NOT in top-20). idx 4 already rank 1.
+- **TEST-BOUND: fact 2 ("PNF largest acute ROM") CONTRADICTS source** — Behm found *no significant difference between techniques* (Q=0.667, P=0.72; idx 22). Flag for test edit; ungroundable regardless of retrieval.
+- Fix: **noise-chunk cleanup** (drop Supplementary-Information/reference chunks) → promotes idx 22/26 into top-5.
+
+### Case 14: STR-003 — Powerlifters' long-term strength (Latella 2020, strength)
+Latella et al. 2020, "Long-Term Strength Adaptation: A 15-Year Analysis" (`9bbebdc5-...`, 20 chunks).
+- **Failure mode: RETRIEVAL-BOUND (wrong-chunk selection; NO saturation — right paper holds 12/20).** Retrieval over-weights Abstract/Intro/Discussion + reference chunks over data-dense Methods/Results.
+- PRIMARY targets: **idx 8** (Results — sex diffs, all quartiles gained, correlations; most fact-dense chunk for facts 2/3/4 — **NOT in top-20**), **idx 10** (Discussion — Q4 slower/ceiling, rank 16), **idx 5** (Methods — body-mass & age descriptives, NOT in top-20), **idx 3** (Intro — "rate diminishes over time", rank 8). Sex already covered by idx 2 @ rank 1.
+- **TEST-BOUND: fact 2 "weight class" + fact 3 "age affects rate" NOT in paper** (uses relative strength + quartiles, never weight classes; age is descriptive only, never a predictor). Flag for test edit; caps achievable recall.
+- Fix: **diversification toward Methods/Results + reranking** → surface idx 8, 10, 5.
+
+### Case 15: STR-007 — Plyometric effects + programming (Kons 2023 + Dudagoitia Barrio 2023, strength)
+Kons 2023 umbrella review (`60d3d0c6-...`, 57 chunks) + Dudagoitia Barrio 2023 optimization (`9dded9d1-...`, 66 chunks).
+- **Failure mode: SINGLE-PAPER SATURATION.** Montoro-Bombú 2023 (NON-expected) takes **3 of top-5 and 10 of top-20**, crowding out BOTH expected papers. **Dudagoitia crowded out entirely** (only idx 3 Intro @7 and idx 61 Glossary @18 surface).
+- PRIMARY targets: **Dud idx 5** (prescription vars — fact 2), **Dud idx 50** (unilateral vs bilateral) and/or **Dud idx 4** (contact type/SSC — fact 4), **Dud idx 40** (duration 3-12wk, mean 7.1 — fact 3 proxy) — **all NOT in top-20**; **Kons idx 2** (Key Points — fact 1, rank 10). Fact 1 partially covered by Kons idx 1 @ rank 5.
+- **TEST-BOUND (partial): fact 3's exact "~4-8 weeks minimum" not literally in either source** (source: mean 7.1wk, mode ≥6wk, min ≥2wk, >12wk long-term). Consider phrasing edit; lenient judges map onto Dud idx 40.
+- Fix: **per-paper diversification (cap Montoro-Bombú at ~1-2) + top_k bump** → let Dud idx 4/5/40/50 surface.
+
+**Net:** Ragas's stricter claim-decomposition recall caught generosity in the holistic custom judge on all 3. A follow-up test-fix experiment (below) then separated which were really retrieval defects vs. test-authoring.
+
+### Test-fix experiment (2026-05-31) — isolating test-bound vs retrieval-bound
+Applied the grounded fact edits (test_dataset.json, backup `.bak.2026-05-31`) and re-ran Ragas + custom on the 3 cases against the SAME frozen retrieval — only `expected_facts` changed. This isolates the drag:
+
+| Case | Ragas recall before→after | Custom recall before→after | Verdict |
+|---|---|---|---|
+| **STR-003** | 0.50 → **1.00** | 4 → 4 | **Was mostly TEST-BOUND** — grounded claims (sex, experience, diminishing, continued-slower) ARE covered by current retrieval (the Abstract). **Resolved by the fix; REMOVE from the Phase-2 retrieval target list.** |
+| **MOB-003** | 0.33 → 0.33 | 4 → **3** | **Confirmed RETRIEVAL-BOUND (reference-pollution)** — corrected facts still need the unretrieved Results/Discussion chunks (idx 20/21/22/26). Phase-2 noise cleanup. |
+| **STR-007** | 0.50 → 0.50 | 4 → **3** | **Confirmed RETRIEVAL-BOUND (saturation)** — facts 2/4 need crowded-out Dudagoitia (idx 4/5/40/50). Phase-2 diversification. |
+
+**Key insight:** tightening vague/over-reaching expected facts can LOWER a holistic judge's recall (4→3) — precise grounded facts expose a retrieval gap that vague facts let the judge paper over. Ragas's claim-decomposition moved the *opposite* way (up) only where the grounding genuinely existed (STR-003). So for Phase 2: **MOB-003 and STR-007 are the live retrieval targets; STR-003 is closed.**

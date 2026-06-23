@@ -83,6 +83,13 @@ def parse_args() -> argparse.Namespace:
         help="Override judge model (default: same as RAG model)",
     )
     parser.add_argument(
+        "--from-fixture",
+        type=str,
+        default=None,
+        help="Judge frozen RAG outputs from a fixture JSON (results/rag_outputs_fixture.json) "
+        "instead of running rag_query live. Used for apples-to-apples comparison with Ragas.",
+    )
+    parser.add_argument(
         "--output",
         type=str,
         help="Save JSON report to file (e.g., results/eval_001.json)",
@@ -116,28 +123,52 @@ def load_dataset(path: str, ids: list[str] | None = None) -> list[dict]:
     return dataset
 
 
-def print_dry_run(dataset: list[dict], combined: bool, judge_model: str | None) -> None:
+def load_fixture(path: str, ids: list[str] | None = None) -> list[dict]:
+    """Load frozen RAG-output fixture cases, optionally filtering by IDs.
+
+    Each fixture case carries the full test metadata (id, question, category,
+    expected_facts, difficulty, tags) plus the frozen answer + chunks, so it
+    doubles as both the dataset and the fixture map.
+    """
+    with open(path) as f:
+        fixture = json.load(f)
+    cases = fixture.get("cases", [])
+
+    if ids:
+        id_set = set(ids)
+        cases = [c for c in cases if c["id"] in id_set]
+        missing = id_set - {c["id"] for c in cases}
+        if missing:
+            print(f"Warning: IDs not found in fixture: {missing}")
+
+    return cases
+
+
+def print_dry_run(
+    dataset: list[dict], combined: bool, judge_model: str | None, from_fixture: bool = False
+) -> None:
     """Print expected call counts without executing."""
     n = len(dataset)
     oos_count = sum(1 for tc in dataset if "out-of-scope" in tc.get("tags", []))
     scored_count = n - oos_count
+    # Fixture mode skips live rag_query, so no RAG calls — judge calls only.
+    rag_calls = 0 if from_fixture else n
 
     if combined:
-        # OOS: 1 RAG call each, scored: 1 RAG + 1 judge each
-        gemini_calls = n + scored_count  # RAG calls + judge calls
+        gemini_calls = rag_calls + scored_count  # RAG calls + judge calls
         mode = "combined"
     else:
-        # OOS: 1 RAG call each, scored: 1 RAG + 5 judge calls each
-        gemini_calls = n + (scored_count * 5)
+        gemini_calls = rag_calls + (scored_count * 5)
         mode = "separate"
 
-    voyage_calls = n  # 1 embedding per test case
+    voyage_calls = 0 if from_fixture else n  # 1 embedding per live RAG query
     pct = (gemini_calls / 250) * 100
     est_time = (n * 37 / 60) if not combined else (n * 12 / 60)
 
     print(f"\nDRY RUN — Phase 8 RAG Evaluation")
-    print(f"  Dataset: {DEFAULT_DATASET.name} ({n} cases, {oos_count} out-of-scope)")
-    print(f"  Mode: {mode}")
+    source = f"fixture ({n} cases)" if from_fixture else f"{DEFAULT_DATASET.name} ({n} cases)"
+    print(f"  Source: {source}, {oos_count} out-of-scope")
+    print(f"  Mode: {mode}{' (from fixture — no RAG calls)' if from_fixture else ''}")
     print(f"  Judge model: {judge_model or config.LLM_MODEL}")
     print(f"  Expected Gemini calls: {gemini_calls} (of 250 RPD limit = {pct:.0f}%)")
     print(f"  Expected Voyage calls: {voyage_calls}")
@@ -147,15 +178,23 @@ def print_dry_run(dataset: list[dict], combined: bool, judge_model: str | None) 
 async def main() -> None:
     args = parse_args()
 
-    # Load dataset
-    dataset = load_dataset(args.dataset, args.ids)
+    # Load cases. Fixture mode uses the fixture's own cases (self-contained:
+    # they carry test metadata + frozen RAG outputs) and builds a fixture map
+    # so the judge scores frozen outputs instead of querying live.
+    fixture_map: dict | None = None
+    if args.from_fixture:
+        dataset = load_fixture(args.from_fixture, args.ids)
+        fixture_map = {c["id"]: c for c in dataset}
+    else:
+        dataset = load_dataset(args.dataset, args.ids)
+
     if not dataset:
         print("No test cases to evaluate.")
         return
 
     # Dry run
     if args.dry_run:
-        print_dry_run(dataset, args.combined, args.judge_model)
+        print_dry_run(dataset, args.combined, args.judge_model, from_fixture=bool(args.from_fixture))
         return
 
     # Run evaluation
@@ -166,6 +205,7 @@ async def main() -> None:
         inter_call_delay=5.0,
         judge_model=args.judge_model,
         metrics=args.metrics,
+        fixture_map=fixture_map,
     )
 
     report = await runner.run(dataset)

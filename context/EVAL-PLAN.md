@@ -120,7 +120,11 @@ Wall-clock for the runs themselves: Haiku 4.5 runs ~30-40 min in combined mode (
 
 ---
 
-## Run B Status: Committed
+## Run B Status: DONE (2026-05-31)
+
+Executed on the frozen fixture (all-Gemini Ragas stack, `gemini-embedding-001` since `text-embedding-004` 404s on this key) → `results/run_b_ragas_gemini.json`; custom-on-fixture comparison anchor → `results/run0_custom_fixture.json`; analysis → `results/eval_agreement_analysis.md` (built by `scripts/analyze_eval_agreement.py`). Headline: recall correlates r=0.73 (robust); answer-quality metrics saturated (correlation `n/a`, agreement 89–94%). Open Decision #2 resolved: **synthetic ground-truth worked** (no need to hand-write — `context_recall` scores were not noisy). Ragas isolated in `venv-ragas` (see `requirements-ragas.txt`). Full state in `CONTEXT.md` + `ROADMAP.md` Phase 1 steps 5-7.
+
+---
 
 Original plan staged Run B as conditional on Run A results. **Updated 2026-05-10**: Run B is committed regardless of Run A outcome.
 
