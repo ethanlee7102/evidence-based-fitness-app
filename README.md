@@ -1,5 +1,7 @@
 # Flame Fitness
 
+[![CI](https://github.com/ethanlee7102/Gym-App-V2/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanlee7102/Gym-App-V2/actions/workflows/ci.yml)
+
 AI-powered form analysis for the Big 3 lifts (squat, bench, deadlift). Upload your videos, get instant feedback on your technique, and track your improvement over time.
 
 ## Architecture

@@ -165,7 +165,7 @@ def print_dry_run(
     pct = (gemini_calls / 250) * 100
     est_time = (n * 37 / 60) if not combined else (n * 12 / 60)
 
-    print(f"\nDRY RUN — Phase 8 RAG Evaluation")
+    print("\nDRY RUN — Phase 8 RAG Evaluation")
     source = f"fixture ({n} cases)" if from_fixture else f"{DEFAULT_DATASET.name} ({n} cases)"
     print(f"  Source: {source}, {oos_count} out-of-scope")
     print(f"  Mode: {mode}{' (from fixture — no RAG calls)' if from_fixture else ''}")

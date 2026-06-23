@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { listWorkouts, deleteWorkout as deleteWorkoutApi } from '../services/workoutService'
-import type { WorkoutSummary, WorkoutFilters, DatePreset } from '../types'
+import type { WorkoutSummary, WorkoutFilters } from '../types'
 
 const PAGE_SIZE = 20
 
@@ -51,17 +51,6 @@ export function useWorkoutHistory() {
   const [hasMore, setHasMore] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<WorkoutFilters>(DEFAULT_FILTERS)
-
-  // Serialize filter values that affect the API query for dependency tracking
-  const filterKey = useMemo(
-    () =>
-      JSON.stringify({
-        ...computeDateRange(filters),
-        min_rating: filters.minRating,
-        exercise_id: filters.exerciseId,
-      }),
-    [filters],
-  )
 
   const activeFilterCount = useMemo(() => {
     let count = 0

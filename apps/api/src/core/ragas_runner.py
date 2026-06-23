@@ -39,6 +39,10 @@ from pathlib import Path
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="ragas")
 
 import ragas  # noqa: E402
+from langchain_google_genai import (  # noqa: E402
+    ChatGoogleGenerativeAI,
+    GoogleGenerativeAIEmbeddings,
+)
 from ragas import EvaluationDataset, SingleTurnSample, evaluate  # noqa: E402
 from ragas.embeddings import LangchainEmbeddingsWrapper  # noqa: E402
 from ragas.llms import LangchainLLMWrapper  # noqa: E402
@@ -50,11 +54,6 @@ from ragas.metrics import (  # noqa: E402
     ResponseRelevancy,
 )
 from ragas.run_config import RunConfig  # noqa: E402
-
-from langchain_google_genai import (  # noqa: E402
-    ChatGoogleGenerativeAI,
-    GoogleGenerativeAIEmbeddings,
-)
 
 from src.utils.config import config  # noqa: E402
 

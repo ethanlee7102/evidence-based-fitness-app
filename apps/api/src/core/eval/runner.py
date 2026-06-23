@@ -7,7 +7,7 @@ Gemini rate limits (free tier: 20 RPD; paid tier: 2000 RPD).
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from src.core.eval.judge import JudgeResult, judge_all
 from src.core.rag_pipeline import rag_query

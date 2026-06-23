@@ -71,8 +71,6 @@ export function StepPhysicalStats({ formData, updateFormData }: StepPhysicalStat
       setInches(value)
       if (feet !== '' && value !== '') {
         updateFormData({ heightCm: feetInchesToCm(Number(feet), Number(value)) })
-      } else if (value !== '' && feet !== '') {
-        updateFormData({ heightCm: feetInchesToCm(Number(feet), Number(value)) })
       }
     }
   }

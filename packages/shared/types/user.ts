@@ -1,5 +1,5 @@
 // UserProfile is now exported from profile.ts with full onboarding fields
-export { UserProfile } from './profile'
+export type { UserProfile } from './profile'
 
 export interface Video {
   id: string

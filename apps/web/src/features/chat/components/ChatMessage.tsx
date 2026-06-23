@@ -24,7 +24,7 @@ interface ChatMessageProps {
  */
 function processCitations(content: string): string {
   return content.replace(
-    /\[([^\[\]]+?,\s*(\d{4})[^\[\]]*)\](?!\()/g,
+    /\[([^[\]]+?,\s*(\d{4})[^[\]]*)\](?!\()/g,
     (_match, fullCitation: string, year: string) => {
       // "cited in" pattern — link to the paper we actually have
       const citedInMatch = fullCitation.match(/cited\s+in\s+(.+?),\s*(\d{4})/i)
