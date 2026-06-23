@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from src.schema.workout import ExerciseResponse, SetType
 
-
 # --- Response Models ---
 
 class RoutineSetResponse(BaseModel):

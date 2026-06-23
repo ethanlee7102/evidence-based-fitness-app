@@ -185,7 +185,6 @@ def build_report(runs: dict) -> str:
     for key in ["baseline", "run_a", "custom_fixture", "run_b"]:
         r = runs[key]
         n = len(r["cases"])
-        ov = r["meta"].get("aggregate_overall")
         # recompute native overall mean from cases
         ov_norm = mean([c["overall_norm"] for c in r["cases"].values() if c["overall_norm"] is not None])
         native = ov_norm * 4 + 1 if r["scale"] == 5 else ov_norm

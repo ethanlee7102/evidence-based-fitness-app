@@ -19,6 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@flame-fitness/shared": ["../../packages/shared/types/index.ts"],
       "@flame-fitness/shared/*": ["../../packages/shared/*"]
     }
   },

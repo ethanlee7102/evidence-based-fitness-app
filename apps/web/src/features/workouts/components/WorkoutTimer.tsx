@@ -9,7 +9,7 @@ interface WorkoutTimerProps {
   elapsedRef?: React.MutableRefObject<number>
 }
 
-export function WorkoutTimer({ startedAt, initialElapsed = 0, elapsedRef }: WorkoutTimerProps) {
+export function WorkoutTimer({ initialElapsed = 0, elapsedRef }: WorkoutTimerProps) {
   // "Virtual start" = now minus whatever time was already accumulated
   const virtualStart = useRef(Date.now() - initialElapsed * 1000)
   const [elapsed, setElapsed] = useState(initialElapsed)

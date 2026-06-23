@@ -9,7 +9,6 @@ from src.schema.workout import (
     AddExerciseRequest,
     CreateExerciseRequest,
     CreateSetRequest,
-    ExerciseMuscleResponse,
     ExerciseResponse,
     ExerciseStatsResponse,
     FinishWorkoutRequest,
