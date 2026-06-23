@@ -1,0 +1,23 @@
+# Ragas eval environment — ISOLATED from the app's requirements.txt.
+#
+# Why a separate file/venv: Ragas 0.4.3 hard-imports
+# `langchain_community.chat_models.vertexai.ChatVertexAI`, a path that exists
+# only in the langchain-community 0.3.x line. The app runs on the langchain 1.x
+# stack (langchain-community 0.4.x), where that path was removed. The two can't
+# coexist, so Ragas lives in apps/api/venv-ragas and the app's venv stays clean.
+#
+# Handoff boundary: the Ragas runner reads a frozen RAG-output fixture (JSON)
+# produced by the app's venv — it never imports the app's RAG pipeline.
+#
+# Setup:
+#   cd apps/api
+#   python -m venv venv-ragas
+#   venv-ragas/bin/pip install -r requirements-ragas.txt
+#
+# Run B (Ragas + Gemini):
+#   venv-ragas/bin/python -m scripts.evaluate_rag_ragas --output results/run_b_ragas_gemini.json
+
+ragas==0.4.3
+langchain-google-genai==2.1.12
+langchain-community==0.3.31   # <0.4: keeps the chat_models.vertexai import Ragas needs
+python-dotenv>=1.0.0          # for reusing src/utils/config.py to read GOOGLE_API_KEY

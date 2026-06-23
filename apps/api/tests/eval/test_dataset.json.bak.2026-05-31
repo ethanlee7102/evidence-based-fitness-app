@@ -247,8 +247,8 @@
     "category": "strength",
     "expected_facts": [
       "Strength improvements tend to be largest in the early years of training with diminishing returns over time",
-      "Sex influences long-term strength trajectories \u2014 males showed greater absolute and relative strength, though strength gain per day was similar between sexes",
-      "Years of competitive experience and competition frequency relate to the rate of strength gains, with more competitions over time associated with a slower rate of gain",
+      "Body weight, sex, and weight class influence long-term strength trajectories",
+      "Age and years of competitive experience affect the rate of strength gains",
       "Powerlifters can continue to make progress even after many years of training, though at a slower rate"
     ],
     "expected_papers": [
@@ -260,15 +260,7 @@
       "long-term",
       "powerlifting",
       "predictors"
-    ],
-    "_original_expected_facts": [
-      "Strength improvements tend to be largest in the early years of training with diminishing returns over time",
-      "Body weight, sex, and weight class influence long-term strength trajectories",
-      "Age and years of competitive experience affect the rate of strength gains",
-      "Powerlifters can continue to make progress even after many years of training, though at a slower rate"
-    ],
-    "_edit_reason": "Fact 2 'weight class' not studied in Latella 2020 (uses relative strength + starting-strength quartiles, not weight classes); fact 3 'age' is a baseline descriptive only, never an analyzed predictor of gain rate. Replaced with the sex/body-mass and experience/competition-frequency findings the paper actually reports (Run B chunk forensic 2026-05-31).",
-    "_edited_date": "2026-05-31"
+    ]
   },
   {
     "id": "STR-004",
@@ -295,7 +287,7 @@
     "expected_facts": [
       "Plyometric training produces significant improvements in vertical jump height, sprint speed, and explosive strength",
       "Key prescription variables include exercise type, intensity, volume, frequency, and rest intervals",
-      "Most plyometric interventions lasted at least 6 weeks (mean ~7 weeks), and longer-term programs (>12 weeks) are recommended for maximal adaptations",
+      "A minimum dosage of approximately 4-8 weeks is needed for meaningful adaptations",
       "Exercise selection should consider unilateral vs bilateral, direction of movement, and contact type"
     ],
     "expected_papers": [
@@ -309,15 +301,7 @@
       "programming",
       "performance",
       "multi-paper"
-    ],
-    "_original_expected_facts": [
-      "Plyometric training produces significant improvements in vertical jump height, sprint speed, and explosive strength",
-      "Key prescription variables include exercise type, intensity, volume, frequency, and rest intervals",
-      "A minimum dosage of approximately 4-8 weeks is needed for meaningful adaptations",
-      "Exercise selection should consider unilateral vs bilateral, direction of movement, and contact type"
-    ],
-    "_edit_reason": "Fact 3's exact '~4-8 weeks minimum' is not stated in Kons 2023 or Dudagoitia Barrio 2023 (source: mean ~7.1 weeks, mode >=6 weeks, min studied >=2 weeks, >12 weeks for long-term gains). Replaced fact 3 with grounded duration figures. Facts 2 and 4 kept \u2014 they ARE grounded in Dudagoitia but were not retrieved (retrieval issue, not test-authoring). (Run B chunk forensic 2026-05-31)",
-    "_edited_date": "2026-05-31"
+    ]
   },
   {
     "id": "STR-009",
@@ -644,7 +628,7 @@
     ],
     "expected_papers": [
       "Kazeminasab 2025",
-      "Conde-Pip\u00f3 2024",
+      "Conde-Pipó 2024",
       "Aragon 2022"
     ],
     "difficulty": "medium",
@@ -655,7 +639,7 @@
       "fat-loss",
       "multi-paper"
     ],
-    "_edit_reason": "Fact 3 (VO2max reduced) contradicted by Conde-Pip\u00f3 2024 ch20 conclusion which says IF does NOT negatively affect aerobic performance. Rewrote to match paper finding.",
+    "_edit_reason": "Fact 3 (VO2max reduced) contradicted by Conde-Pipó 2024 ch20 conclusion which says IF does NOT negatively affect aerobic performance. Rewrote to match paper finding.",
     "_edited_date": "2026-05-10",
     "_original_expected_facts": [
       "IF generally does not significantly impair strength and anaerobic exercise performance",
@@ -783,7 +767,7 @@
     "expected_facts": [
       "Iron deficiency impairs oxygen transport (hemoglobin) and energy metabolism, reducing aerobic capacity and endurance",
       "Female athletes are at higher risk due to menstrual blood losses, with prevalence of iron deficiency reported at 40-50%+",
-      "Oral iron supplementation can improve serum ferritin levels, with greatest benefit when baseline ferritin is very low (\u226412 \u03bcg/L)"
+      "Oral iron supplementation can improve serum ferritin levels, with greatest benefit when baseline ferritin is very low (≤12 μg/L)"
     ],
     "expected_papers": [
       "Smid 2024",
@@ -875,7 +859,7 @@
       "The negative effects on hypertrophy may be due to blunting of the inflammatory signaling needed for adaptation"
     ],
     "expected_papers": [
-      "Pi\u00f1ero 2024",
+      "Piñero 2024",
       "Moore 2022"
     ],
     "difficulty": "medium",
@@ -892,7 +876,7 @@
     "expected_facts": [
       "Sleep deprivation negatively impacts physical performance, with an average decrease of roughly 7-8%",
       "Strength and power output can be impaired by acute sleep loss",
-      "The pattern of sleep loss matters \u2014 total deprivation is worse than partial restriction"
+      "The pattern of sleep loss matters — total deprivation is worse than partial restriction"
     ],
     "expected_papers": [
       "Craven 2022",
@@ -956,7 +940,7 @@
       "Higher doses of alcohol have more detrimental effects on recovery than moderate doses"
     ],
     "expected_papers": [
-      "Laki\u0107evi\u0107 2019"
+      "Lakićević 2019"
     ],
     "difficulty": "easy",
     "tags": [
@@ -1163,12 +1147,12 @@
   },
   {
     "id": "MOB-003",
-    "question": "What type of stretching is best for improving range of motion \u2014 static, dynamic, PNF, or ballistic?",
+    "question": "What type of stretching is best for improving range of motion — static, dynamic, PNF, or ballistic?",
     "category": "mobility",
     "expected_facts": [
       "Static stretching, dynamic stretching, and PNF stretching all acutely increase range of motion",
-      "The different stretching techniques (static, dynamic, ballistic, PNF) produce similar acute ROM increases, with no significant difference between techniques",
-      "Acute ROM gains were similar regardless of stretch intensity, duration, or trained state, but varied by the muscle group targeted"
+      "PNF stretching tends to produce the largest acute ROM increases",
+      "The effectiveness of stretching techniques can vary based on duration, intensity, and the muscle group targeted"
     ],
     "expected_papers": [
       "Behm 2023"
@@ -1179,14 +1163,7 @@
       "stretching-techniques",
       "ROM",
       "comparison"
-    ],
-    "_original_expected_facts": [
-      "Static stretching, dynamic stretching, and PNF stretching all acutely increase range of motion",
-      "PNF stretching tends to produce the largest acute ROM increases",
-      "The effectiveness of stretching techniques can vary based on duration, intensity, and the muscle group targeted"
-    ],
-    "_edit_reason": "Fact 2 (PNF largest) CONTRADICTS Behm 2023 \u2014 meta-analysis found no significant difference between techniques (Q=0.667, P=0.72). Fact 3 (varies by duration/intensity) also contradicted \u2014 Behm found no significant moderating effect of intensity/duration/trained-state; only muscle group varied. Replaced both with the source's actual findings (Run B chunk forensic 2026-05-31).",
-    "_edited_date": "2026-05-31"
+    ]
   },
   {
     "id": "MOB-005",
@@ -1281,7 +1258,7 @@
     ],
     "expected_papers": [
       "Delaire 2025",
-      "T\u00f8ien 2025",
+      "Tøien 2025",
       "Govindasamy 2025"
     ],
     "difficulty": "medium",
@@ -1767,7 +1744,7 @@
       "These techniques can produce similar or slightly greater hypertrophy compared to traditional methods",
       "They are particularly useful for time-efficient training as they allow more work in less time"
     ],
-    "_edit_reason": "Fact 1 over-claimed: Fonseca 2023 found NO difference (\"ADV does not induce superior hypertrophy\"), so \"slightly greater\" contradicted. Fact 2 (time-efficiency) not in Fonseca \u2014 its rationale is plateau-breaking/stimulus variation. Rewrote both; fact 0 (technique list) kept.",
+    "_edit_reason": "Fact 1 over-claimed: Fonseca 2023 found NO difference (\"ADV does not induce superior hypertrophy\"), so \"slightly greater\" contradicted. Fact 2 (time-efficiency) not in Fonseca — its rationale is plateau-breaking/stimulus variation. Rewrote both; fact 0 (technique list) kept.",
     "_edited_date": "2026-05-30"
   },
   {
@@ -1993,7 +1970,7 @@
       "Network meta-analysis shows high-load RT protocols produce greater BMD improvements than low-load",
       "Weight-bearing exercise is superior to non-weight-bearing activities for bone health"
     ],
-    "_edit_reason": "Fact 2 inverted Wang 2023 NMA (found MODERATE intensity 65-80% 1RM optimal, superior to high \u2014 not high>low). Fact 3 (WB>non-WB) ungrounded; Kemmler 2020 found effects \"largely independent of exercise type\". Fact 1 (\"combined > either alone\") contradicted by Kemmler. Rewrote 1-3; fact 0 (Manaye) kept.",
+    "_edit_reason": "Fact 2 inverted Wang 2023 NMA (found MODERATE intensity 65-80% 1RM optimal, superior to high — not high>low). Fact 3 (WB>non-WB) ungrounded; Kemmler 2020 found effects \"largely independent of exercise type\". Fact 1 (\"combined > either alone\") contradicted by Kemmler. Rewrote 1-3; fact 0 (Manaye) kept.",
     "_edited_date": "2026-05-30"
   },
   {
@@ -2111,7 +2088,7 @@
   },
   {
     "id": "BFR-003",
-    "question": "What are the recommended protocols for blood flow restriction training \u2014 pressure, sets, reps, and frequency?",
+    "question": "What are the recommended protocols for blood flow restriction training — pressure, sets, reps, and frequency?",
     "category": "hypertrophy",
     "expected_facts": [
       "Cuff pressure is typically set at 40-80% of limb occlusion pressure, with wider cuffs requiring lower pressures",
