@@ -7,3 +7,6 @@ pytest-asyncio==0.23.7
 # Linting
 ruff==0.4.4
 mypy==1.10.0
+
+# Retrieval diagnostics (scripts/measure_target_chunks_bm25.py — throwaway BM25 index)
+rank-bm25==0.2.2

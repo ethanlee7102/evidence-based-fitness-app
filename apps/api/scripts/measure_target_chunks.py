@@ -171,6 +171,107 @@ async def measure(top_k: int) -> dict:
     }
 
 
+def _bucket(rank: int | None) -> str:
+    """Coarse rank bucket. The fork these decide:
+    1-5/6-20 = selection problem (in pool, mis-ordered); 21-60 = deep fetch fixes;
+    61-200 = saturation displacement (per-paper fetch); 201+ / not found = vector
+    search fundamentally fails for this chunk (vocabulary mismatch -> hybrid).
+    """
+    if rank is None:
+        return ">1000"
+    if rank <= 5:
+        return "1-5"
+    if rank <= 20:
+        return "6-20"
+    if rank <= 60:
+        return "21-60"
+    if rank <= 200:
+        return "61-200"
+    if rank <= 1000:
+        return "201-1000"
+    return ">1000"
+
+
+async def diagnose(deep_k: int, threshold: float, ef_search: int | None = None) -> dict:
+    """Find the EXACT vector-similarity rank of every target chunk in a deep pool.
+
+    Answers the availability-vs-selection fork: are the missing target chunks just
+    outside the top-20 (fetch deeper), buried by a saturating paper (per-paper
+    fetch), or essentially un-retrievable by vector search (reopen hybrid)?
+
+    ef_search widens the HNSW beam; deep ranks past ~40 are only trustworthy when
+    ef_search >= deep_k (else HNSW returns an approximate tail).
+    """
+    queries = _load_queries()
+    cases_out = []
+    buckets: Counter = Counter()
+    total = 0
+
+    for cid, info in TARGETS.items():
+        res = await retrieve_chunks(
+            queries[cid], top_k=deep_k, similarity_threshold=threshold, ef_search=ef_search
+        )
+        ranked = [(c.authors, c.year, c.chunk_index, c.similarity) for c in res.chunks]
+        top_sim = ranked[0][3] if ranked else None
+        top20_papers = Counter(f"{_surname(a)} {y}" for a, y, _, _ in ranked[:20])
+        dom_paper, dom_count = top20_papers.most_common(1)[0] if top20_papers else ("?", 0)
+
+        targets_out = []
+        for (asub, yr), idxs in info["targets"].items():
+            for idx in sorted(idxs):
+                rank = None
+                sim = None
+                for i, (a, y, ci, s) in enumerate(ranked):
+                    if asub.lower() in a.lower() and y == yr and ci == idx:
+                        rank, sim = i + 1, s
+                        break
+                total += 1
+                buckets[_bucket(rank)] += 1
+                targets_out.append(
+                    {"paper": f"{asub} {yr}", "chunk": idx, "rank": rank,
+                     "similarity": round(sim, 4) if sim is not None else None}
+                )
+
+        cases_out.append(
+            {
+                "id": cid,
+                "tier": info.get("tier", "core"),
+                "pool_size": len(ranked),
+                "top1_similarity": round(top_sim, 4) if top_sim is not None else None,
+                "dominant_paper_in_top20": f"{dom_paper} ({dom_count}/20)",
+                "targets": targets_out,
+            }
+        )
+
+    return {
+        "mode": "diagnose",
+        "deep_k": deep_k,
+        "similarity_threshold": threshold,
+        "ef_search": ef_search,
+        "rank_histogram": dict(sorted(buckets.items(), key=lambda kv: kv[0])),
+        "total_targets": total,
+        "cases": cases_out,
+    }
+
+
+def _print_diagnose(report: dict) -> None:
+    for c in report["cases"]:
+        print("=" * 80)
+        print(f"{c['id']}  (pool={c['pool_size']}, top1 sim={c['top1_similarity']}, "
+              f"dominant: {c['dominant_paper_in_top20']})")
+        for t in c["targets"]:
+            where = f"rank {t['rank']:>4} (sim {t['similarity']})" if t["rank"] else ">1000 / below-floor"
+            print(f"    {t['paper']:<22} ch{t['chunk']:<3}: {where}")
+    print("=" * 80)
+    print("RANK HISTOGRAM (where target chunks actually land by vector similarity):")
+    order = ["1-5", "6-20", "21-60", "61-200", "201-1000", ">1000"]
+    for b in order:
+        n = report["rank_histogram"].get(b, 0)
+        bar = "#" * n
+        print(f"  {b:>9}: {n:>2} {bar}")
+    print(f"  total targets: {report['total_targets']}")
+
+
 def _print(report: dict) -> None:
     for c in report["cases"]:
         print("=" * 80)
@@ -198,11 +299,22 @@ def _print(report: dict) -> None:
 async def main() -> None:
     ap = argparse.ArgumentParser(description="Measure retrieval vs verified target chunks")
     ap.add_argument("--top-k", type=int, default=20, help="Candidate depth to inspect")
+    ap.add_argument("--diagnose", action="store_true",
+                    help="Find each target chunk's EXACT rank in a deep pool (availability vs selection fork)")
+    ap.add_argument("--deep-k", type=int, default=1000, help="Deep pool size for --diagnose")
+    ap.add_argument("--ef-search", type=int, default=None,
+                    help="HNSW beam width for --diagnose (set >= --deep-k for a trustworthy deep tail)")
     ap.add_argument("--output", type=str, help="Save report JSON to this path")
     args = ap.parse_args()
 
-    report = await measure(args.top_k)
-    _print(report)
+    if args.diagnose:
+        # threshold -1.0 = include everything (note: retrieve_chunks treats 0.0 as
+        # falsy and falls back to the config default, so -1.0 is the safe floor).
+        report = await diagnose(args.deep_k, threshold=-1.0, ef_search=args.ef_search)
+        _print_diagnose(report)
+    else:
+        report = await measure(args.top_k)
+        _print(report)
     if args.output:
         Path(args.output).write_text(json.dumps(report, indent=2))
         print(f"\nSaved report to {args.output}")

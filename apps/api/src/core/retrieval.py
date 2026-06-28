@@ -14,6 +14,7 @@ async def retrieve_chunks(
     top_k: int | None = None,
     category: str | None = None,
     similarity_threshold: float | None = None,
+    ef_search: int | None = None,
 ) -> RetrievalResult:
     """Embed a query and retrieve the most relevant chunks from the vector DB.
 
@@ -22,6 +23,9 @@ async def retrieve_chunks(
         top_k: Number of chunks to return (defaults to config.RAG_TOP_K).
         category: Optional category filter (e.g. "nutrition"). None = all.
         similarity_threshold: Minimum cosine similarity (defaults to config.RAG_SIMILARITY_THRESHOLD).
+        ef_search: Optional HNSW search beam width. None = leave the DB default (40)
+            untouched. Set >= top_k for deep candidate fetches, else recall degrades
+            past rank ~40 (approximate results).
 
     Returns:
         RetrievalResult with matched chunks, query text, and timing.
@@ -40,6 +44,8 @@ async def retrieve_chunks(
         "similarity_threshold": similarity_threshold or config.RAG_SIMILARITY_THRESHOLD,
         "filter_category": category,
     }
+    if ef_search is not None:
+        rpc_params["ef_search"] = ef_search
     result = get_supabase().rpc("match_chunks", rpc_params).execute()
 
     # 3. Parse rows into ChunkResponse objects
