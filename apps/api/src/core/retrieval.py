@@ -2,7 +2,6 @@ import logging
 import time
 
 from src.core.embedding_provider import embed_query
-from src.db import get_supabase
 from src.schema.rag import ChunkResponse, RetrievalResult
 from src.utils.config import config
 
@@ -44,6 +43,10 @@ async def retrieve_chunks(
     embedding_time_ms = (time.perf_counter() - embed_start) * 1000
 
     # 2. Call match_chunks RPC
+    # Lazy import: keeps importing retrieval.py (and retrieve_reranked) free of the
+    # supabase dependency, so offline unit tests run on the lean CI env without it.
+    from src.db import get_supabase
+
     rpc_params = {
         "query_embedding": embedding,
         "match_count": top_k or config.RAG_TOP_K,
