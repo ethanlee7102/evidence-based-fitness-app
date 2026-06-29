@@ -74,6 +74,9 @@ class ChunkResponse(BaseModel):
     page_end: Optional[int] = None
     token_count: Optional[int] = None
     similarity: float
+    # Cross-encoder relevance score, set by the reranker (None on vector-only paths).
+    # The sort key after reranking; `similarity` is preserved for citations/observability.
+    rerank_score: Optional[float] = None
     # Flattened paper metadata for citations
     title: str
     authors: str
@@ -100,6 +103,7 @@ class RetrievalResult:
     query: str = ""
     retrieval_time_ms: float = 0.0
     embedding_time_ms: float = 0.0
+    rerank_time_ms: float = 0.0
 
 
 @dataclass
@@ -116,6 +120,7 @@ class RAGResult:
     prompt_sent: str
     retrieval_time_ms: float
     embedding_time_ms: float
+    rerank_time_ms: float
     generation_time_ms: float
     model: str
     grounded: bool
@@ -137,6 +142,7 @@ class StreamingRAGResult:
     prompt_sent: str
     retrieval_time_ms: float
     embedding_time_ms: float
+    rerank_time_ms: float
     model: str
     grounded: bool
     stream: AsyncGenerator[str, None]

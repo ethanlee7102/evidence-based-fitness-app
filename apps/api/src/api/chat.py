@@ -193,6 +193,7 @@ async def send_message(
                 grounded=rag_result.grounded,
                 retrieval_time_ms=rag_result.retrieval_time_ms,
                 embedding_time_ms=rag_result.embedding_time_ms,
+                rerank_time_ms=rag_result.rerank_time_ms,
                 generation_time_ms=gen_time_ms,
                 error=error_detail,
             )
@@ -220,6 +221,7 @@ async def send_message(
             grounded=rag_result.grounded,
             retrieval_time_ms=rag_result.retrieval_time_ms,
             embedding_time_ms=rag_result.embedding_time_ms,
+            rerank_time_ms=rag_result.rerank_time_ms,
             generation_time_ms=gen_time_ms,
         )
 
