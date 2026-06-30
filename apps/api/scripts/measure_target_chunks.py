@@ -24,7 +24,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from src.core.retrieval import retrieve_chunks
+from src.core.retrieval import retrieve_chunks, retrieve_reranked
 
 DATASET = Path("tests/eval/test_dataset.json")
 
@@ -110,7 +110,7 @@ def _load_queries() -> dict[str, str]:
     return {c["id"]: c["question"] for c in cases}
 
 
-async def measure(top_k: int) -> dict:
+async def measure(top_k: int, rerank: bool = False) -> dict:
     queries = _load_queries()
     cases_out = []
     grand_primary = 0
@@ -118,7 +118,12 @@ async def measure(top_k: int) -> dict:
     grand_top20 = 0
 
     for cid, info in TARGETS.items():
-        res = await retrieve_chunks(queries[cid], top_k=top_k)
+        if rerank:
+            # top_n=top_k so the per-paper cap fills the full inspection depth (e.g. 20);
+            # rank<=5 is still exactly what production (top_n=5) would surface.
+            res = await retrieve_reranked(queries[cid], top_n=top_k)
+        else:
+            res = await retrieve_chunks(queries[cid], top_k=top_k)
         ranked = [(c.authors, c.year, c.chunk_index) for c in res.chunks]
         top5_comp = Counter(f"{_surname(a)} {y}" for a, y, _ in ranked[:5])
 
@@ -163,6 +168,7 @@ async def measure(top_k: int) -> dict:
 
     return {
         "top_k": top_k,
+        "rerank": rerank,
         "metric_primary_in_top5": f"{grand_top5}/{grand_primary}",
         "metric_primary_in_top20": f"{grand_top20}/{grand_primary}",
         "metric_core6": _subtotal("core"),
@@ -299,6 +305,8 @@ def _print(report: dict) -> None:
 async def main() -> None:
     ap = argparse.ArgumentParser(description="Measure retrieval vs verified target chunks")
     ap.add_argument("--top-k", type=int, default=20, help="Candidate depth to inspect")
+    ap.add_argument("--rerank", action="store_true",
+                    help="Route retrieval through retrieve_reranked (deep fetch + cross-encoder + per-paper cap)")
     ap.add_argument("--diagnose", action="store_true",
                     help="Find each target chunk's EXACT rank in a deep pool (availability vs selection fork)")
     ap.add_argument("--deep-k", type=int, default=1000, help="Deep pool size for --diagnose")
@@ -313,7 +321,7 @@ async def main() -> None:
         report = await diagnose(args.deep_k, threshold=-1.0, ef_search=args.ef_search)
         _print_diagnose(report)
     else:
-        report = await measure(args.top_k)
+        report = await measure(args.top_k, rerank=args.rerank)
         _print(report)
     if args.output:
         Path(args.output).write_text(json.dumps(report, indent=2))

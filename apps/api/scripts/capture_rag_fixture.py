@@ -31,6 +31,7 @@ from pathlib import Path
 
 from scripts.evaluate_rag import load_dataset
 from src.core.eval.runner import _rag_query_with_retry
+from src.core.retrieval import retrieve_reranked
 from src.utils.config import config
 
 logging.basicConfig(
@@ -51,13 +52,57 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", type=str, default=str(DEFAULT_DATASET))
     parser.add_argument("--ids", nargs="+", help="Capture only specific test case IDs")
     parser.add_argument("--output", type=str, default=str(DEFAULT_OUTPUT))
+    parser.add_argument(
+        "--retrieval-only",
+        action="store_true",
+        help="Skip LLM generation — capture reranked chunks only (for chunk-level "
+        "retrieval-metric judging; empty answer). Much faster/cheaper.",
+    )
+    parser.add_argument(
+        "--per-paper-cap",
+        type=int,
+        default=None,
+        help="Override the per-paper cap for --retrieval-only (e.g. 999 = no cap). "
+        "Used for the cap ablation.",
+    )
+    parser.add_argument(
+        "--inter-case-delay",
+        type=float,
+        default=INTER_CASE_DELAY,
+        help=f"Seconds to pause between generation cases (default {INTER_CASE_DELAY}). "
+        "Lower it on a generous rate tier to speed up the capture.",
+    )
     return parser.parse_args()
 
 
-async def capture_case(test_case: dict) -> dict:
-    """Run the RAG pipeline for one case and build a fixture entry."""
+async def capture_case(test_case: dict, retrieval_only: bool = False, per_paper_cap: int | None = None) -> dict:
+    """Run the RAG pipeline for one case and build a fixture entry.
+
+    retrieval_only: skip generation, capture only the reranked chunks (answer left
+    empty). The 3 retrieval metrics are judged on chunks alone, so this supports a
+    cheap chunk-level ablation (e.g. cap on vs off) without paying for generation.
+    """
     question = test_case["question"]
     category = test_case.get("category")
+
+    if retrieval_only:
+        retr = await retrieve_reranked(question, category=category, per_paper_cap=per_paper_cap)
+        return {
+            "id": test_case["id"],
+            "question": question,
+            "category": category,
+            "expected_facts": test_case.get("expected_facts", []),
+            "difficulty": test_case.get("difficulty", "unknown"),
+            "tags": test_case.get("tags", []),
+            "answer": "",  # no generation — generation metrics must be skipped (--metrics retrieval)
+            "grounded": len(retr.chunks) > 0,
+            "rewritten_query": None,
+            "model": config.LLM_MODEL,
+            "retrieval_time_ms": round(retr.retrieval_time_ms, 1),
+            "rerank_time_ms": round(retr.rerank_time_ms, 1),
+            "generation_time_ms": 0.0,
+            "chunks": [c.model_dump(mode="json") for c in retr.chunks],
+        }
 
     rag_result = await _rag_query_with_retry(question, category)
 
@@ -97,7 +142,7 @@ async def main() -> None:
     for i, test_case in enumerate(dataset):
         case_id = test_case["id"]
         try:
-            entry = await capture_case(test_case)
+            entry = await capture_case(test_case, args.retrieval_only, args.per_paper_cap)
             entries.append(entry)
             print(
                 f"  [{case_id}] {len(entry['chunks'])} chunks, "
@@ -107,8 +152,9 @@ async def main() -> None:
             logger.error(f"[{case_id}] capture failed: {e}")
             failures.append(case_id)
 
-        if i < len(dataset) - 1:
-            await asyncio.sleep(INTER_CASE_DELAY)
+        # Generation needs the Gemini rate-limit pause; retrieval-only doesn't.
+        if not args.retrieval_only and i < len(dataset) - 1:
+            await asyncio.sleep(args.inter_case_delay)
 
     fixture = {
         "metadata": {
@@ -116,6 +162,8 @@ async def main() -> None:
             "model": config.LLM_MODEL,
             "top_k": config.RAG_TOP_K,
             "similarity_threshold": config.RAG_SIMILARITY_THRESHOLD,
+            "retrieval_only": args.retrieval_only,
+            "per_paper_cap": args.per_paper_cap if args.retrieval_only else None,
             "duration_s": round(time.time() - start, 1),
             "total_cases": len(dataset),
             "captured_cases": len(entries),

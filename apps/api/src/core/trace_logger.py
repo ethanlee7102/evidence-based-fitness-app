@@ -30,6 +30,7 @@ def _chunks_to_json(chunks: list[ChunkResponse]) -> list[dict]:
             "page_end": c.page_end,
             "token_count": c.token_count,
             "similarity": c.similarity,
+            "rerank_score": c.rerank_score,
             "title": c.title,
             "authors": c.authors,
             "year": c.year,
@@ -54,11 +55,12 @@ async def _insert_trace(
     retrieval_time_ms: float,
     embedding_time_ms: float,
     generation_time_ms: float,
+    rerank_time_ms: float = 0.0,
     error: Optional[str] = None,
 ) -> None:
     """Insert a trace row into rag_traces. Catches all exceptions."""
     try:
-        total_time_ms = retrieval_time_ms + generation_time_ms
+        total_time_ms = retrieval_time_ms + rerank_time_ms + generation_time_ms
 
         trace_data: dict = {
             "user_id": user_id,
@@ -72,6 +74,7 @@ async def _insert_trace(
             "grounded": grounded,
             "retrieval_time_ms": round(retrieval_time_ms),
             "embedding_time_ms": round(embedding_time_ms),
+            "rerank_time_ms": round(rerank_time_ms),
             "generation_time_ms": round(generation_time_ms),
             "total_time_ms": round(total_time_ms),
             "error": error,
@@ -100,6 +103,7 @@ def log_trace(
     retrieval_time_ms: float,
     embedding_time_ms: float,
     generation_time_ms: float,
+    rerank_time_ms: float = 0.0,
     error: Optional[str] = None,
 ) -> None:
     """Log a RAG trace as a fire-and-forget async task.
@@ -120,6 +124,7 @@ def log_trace(
             retrieval_time_ms=retrieval_time_ms,
             embedding_time_ms=embedding_time_ms,
             generation_time_ms=generation_time_ms,
+            rerank_time_ms=rerank_time_ms,
             error=error,
         )
     )

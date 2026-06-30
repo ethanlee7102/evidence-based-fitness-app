@@ -78,6 +78,7 @@ def _rag_result_from_fixture(entry: dict, query: str) -> RAGResult:
         prompt_sent="",
         retrieval_time_ms=entry.get("retrieval_time_ms", 0.0),
         embedding_time_ms=0.0,
+        rerank_time_ms=entry.get("rerank_time_ms", 0.0),
         generation_time_ms=entry.get("generation_time_ms", 0.0),
         model=entry.get("model", config.LLM_MODEL),
         grounded=entry.get("grounded", len(chunks) > 0),

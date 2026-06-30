@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import api_router
-from src.core import anthropic_provider, embedding_provider, llm_provider
+from src.core import anthropic_provider, embedding_provider, llm_provider, reranker
 
 # Enable debug logging
 logging.basicConfig(level=logging.DEBUG)
@@ -18,6 +18,7 @@ async def lifespan(app: FastAPI):
     await embedding_provider.client.aclose()
     await llm_provider.client.aclose()
     await anthropic_provider.client.aclose()
+    await reranker.aclose()  # Voyage rerank client (no-op if reranking never used)
 
 
 app = FastAPI(

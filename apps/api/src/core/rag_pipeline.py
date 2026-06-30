@@ -15,7 +15,7 @@ import logging
 import time
 
 from src.core.llm_provider import generate, generate_stream
-from src.core.retrieval import retrieve_chunks
+from src.core.retrieval import retrieve_chunks, retrieve_reranked
 from src.schema.rag import (
     ChatMessage,
     ChunkResponse,
@@ -179,12 +179,19 @@ async def rag_query(
     rewritten = await _rewrite_query(query, history)
     search_query = rewritten if rewritten != query else query
 
-    # 2. Retrieve relevant chunks
-    retrieval_result = await retrieve_chunks(
-        query=search_query,
-        top_k=top_k,
-        category=category,
-    )
+    # 2. Retrieve relevant chunks (deep-fetch + rerank when enabled, else vector-only)
+    if config.RERANK_ENABLED:
+        retrieval_result = await retrieve_reranked(
+            query=search_query,
+            top_n=top_k,
+            category=category,
+        )
+    else:
+        retrieval_result = await retrieve_chunks(
+            query=search_query,
+            top_k=top_k,
+            category=category,
+        )
     chunks = retrieval_result.chunks
     grounded = len(chunks) > 0
 
@@ -221,6 +228,7 @@ async def rag_query(
         prompt_sent=prompt,
         retrieval_time_ms=retrieval_result.retrieval_time_ms,
         embedding_time_ms=retrieval_result.embedding_time_ms,
+        rerank_time_ms=retrieval_result.rerank_time_ms,
         generation_time_ms=gen_time_ms,
         model=config.LLM_MODEL,
         grounded=grounded,
@@ -246,12 +254,19 @@ async def rag_query_stream(
     rewritten = await _rewrite_query(query, history)
     search_query = rewritten if rewritten != query else query
 
-    # 2. Retrieve relevant chunks
-    retrieval_result = await retrieve_chunks(
-        query=search_query,
-        top_k=top_k,
-        category=category,
-    )
+    # 2. Retrieve relevant chunks (deep-fetch + rerank when enabled, else vector-only)
+    if config.RERANK_ENABLED:
+        retrieval_result = await retrieve_reranked(
+            query=search_query,
+            top_n=top_k,
+            category=category,
+        )
+    else:
+        retrieval_result = await retrieve_chunks(
+            query=search_query,
+            top_k=top_k,
+            category=category,
+        )
     chunks = retrieval_result.chunks
     grounded = len(chunks) > 0
 
@@ -279,6 +294,7 @@ async def rag_query_stream(
         prompt_sent=prompt,
         retrieval_time_ms=retrieval_result.retrieval_time_ms,
         embedding_time_ms=retrieval_result.embedding_time_ms,
+        rerank_time_ms=retrieval_result.rerank_time_ms,
         model=config.LLM_MODEL,
         grounded=grounded,
         stream=stream,
