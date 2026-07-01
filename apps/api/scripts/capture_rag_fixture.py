@@ -66,6 +66,25 @@ def parse_args() -> argparse.Namespace:
         "Used for the cap ablation.",
     )
     parser.add_argument(
+        "--cap-margin",
+        type=float,
+        default=None,
+        help="Score-gated cap margin for --retrieval-only (>0 enables the score gate; "
+        "0 = hard cap). Used for the cap ablation.",
+    )
+    parser.add_argument(
+        "--cap-normalize",
+        action="store_true",
+        help="Interpret --cap-margin as a fraction of the query's score range (relative).",
+    )
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=None,
+        help="Override the number of chunks returned for --retrieval-only (e.g. 20 to "
+        "freeze a reranked POOL that cap variants can be applied to offline, noise-free).",
+    )
+    parser.add_argument(
         "--inter-case-delay",
         type=float,
         default=INTER_CASE_DELAY,
@@ -75,7 +94,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def capture_case(test_case: dict, retrieval_only: bool = False, per_paper_cap: int | None = None) -> dict:
+async def capture_case(
+    test_case: dict,
+    retrieval_only: bool = False,
+    per_paper_cap: int | None = None,
+    cap_margin: float | None = None,
+    cap_normalize: bool = False,
+    top_n: int | None = None,
+) -> dict:
     """Run the RAG pipeline for one case and build a fixture entry.
 
     retrieval_only: skip generation, capture only the reranked chunks (answer left
@@ -86,7 +112,14 @@ async def capture_case(test_case: dict, retrieval_only: bool = False, per_paper_
     category = test_case.get("category")
 
     if retrieval_only:
-        retr = await retrieve_reranked(question, category=category, per_paper_cap=per_paper_cap)
+        retr = await retrieve_reranked(
+            question,
+            top_n=top_n,
+            category=category,
+            per_paper_cap=per_paper_cap,
+            cap_margin=cap_margin,
+            cap_normalize=cap_normalize,
+        )
         return {
             "id": test_case["id"],
             "question": question,
@@ -142,7 +175,14 @@ async def main() -> None:
     for i, test_case in enumerate(dataset):
         case_id = test_case["id"]
         try:
-            entry = await capture_case(test_case, args.retrieval_only, args.per_paper_cap)
+            entry = await capture_case(
+                test_case,
+                args.retrieval_only,
+                args.per_paper_cap,
+                args.cap_margin,
+                args.cap_normalize,
+                args.top_n,
+            )
             entries.append(entry)
             print(
                 f"  [{case_id}] {len(entry['chunks'])} chunks, "
@@ -164,6 +204,8 @@ async def main() -> None:
             "similarity_threshold": config.RAG_SIMILARITY_THRESHOLD,
             "retrieval_only": args.retrieval_only,
             "per_paper_cap": args.per_paper_cap if args.retrieval_only else None,
+            "cap_margin": args.cap_margin if args.retrieval_only else None,
+            "cap_normalize": args.cap_normalize if args.retrieval_only else None,
             "duration_s": round(time.time() - start, 1),
             "total_cases": len(dataset),
             "captured_cases": len(entries),

@@ -91,6 +91,8 @@ async def retrieve_reranked(
     fetch_depth: int | None = None,
     ef_search: int | None = None,
     per_paper_cap: int | None = None,
+    cap_margin: float | None = None,
+    cap_normalize: bool | None = None,
     similarity_threshold: float | None = None,
 ) -> RetrievalResult:
     """Deep-fetch + cross-encoder rerank + per-paper cap retrieval (Phase 2 step 9').
@@ -121,12 +123,14 @@ async def retrieve_reranked(
     """
     # Imported here (not module-top) so importing retrieval.py never pulls flashrank —
     # keeps the lean CI path and vector-only callers free of the ONNX dependency.
-    from src.core.reranker import apply_per_paper_cap, rerank
+    from src.core.reranker import apply_per_paper_cap, apply_score_gated_cap, rerank
 
     top_n = top_n or config.RERANK_TOP_N
     fetch_depth = fetch_depth or config.RERANK_FETCH_DEPTH
     ef_search = ef_search or config.RERANK_EF_SEARCH
     per_paper_cap = per_paper_cap if per_paper_cap is not None else config.RERANK_PER_PAPER_CAP
+    cap_margin = cap_margin if cap_margin is not None else config.RERANK_CAP_MARGIN
+    cap_normalize = cap_normalize if cap_normalize is not None else config.RERANK_CAP_NORMALIZE
     floor = similarity_threshold if similarity_threshold is not None else config.RERANK_FETCH_THRESHOLD
     if floor == 0.0:
         floor = _NO_FLOOR
@@ -144,12 +148,17 @@ async def retrieve_reranked(
     rerank_start = time.perf_counter()
     reranked = await rerank(query, fetch.chunks)
     rerank_time_ms = (time.perf_counter() - rerank_start) * 1000
-    capped = apply_per_paper_cap(reranked, cap=per_paper_cap, top_n=top_n)
+    if per_paper_cap > 0 and cap_margin > 0:
+        capped = apply_score_gated_cap(
+            reranked, cap=per_paper_cap, margin=cap_margin, top_n=top_n, normalize=cap_normalize
+        )
+    else:
+        capped = apply_per_paper_cap(reranked, cap=per_paper_cap, top_n=top_n)
 
     logger.info(
         f"Reranked {len(fetch.chunks)} candidates -> {len(capped)} chunks "
         f"(fetch_depth={fetch_depth}, ef_search={ef_search}, cap={per_paper_cap}, "
-        f"rerank={rerank_time_ms:.0f}ms)"
+        f"cap_margin={cap_margin}, rerank={rerank_time_ms:.0f}ms)"
     )
 
     return RetrievalResult(

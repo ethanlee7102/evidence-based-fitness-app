@@ -34,19 +34,31 @@ class Config:
     RAG_SIMILARITY_THRESHOLD: float = float(os.getenv("RAG_SIMILARITY_THRESHOLD", "0.3"))
 
     # Reranking (Phase 2 step 9' — cross-encoder rerank on a deep fetch).
-    # Shipped config (Phase 2, 2026-06-29): deep fetch (150, ef_search 500) ->
-    # Voyage rerank-2.5 -> top-5, NO per-paper cap. Validated on 100 cases / two judges:
-    # recall +0.19, faithfulness +0.19, overall 4.56->4.64 vs vector-only (custom Gemini).
-    # FlashRank (ms-marco-MiniLM) was measured first and DEGRADED retrieval; the cap was
-    # ablated and found harmful. See results/RERANK_EVAL_REPORT.md.
+    # Shipped config (Phase 2, final 2026-07-01): deep fetch (150, ef_search 500) ->
+    # Voyage rerank-2.5 -> score-gated per-paper cap (base 2, normalized margin 0.15)
+    # -> top-5. Validated airtight on 100 cases / two judges (custom Gemini + Ragas) from
+    # one frozen-embedding pool: reranking beats vector (recall +0.15), and the score-gated
+    # cap has the BEST recall of any config on BOTH judges while cutting single-paper
+    # saturation 64%->38% at no overall-quality cost. FlashRank (ms-marco-MiniLM) was
+    # measured first and DEGRADED retrieval; a HARD cap over-diversified single-paper
+    # questions. See results/RERANK_EVAL_REPORT.md.
     RERANK_ENABLED: bool = os.getenv("RERANK_ENABLED", "true").lower() == "true"
     RERANK_PROVIDER: str = os.getenv("RERANK_PROVIDER", "voyage")
     RERANK_MODEL: str = os.getenv("RERANK_MODEL", "rerank-2.5")
     RERANK_FETCH_DEPTH: int = int(os.getenv("RERANK_FETCH_DEPTH", "150"))
     RERANK_EF_SEARCH: int = int(os.getenv("RERANK_EF_SEARCH", "500"))
-    # Per-paper cap on the reranked top-N. 0 = NO cap (shipped default — the ablation
-    # showed the cap diluted relevance/recall). Kept configurable for future tuning.
-    RERANK_PER_PAPER_CAP: int = int(os.getenv("RERANK_PER_PAPER_CAP", "0"))
+    # Per-paper cap base. Combined with the score gate below, a paper may exceed this cap
+    # only when its extra chunk is clearly better than any new-paper alternative. 0 = no cap.
+    RERANK_PER_PAPER_CAP: int = int(os.getenv("RERANK_PER_PAPER_CAP", "2"))
+    # Score-gated cap margin. When > 0 (and cap > 0), a paper may exceed the cap if its
+    # over-cap chunk outscores the best new-paper alternative by more than this margin
+    # ("diversify only when nearly free"). 0 = plain hard cap. Within-query relative, so
+    # the value depends on the reranker's score spread — 0.15 (of the score range) chosen
+    # empirically as the peak of multi-vs-single-paper discrimination for Voyage rerank-2.5.
+    RERANK_CAP_MARGIN: float = float(os.getenv("RERANK_CAP_MARGIN", "0.15"))
+    # When true, RERANK_CAP_MARGIN is a FRACTION of the query's score range, not a raw
+    # score gap (calibration-robust — reranker score spreads vary across queries).
+    RERANK_CAP_NORMALIZE: bool = os.getenv("RERANK_CAP_NORMALIZE", "true").lower() == "true"
     RERANK_TOP_N: int = int(os.getenv("RERANK_TOP_N", "5"))
     # Max tokens a LOCAL cross-encoder reads per (query, chunk) pair (FlashRank only;
     # ignored by the Voyage API, which truncates server-side). FlashRank's default 128

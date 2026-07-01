@@ -34,7 +34,26 @@ _VOYAGE_RERANK_URL = "https://api.voyageai.com/v1/rerank"
 # Providers whose scoring is async-native (network) rather than sync/CPU-local.
 _ASYNC_PROVIDERS = {"voyage"}
 _RETRYABLE_STATUSES = {429, 500, 502, 503, 529}
-_BACKOFF_DELAYS = [1, 2, 4]
+
+# Adaptive pacing for the rerank API. The pace PERSISTS across calls (module-level), so
+# sustained rate-limiting doesn't make every call re-probe from 1s — once throttled, the
+# next call pre-waits the elevated pace. AIMD-style: double on a 429, decay on success.
+_MAX_ATTEMPTS = 5
+_PACE_BASE = 1.0     # first backoff step
+_PACE_MAX = 30.0     # ceiling
+_PACE_DECAY = 0.6    # multiply pace by this on each success (gentle recovery)
+_pace = 0.0          # current inter-call delay, seconds
+
+
+def _retry_after_seconds(response: httpx.Response) -> float:
+    """Honor a Retry-After header (seconds form) when present; else 0."""
+    raw = response.headers.get("retry-after")
+    if not raw:
+        return 0.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return 0.0
 
 
 class Reranker(Protocol):
@@ -119,12 +138,18 @@ class _VoyageReranker:
         self._model = model
 
     async def ascore(self, query: str, passages: list[str]) -> list[float]:
+        global _pace
         if not passages:
             return []
         if not config.VOYAGE_API_KEY:
             raise ValueError("VOYAGE_API_KEY not configured")
 
-        for attempt in range(len(_BACKOFF_DELAYS) + 1):
+        resp = None
+        for attempt in range(_MAX_ATTEMPTS):
+            # Carry throttle state across calls AND attempts: a recently-throttled run
+            # pre-waits the elevated pace instead of restarting at 1s every call.
+            if _pace > 0:
+                await asyncio.sleep(_pace)
             resp = await _get_async_client().post(
                 _VOYAGE_RERANK_URL,
                 headers={
@@ -134,13 +159,20 @@ class _VoyageReranker:
                 json={"query": query, "documents": passages, "model": self._model},
             )
             if resp.status_code == 200:
+                _pace *= _PACE_DECAY  # ease off as throttling clears
+                if _pace < 0.1:
+                    _pace = 0.0
                 break
-            if resp.status_code in _RETRYABLE_STATUSES and attempt < len(_BACKOFF_DELAYS):
-                delay = _BACKOFF_DELAYS[attempt]
-                logger.warning(
-                    f"Voyage rerank {resp.status_code}, retry {attempt + 1} in {delay}s..."
+            if resp.status_code in _RETRYABLE_STATUSES and attempt < _MAX_ATTEMPTS - 1:
+                # Ratchet the persistent pace up (double, honor Retry-After, cap).
+                _pace = min(
+                    _PACE_MAX,
+                    max(_retry_after_seconds(resp), max(_pace, _PACE_BASE) * 2),
                 )
-                await asyncio.sleep(delay)
+                logger.warning(
+                    f"Voyage rerank {resp.status_code}; pace -> {_pace:.1f}s "
+                    f"(attempt {attempt + 1}/{_MAX_ATTEMPTS})"
+                )
                 continue
             raise RuntimeError(f"Voyage rerank API error {resp.status_code}: {resp.text}")
 
@@ -257,6 +289,67 @@ def apply_per_paper_cap(
             continue
         per_paper[chunk.paper_id] += 1
         kept.append(chunk)
+
+    if return_suppressed:
+        return kept, suppressed
+    return kept
+
+
+def apply_score_gated_cap(
+    chunks: list[ChunkResponse],
+    cap: int,
+    margin: float,
+    top_n: int,
+    normalize: bool = False,
+    return_suppressed: bool = False,
+):
+    """Per-paper cap a paper may EXCEED when doing so costs little relevance.
+
+    Walking rerank-sorted chunks: a chunk whose paper is already at `cap` is kept anyway
+    if it outscores the best still-available *new-paper* chunk by more than `margin` (the
+    dominant paper's chunk is clearly better — keep it); otherwise it's suppressed so a
+    new paper can take the slot (the alternative is nearly as good — diversify for free).
+
+    `margin` tunes the spectrum: ~0 behaves like no cap, large behaves like a hard cap.
+    It's a within-query relative comparison, so it doesn't depend on absolute score
+    calibration. Requires chunks pre-sorted desc by rerank_score.
+
+    normalize=True interprets `margin` as a FRACTION of the query's score range (computed
+    over the top candidates) rather than a raw score gap — the calibration-robust form,
+    since reranker score spreads vary widely across queries. Recommended: rerankers like
+    Voyage compress the top scores, so a fixed absolute margin behaves inconsistently.
+    """
+    denom = 1.0
+    if normalize and chunks:
+        # Range over the top candidates that actually compete for the top_n slots, so the
+        # fraction means the same thing regardless of how compressed a query's scores are.
+        window = [c.rerank_score or 0.0 for c in chunks[: max(20, 4 * top_n)]]
+        denom = (max(window) - min(window)) or 1e-9
+
+    kept: list[ChunkResponse] = []
+    suppressed: list[ChunkResponse] = []
+    per_paper: Counter[str] = Counter()
+    n = len(chunks)
+
+    for i, c in enumerate(chunks):
+        if len(kept) >= top_n:
+            break
+        if per_paper[c.paper_id] < cap:
+            per_paper[c.paper_id] += 1
+            kept.append(c)
+            continue
+        # c's paper is at the cap. The best under-cap alternative still ahead of us is the
+        # first such chunk (chunks are score-sorted) — what diversity would admit instead.
+        alt = next(
+            (chunks[j] for j in range(i + 1, n) if per_paper[chunks[j].paper_id] < cap),
+            None,
+        )
+        score = c.rerank_score or 0.0
+        if alt is None or (score - (alt.rerank_score or 0.0)) / denom > margin:
+            per_paper[c.paper_id] += 1
+            kept.append(c)  # exceed cap: clearly better, or nothing to diversify to
+        else:
+            suppressed.append(c)  # diversify: the alternative is nearly as good
 
     if return_suppressed:
         return kept, suppressed
