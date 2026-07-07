@@ -27,6 +27,7 @@ from docling_core.types.doc.labels import DocItemLabel
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.core.embedding_provider import embed_texts
+from src.core.noise_filter import is_noise
 from src.db import get_supabase
 from src.schema.rag import PaperMetadata, PaperResponse
 from src.utils.config import config
@@ -506,7 +507,9 @@ def chunk_sections(sections: list[dict]) -> list[dict]:
     )
 
     all_chunks: list[dict] = []
-    chunk_index = 0
+    raw_index = 0    # position across ALL splits (drives the front-matter guard)
+    chunk_index = 0  # sequential index over KEPT chunks only (no gaps)
+    dropped = 0
 
     for section in sections:
         section_text = section["text"]
@@ -516,6 +519,17 @@ def chunk_sections(sections: list[dict]) -> list[dict]:
         splits = splitter.split_text(section_text)
 
         for split_text in splits:
+            # Drop reference-list / boilerplate chunks before they reach the
+            # embedder. See src/core/noise_filter.py for the validated rule.
+            # conservative=True: at ingestion there is no human reviewer, so the
+            # filter must never silently drop real content — it spares any chunk
+            # showing real content and errs toward keeping. See noise_filter.py.
+            noise, _reason = is_noise(split_text, section["section"], raw_index, conservative=True)
+            raw_index += 1
+            if noise:
+                dropped += 1
+                continue
+
             page_start, page_end = _find_page_range(
                 split_text, section_text, section["page_map"]
             )
@@ -528,6 +542,9 @@ def chunk_sections(sections: list[dict]) -> list[dict]:
                 "token_count": int(len(split_text) / 4),
             })
             chunk_index += 1
+
+    if dropped:
+        logger.info("chunk_sections: dropped %d noise chunk(s), kept %d", dropped, len(all_chunks))
 
     return all_chunks
 
