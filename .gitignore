@@ -65,3 +65,11 @@ apps/api/papers/*.pdf
 
 # Private planning / portfolio / interview-prep docs — local only, never tracked
 context/
+
+# Noise-cleanup local artifacts — large recovery backup + per-agent review scratch.
+# The decision record (noise_review/final_verdict.json) and report are tracked; these are not.
+apps/api/results/noise_review/deleted_chunks_backup.json
+apps/api/results/noise_review/slice_*.json
+apps/api/results/noise_review/suspects_*.json
+apps/api/results/noise_audit.json
+apps/api/results/target_chunks_after_noise_cleanup.json
