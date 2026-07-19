@@ -1,0 +1,92 @@
+{
+  "fixture": "rag_outputs_fixture_sgnorm015_full.json",
+  "fixture_timestamp": "2026-06-29T22:24:26",
+  "cases_total": 100,
+  "verbatim_threshold": 20,
+  "refusal": {
+    "oos_cases": 2,
+    "failures": []
+  },
+  "format": {
+    "grounded_cases": 98,
+    "missing_citation": []
+  },
+  "citation": {
+    "ungrounded_total": 15,
+    "failures": [
+      {
+        "id": "STR-007",
+        "ungrounded": [
+          "Khlifa et al., 2010, p. 7",
+          "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "Sedano et al., 2009, p. 7",
+          "Luebbers et al., 2003, p. 7",
+          "de Villarreal et al., 2008, p. 7",
+          "Markovic et al., 2007, p. 7",
+          "Luebbers et al., 2003, p. 7",
+          "Chelly et al., 2010, p. 7",
+          "de Villarreal et al., 2008, p. 7",
+          "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "de Villarreal et al., 2008, p. 7",
+          "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "Khlifa et al., 2010, p. 7",
+          "Gehri et al., 1998, p. 7"
+        ]
+      }
+    ]
+  },
+  "verbatim_report_only": {
+    "flagged_count": 5,
+    "distribution": {
+      "0": 2,
+      "4": 1,
+      "5": 1,
+      "6": 4,
+      "7": 9,
+      "8": 10,
+      "9": 11,
+      "10": 10,
+      "11": 12,
+      "12": 5,
+      "13": 6,
+      "14": 6,
+      "15": 6,
+      "16": 3,
+      "17": 4,
+      "18": 1,
+      "19": 4,
+      "21": 2,
+      "25": 1,
+      "26": 1,
+      "30": 1
+    },
+    "flagged": [
+      {
+        "id": "NUT-011",
+        "longest_run": 30,
+        "span": "beta alanine ba is a non proteogenic amino acid naturally produced in the liver and found in foods like poultry fish and meat it is a precursor to carnosine synthesis"
+      },
+      {
+        "id": "NUT-003",
+        "longest_run": 26,
+        "span": "that protein intake post workout may not be critical as long as protein is consumed prior to training or total daily protein intake is adequate however"
+      },
+      {
+        "id": "REC-006",
+        "longest_run": 25,
+        "span": "this is an evolving area of research and more data are needed to fully evaluate the best practices for applying hrv in strength and conditioning"
+      },
+      {
+        "id": "BC-001",
+        "longest_run": 21,
+        "span": "that under caloric restriction resistance exercise is more effective in reducing body fat percentage than moderate to low intensity aerobic exercise"
+      },
+      {
+        "id": "BC-009",
+        "longest_run": 21,
+        "span": "strength from the end of the bulking phase to the end of the cutting phase in two of the four exercises"
+      }
+    ]
+  }
+}
