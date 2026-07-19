@@ -1,0 +1,95 @@
+{
+  "fixture": "rag_outputs_fixture_sgnorm015_full.json",
+  "fixture_timestamp": "2026-06-29T22:24:26",
+  "cases_total": 100,
+  "cases_applicable": 98,
+  "metric_ungrounded": "15/1669 ungrounded citations",
+  "total_citations": 1669,
+  "ungrounded_count": 15,
+  "indirect_count": 32,
+  "page_mismatch_count": 0,
+  "ungrounded_findings": [
+    {
+      "id": "STR-007",
+      "grounded_flag": true,
+      "ungrounded": [
+        {
+          "raw": "Khlifa et al., 2010, p. 7",
+          "author": "Khlifa et al.",
+          "year": 2010
+        },
+        {
+          "raw": "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "author": "Ram\u00edrez-Campillo et al.",
+          "year": 2013
+        },
+        {
+          "raw": "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "author": "Ram\u00edrez-Campillo et al.",
+          "year": 2013
+        },
+        {
+          "raw": "Sedano et al., 2009, p. 7",
+          "author": "Sedano et al.",
+          "year": 2009
+        },
+        {
+          "raw": "Luebbers et al., 2003, p. 7",
+          "author": "Luebbers et al.",
+          "year": 2003
+        },
+        {
+          "raw": "de Villarreal et al., 2008, p. 7",
+          "author": "de Villarreal et al.",
+          "year": 2008
+        },
+        {
+          "raw": "Markovic et al., 2007, p. 7",
+          "author": "Markovic et al.",
+          "year": 2007
+        },
+        {
+          "raw": "Luebbers et al., 2003, p. 7",
+          "author": "Luebbers et al.",
+          "year": 2003
+        },
+        {
+          "raw": "Chelly et al., 2010, p. 7",
+          "author": "Chelly et al.",
+          "year": 2010
+        },
+        {
+          "raw": "de Villarreal et al., 2008, p. 7",
+          "author": "de Villarreal et al.",
+          "year": 2008
+        },
+        {
+          "raw": "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "author": "Ram\u00edrez-Campillo et al.",
+          "year": 2013
+        },
+        {
+          "raw": "de Villarreal et al., 2008, p. 7",
+          "author": "de Villarreal et al.",
+          "year": 2008
+        },
+        {
+          "raw": "Ram\u00edrez-Campillo et al., 2013, p. 7",
+          "author": "Ram\u00edrez-Campillo et al.",
+          "year": 2013
+        },
+        {
+          "raw": "Khlifa et al., 2010, p. 7",
+          "author": "Khlifa et al.",
+          "year": 2010
+        },
+        {
+          "raw": "Gehri et al., 1998, p. 7",
+          "author": "Gehri et al.",
+          "year": 1998
+        }
+      ]
+    }
+  ],
+  "page_mismatch_findings": []
+}
