@@ -1,7 +1,11 @@
-"""Eval runner — orchestrates RAG query + judge scoring for a test dataset.
+"""Eval runner — orchestrates RAG query + binary judge scoring for a test dataset.
 
 Processes test cases sequentially with rate limiting to stay within
 Gemini rate limits (free tier: 20 RPD; paid tier: 2000 RPD).
+
+Uses the binary/decomposed judge (`binary_judge.py`): four LLM calls per scored
+case (recall, relevancy+precision shared, faithfulness, answer-relevancy gate),
+each a proportion in [0, 1] computed from binary atoms — or `None` when errored.
 """
 
 import asyncio
@@ -9,7 +13,11 @@ import logging
 import time
 from dataclasses import dataclass
 
-from src.core.eval.judge import JudgeResult, judge_all
+from src.core.eval.binary_judge import (
+    SCORED_METRICS,
+    BinaryJudgeResult,
+    judge_all_binary,
+)
 from src.schema.rag import ChunkResponse, RAGResult
 from src.utils.config import config
 
@@ -25,7 +33,7 @@ class EvalTestResult:
     category: str | None
     difficulty: str
     tags: list[str]
-    scores: dict | None = None  # JudgeResult.to_dict()
+    scores: dict | None = None  # BinaryJudgeResult.to_dict()
     overall_score: float | None = None
     rag_result: dict | None = None
     error: str | None = None
@@ -101,6 +109,36 @@ def _rag_result_to_dict(result: RAGResult) -> dict:
     }
 
 
+# Which scored metrics contribute to `overall` per --metrics filter. The gate
+# (answer_relevancy) has no numeric score and never contributes.
+_RETRIEVAL_METRICS = (
+    "contextual_relevancy",
+    "contextual_recall",
+    "contextual_precision",
+)
+_GENERATION_METRICS = ("faithfulness",)
+
+
+def _compute_overall(scores_dict: dict, metrics_filter: str | None) -> float | None:
+    """Mean of the scored metric proportions selected by the filter.
+
+    Excludes errored metrics (score=None) and the gate (no `score` key). Returns
+    None when nothing in the selection scored (e.g. every metric errored).
+    """
+    if metrics_filter == "retrieval":
+        keys: tuple[str, ...] = _RETRIEVAL_METRICS
+    elif metrics_filter == "generation":
+        keys = _GENERATION_METRICS
+    else:
+        keys = SCORED_METRICS
+    vals = [
+        scores_dict[k]["score"]
+        for k in keys
+        if k in scores_dict and scores_dict[k].get("score") is not None
+    ]
+    return round(sum(vals) / len(vals), 4) if vals else None
+
+
 class EvalRunner:
     """Runs RAG evaluation against a test dataset."""
 
@@ -108,21 +146,26 @@ class EvalRunner:
         self,
         min_delay: float = 7.0,
         verbose: bool = False,
-        combined: bool = False,
         inter_call_delay: float = 5.0,
         judge_model: str | None = None,
         metrics: str | None = None,
         fixture_map: dict | None = None,
+        concurrency: int = 1,
     ):
         self.min_delay = min_delay
         self.verbose = verbose
-        self.combined = combined
-        self.inter_call_delay = inter_call_delay
         self.judge_model = judge_model
         self.metrics = metrics  # "retrieval", "generation", or None (all)
         # {case_id: fixture_entry} — when set, judge frozen RAG outputs
         # instead of calling rag_query live.
         self.fixture_map = fixture_map
+        # Max cases judged concurrently. Bounded by a semaphore in run(); the
+        # 429/5xx exponential-backoff retry in judge._generate_with_retry is the
+        # rate-limit safety net. concurrency=1 preserves the old sequential path.
+        self.concurrency = max(1, concurrency)
+        # The per-call pacing was a free-tier RPM workaround; under bounded
+        # concurrency it is redundant, so drop it when running concurrently.
+        self.inter_call_delay = 0.0 if self.concurrency > 1 else inter_call_delay
 
     async def evaluate_single(self, test_case: dict) -> EvalTestResult:
         """Evaluate a single test case: RAG query + judge scoring."""
@@ -132,7 +175,11 @@ class EvalRunner:
         expected_facts = test_case.get("expected_facts", [])
         difficulty = test_case.get("difficulty", "unknown")
         tags = test_case.get("tags", [])
-        is_oos = "out-of-scope" in tags
+        # A case is out-of-scope when tagged OR carrying zero expected_facts (same
+        # definition as deterministic_checks.check_refusal). The 0-fact clause also
+        # guards the binary recall judge, which cannot score supported/total over an
+        # empty fact set — such a case is skipped here (grounded-flag check only).
+        is_oos = "out-of-scope" in tags or not expected_facts
 
         if self.verbose:
             print(f"  [{case_id}] {question[:60]}...")
@@ -163,54 +210,23 @@ class EvalRunner:
                     error=None,
                 )
 
-            # 2. Run judge scoring
-            judge_result: JudgeResult = await judge_all(
+            # 2. Run binary judge scoring (4 calls: recall, relevancy+precision,
+            #    faithfulness, answer-relevancy gate)
+            judge_result: BinaryJudgeResult = await judge_all_binary(
                 question=question,
                 expected_facts=expected_facts,
                 chunks=rag_result.chunks,
                 answer=rag_result.answer,
-                combined=self.combined,
                 inter_call_delay=self.inter_call_delay,
                 judge_model=self.judge_model,
             )
 
             scores_dict = judge_result.to_dict()
-
-            # Apply metric filter if set
-            if self.metrics == "retrieval":
-                # Only contextual_* metrics
-                filtered = {
-                    k: v
-                    for k, v in scores_dict.items()
-                    if k.startswith("contextual_")
-                }
-                overall = (
-                    sum(v["score"] for v in filtered.values()) / len(filtered)
-                    if filtered
-                    else 0.0
-                )
-            elif self.metrics == "generation":
-                # Only answer_relevancy + faithfulness
-                filtered = {
-                    k: v
-                    for k, v in scores_dict.items()
-                    if k in ("answer_relevancy", "faithfulness")
-                }
-                overall = (
-                    sum(v["score"] for v in filtered.values()) / len(filtered)
-                    if filtered
-                    else 0.0
-                )
-            else:
-                filtered = scores_dict
-                overall = (
-                    sum(v["score"] for v in filtered.values()) / len(filtered)
-                    if filtered
-                    else 0.0
-                )
+            overall = _compute_overall(scores_dict, self.metrics)
 
             if self.verbose:
-                print(f"         Overall: {overall:.2f}")
+                shown = f"{overall:.3f}" if overall is not None else "n/a (all errored)"
+                print(f"         Overall: {shown}")
 
             return EvalTestResult(
                 id=case_id,
@@ -219,7 +235,7 @@ class EvalRunner:
                 difficulty=difficulty,
                 tags=tags,
                 scores=scores_dict,
-                overall_score=round(overall, 2),
+                overall_score=overall,
                 rag_result=rag_dict,
                 error=None,
             )
@@ -237,21 +253,43 @@ class EvalRunner:
                 error=str(e),
             )
 
+    async def _run_sequential(self, dataset: list[dict]) -> list[EvalTestResult]:
+        """One case at a time with an inter-case delay (free-tier-safe pacing)."""
+        results: list[EvalTestResult] = []
+        for i, test_case in enumerate(dataset):
+            results.append(await self.evaluate_single(test_case))
+            if i < len(dataset) - 1:
+                await asyncio.sleep(self.min_delay)
+        return results
+
+    async def _run_concurrent(self, dataset: list[dict]) -> list[EvalTestResult]:
+        """Judge up to `concurrency` cases at once, bounded by a semaphore.
+
+        gather preserves input order, so results align with `dataset`. Rate
+        limits are handled by the per-call 429/5xx backoff, not by pacing.
+        """
+        sem = asyncio.Semaphore(self.concurrency)
+
+        async def _bounded(test_case: dict) -> EvalTestResult:
+            async with sem:
+                return await self.evaluate_single(test_case)
+
+        return list(await asyncio.gather(*(_bounded(tc) for tc in dataset)))
+
     async def run(self, dataset: list[dict]) -> dict:
         """Run evaluation on the full dataset. Returns report dict."""
         start_time = time.time()
-        results: list[EvalTestResult] = []
-        mode = "combined" if self.combined else "separate"
+        mode = "binary"
 
-        print(f"\nStarting RAG evaluation ({len(dataset)} cases, mode={mode})...\n")
+        print(
+            f"\nStarting RAG evaluation ({len(dataset)} cases, mode={mode}, "
+            f"concurrency={self.concurrency})...\n"
+        )
 
-        for i, test_case in enumerate(dataset):
-            result = await self.evaluate_single(test_case)
-            results.append(result)
-
-            # Rate limit between test cases (skip after last)
-            if i < len(dataset) - 1:
-                await asyncio.sleep(self.min_delay)
+        if self.concurrency > 1:
+            results = await self._run_concurrent(dataset)
+        else:
+            results = await self._run_sequential(dataset)
 
         duration_s = time.time() - start_time
 
@@ -268,6 +306,7 @@ class EvalRunner:
                 "total_cases": len(dataset),
                 "failed_cases": sum(1 for r in results if r.error),
                 "metrics_filter": self.metrics,
+                "concurrency": self.concurrency,
                 "from_fixture": self.fixture_map is not None,
             },
             "results": [

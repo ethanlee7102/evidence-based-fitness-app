@@ -1,18 +1,25 @@
-"""Eval cross-validation analysis (ROADMAP Phase 1, step 7).
+"""Eval cross-validation analysis (ROADMAP Phase 1 step 7; Phase 2.5 binary migration).
 
-Loads the available eval runs and characterizes agreement across two axes:
-  - Axis 1 (judge MODEL): custom prompts, Gemini vs Claude Haiku 4.5 (live RAG).
-  - Axis 2 (IMPLEMENTATION): Gemini judge, custom vs Ragas, on the SAME frozen
-    fixture (so any gap is the implementation, not re-generation).
+Loads the available eval runs and characterizes agreement across four axes:
+  - Axis 1 (judge MODEL): 1-5 custom prompts, Gemini vs Claude Haiku 4.5 (live RAG).
+  - Axis 2 (IMPLEMENTATION): binary custom judge vs Ragas, both native 0-1, on the
+    v2 canonical fixture with matched refined facts (any gap is implementation, not
+    re-generation). Refinement lifted recall agreement r=0.70 (v1) -> 0.75 (v2).
+  - Axis 3 (METRIC MATURITY, frozen on v1/old facts): the SAME judge migrated from
+    emitted 1-5 Likert to computed binary atoms, on identical retrieval + facts — so
+    each delta is pure judge methodology (precision's AP ceiling vs the Likert drag).
+  - Axis 4 (CROSS-MODEL self-preference): v2 binary judge, Gemini vs Claude — recall
+    judges the retrieved chunks (Voyage), so any gap is strictness, not self-preference.
 
 Emits results/eval_agreement_analysis.md with: per-metric means, Pearson
 correlation, within-1-point agreement, disagreement cases, and commentary.
 
-Scale handling: custom judge is 1-5, Ragas is 0-1. Everything is normalized to
-0-1 (custom: (x-1)/4) for cross-scale comparison. "Within 1 point" = ±0.25 on
-the normalized scale (1 point on the 1-5 scale). Pearson is scale-invariant but
-UNDEFINED when a series has ~zero variance (a metric saturated near its ceiling),
-which is reported explicitly rather than as a misleading number.
+Scale handling: 1-5 Likert runs and native-0-1 runs (Ragas + the binary custom
+judge) are all normalized to 0-1 (Likert: (x-1)/4). "Within 1 point" = ±0.25
+normalized. Pearson is UNDEFINED when a series has ~zero variance (a metric
+saturated near its ceiling) and is reported as such rather than a misleading
+number. The binary judge scores answer_relevancy as a GATE (no numeric score),
+so it shows `—` on the 0-1 axes; its pass-rate is a note, not a correlation.
 
 Run from the main venv (pure stdlib):
     cd apps/api && python -m scripts.analyze_eval_agreement
@@ -42,47 +49,83 @@ SHORT = {
     "faithfulness": "Fai",
 }
 
-# scale: native max (5 = custom 1-5 judge, 1 = Ragas 0-1)
+# scale: native max (5 = a 1-5 Likert judge, 1 = a native-0-1 judge: Ragas, or the
+# binary/decomposed custom judge). Everything is normalized to 0-1 for comparison.
 RUNS = {
+    # --- historical 1-5 Likert runs (model axis; retained as history) ---
     "baseline": {
         "path": "run0_baseline_clean.json",
         "scale": 5,
-        "label": "Custom · Gemini · live (baseline)",
+        "label": "Custom 1-5 · Gemini · live (old baseline)",
     },
     "run_a": {
         "path": "run_a_custom_claude.json",
         "scale": 5,
-        "label": "Custom · Claude Haiku 4.5 · live",
+        "label": "Custom 1-5 · Claude Haiku 4.5 · live",
     },
-    "custom_fixture": {
-        "path": "run0_custom_fixture.json",
+    # --- v1 canonical-fixture runs (OLD facts; anchor the frozen maturity axis) ---
+    # Same frozen retrieval, OLD expected_facts — so a v1-vs-v1 gap is judge
+    # methodology, never re-generation.
+    "holistic_canonical": {
+        "path": "run_sgnorm015_full_custom.json",
         "scale": 5,
-        "label": "Custom · Gemini · fixture",
+        "label": "Custom 1-5 holistic · Gemini · fixture (old facts)",
     },
-    "run_b": {
-        "path": "run_b_ragas_gemini.json",
+    "binary_v1": {
+        "path": "run1_binary_baseline.json",
         "scale": 1,
-        "label": "Ragas · Gemini · fixture",
+        "label": "Custom binary · Gemini · fixture v1 (old facts)",
+    },
+    # --- v2 canonical-fixture runs (refined atomic facts + chunk-vs-chunk recall
+    # prompt). Same frozen retrieval as v1; only expected_facts changed. ---
+    "binary_v2": {
+        "path": "run2_binary_baseline.json",
+        "scale": 1,
+        "label": "Custom binary · Gemini · fixture v2 (CURRENT baseline)",
+    },
+    "claude_v2": {
+        "path": "run2_binary_claude.json",
+        "scale": 1,
+        "label": "Custom binary · Claude Haiku 4.5 · fixture v2",
+    },
+    "ragas_v2": {
+        "path": "run2_ragas_gemini.json",
+        "scale": 1,
+        "label": "Ragas · Gemini · fixture v2",
     },
 }
 
 AXES = [
     {
-        "name": "Axis 1 — Judge model (custom prompts, live RAG)",
+        "name": "Axis 1 — Judge model (1-5 custom prompts, live RAG)",
         "a": "baseline",
         "b": "run_a",
         "question": "Does swapping the judge model (Gemini→Claude) move the scores? Isolates model bias.",
     },
     {
-        "name": "Axis 2 — Implementation (Gemini judge, same frozen fixture)",
-        "a": "custom_fixture",
-        "b": "run_b",
-        "question": "Does my custom judge agree with the industry-standard Ragas? Isolates implementation differences.",
+        "name": "Axis 2 — Implementation (binary custom vs Ragas, v2 matched facts)",
+        "a": "binary_v2",
+        "b": "ragas_v2",
+        "question": "Does the binary custom judge agree with industry-standard Ragas? Both native 0-1 on identical retrieval AND matched (refined) facts — the cleanest apples-to-apples the project has. Recall agreement rose from r=0.70 (v1) to r=0.75 (v2) after the fact refinement.",
+    },
+    {
+        "name": "Axis 3 — Metric maturity (old 1-5 holistic vs binary v1, old facts, FROZEN)",
+        "a": "holistic_canonical",
+        "b": "binary_v1",
+        "question": "How did migrating the SAME judge from emitted 1-5 Likert to computed binary atoms move each metric? Both on the OLD fact set + byte-identical retrieval, so every delta is pure judge methodology (kept on v1 facts precisely to hold that isolation).",
+    },
+    {
+        "name": "Axis 4 — Cross-model self-preference check (binary Gemini vs Claude, v2)",
+        "a": "binary_v2",
+        "b": "claude_v2",
+        "question": "Is the primary Gemini number a same-family self-preference artifact? Recall judges the retrieved chunks (Voyage, not Gemini), so a Gemini↔Claude gap here is judge strictness, not self-preference.",
     },
 ]
 
-WITHIN_1PT = 0.25  # 1 point on the 1-5 scale, normalized
-DISAGREE = 0.375  # >1.5 points on the 1-5 scale, normalized
+# On a native-0-1 run these bands are absolute (a quarter of the range / >0.375),
+# no longer literally "1 Likert point" — the label survives from the 1-5 era.
+WITHIN_1PT = 0.25  # within a quarter of the 0-1 range (== 1 pt on the old 1-5 scale)
+DISAGREE = 0.375  # differ by more than 0.375 normalized (== >1.5 pts on 1-5)
 
 
 # --- loading -----------------------------------------------------------------
@@ -182,7 +225,7 @@ def build_report(runs: dict) -> str:
     L.append("## Runs compared\n")
     L.append("| Run | Implementation · model · RAG source | Native scale | n scored | Overall (native) |")
     L.append("|---|---|---|---|---|")
-    for key in ["baseline", "run_a", "custom_fixture", "run_b"]:
+    for key in RUNS:
         r = runs[key]
         n = len(r["cases"])
         # recompute native overall mean from cases
@@ -270,31 +313,50 @@ def build_report(runs: dict) -> str:
 
     # Commentary (auto-anchored to the computed numbers)
     L.append("## Commentary\n")
-    # recall correlation on axis 2
-    xs, ys, _ = aligned(runs["custom_fixture"], runs["run_b"], "contextual_recall")
-    rec_r = pearson(xs, ys)
-    # model-axis recall delta
+    # implementation axis: binary custom vs Ragas (v2 matched facts, both 0-1)
+    ixs, iys, _ = aligned(runs["binary_v2"], runs["ragas_v2"], "contextual_recall")
+    rec_impl_r = pearson(ixs, iys)
+    # implementation axis, v1 (old facts) — to show the refinement lifted agreement
+    v1xs, v1ys, _ = aligned(runs["binary_v1"], runs["ragas_v2"], "contextual_recall")
+    # model axis: recall delta (Gemini -> Claude, 1-5 live)
     mxs, mys, _ = aligned(runs["baseline"], runs["run_a"], "contextual_recall")
     rec_model_delta = mean(mys) - mean(mxs)
+    # cross-model self-preference check (v2 binary: Gemini vs Claude)
+    cmxs, cmys, _ = aligned(runs["binary_v2"], runs["claude_v2"], "contextual_recall")
+    rec_cm_r = pearson(cmxs, cmys)
+    rec_cm_delta = mean(cmys) - mean(cmxs)
+    # maturity axis: old 1-5 holistic -> binary v1 (old facts, identical retrieval)
+    prxs, prys, _ = aligned(runs["holistic_canonical"], runs["binary_v1"], "contextual_precision")
+    prec_mat_delta = mean(prys) - mean(prxs)
+    rcxs, rcys, _ = aligned(runs["holistic_canonical"], runs["binary_v1"], "contextual_recall")
+    rec_mat_delta = mean(rcys) - mean(rcxs)
     L.append(
-        f"- **Both axes independently flag retrieval (recall/precision) as the weak spot**, not "
-        f"answer quality — convergent evidence that the eval is measuring something real about the "
-        f"system, not an artifact of one judge.\n"
-        f"- **Model axis:** swapping Gemini→Claude leaves answer-quality metrics ~unchanged but "
-        f"makes the judge **more lenient on retrieval** (recall Δ {rec_model_delta:+.2f} normalized). "
-        f"Implication: any retrieval before/after comparison must hold the judge model fixed, or a "
-        f"judge swap would masquerade as a retrieval gain.\n"
-        f"- **Implementation axis:** custom vs Ragas **correlate strongly on contextual recall "
-        f"(r={fmt_r(rec_r)})** — the metric that drives the Phase-2 retrieval roadmap — so that signal "
-        f"is implementation-robust. Known retrieval-weak cases (GEN-004, BC-010, STR-010) score low in both.\n"
-        f"- **Why some metrics show `n/a (saturated)` correlation:** answer-quality metrics cluster "
-        f"near the ceiling in both implementations (e.g. custom answer-relevancy is 5/5 on nearly every "
-        f"case → zero variance → Pearson undefined). This is *agreement*, not disagreement — their "
-        f"within-1-point rates are high. Correlation is only meaningful where there's spread (the "
-        f"retrieval metrics); agreement-rate is the right statistic for saturated metrics.\n"
-        f"- **Takeaway:** the custom judge is not self-confirming. It tracks a different model on "
-        f"answer quality, tracks the industry-standard implementation on the retrieval signal that "
-        f"matters, and the disagreements are explainable (judge strictness; metric saturation), not bugs.\n"
+        f"- **Recall is the weak spot on every axis**, not answer quality — convergent evidence the eval "
+        f"measures something real about retrieval, not a single-judge artifact.\n"
+        f"- **Implementation axis (binary custom vs Ragas, v2):** the two independent implementations agree "
+        f"on recall at **r={fmt_r(rec_impl_r)}** on native-0-1 identical retrieval with matched facts — the "
+        f"cleanest apples-to-apples cross-check the project has. Refining the facts (splitting compounds + "
+        f"correcting source-overstated ones) *raised* agreement from r={fmt_r(pearson(v1xs,v1ys))} (v1 facts) "
+        f"— removing noise both judges tripped on, not imposing our own view. The custom judge is not "
+        f"self-confirming.\n"
+        f"- **Cross-model self-preference check (v2 binary, Gemini vs Claude):** Claude is more lenient on "
+        f"recall (Δ {rec_cm_delta:+.2f}) but tracks Gemini (r={fmt_r(rec_cm_r)}). Crucially, recall judges "
+        f"the **retrieved chunks (Voyage, not Gemini)** — so a Gemini↔Claude gap is judge *strictness*, not "
+        f"same-family self-preference, which structurally cannot apply to the retrieval metrics.\n"
+        f"- **Model axis (1-5 live):** Gemini→Claude leaves answer-quality metrics ~unchanged but is "
+        f"more lenient on retrieval (recall Δ {rec_model_delta:+.2f} normalized) — so a retrieval A/B must "
+        f"hold the judge model fixed, else a judge swap masquerades as a retrieval gain.\n"
+        f"- **Maturity axis (1-5 holistic → binary v1, identical retrieval + facts):** migrating the judge "
+        f"moved **precision {prec_mat_delta:+.2f}** and **recall {rec_mat_delta:+.2f}** (normalized) with the "
+        f"chunks byte-identical — so both deltas are *measurement*, not system. The precision rise is AP's "
+        f"ceiling behavior (a relevant chunk at rank 1 in ~97% of cases saturates Average Precision), whereas "
+        f"the old holistic 1-5 was dragged down by Likert reluctance-to-give-5s plus the (x−1)/4 "
+        f"normalization. Recall went the other way — *stricter* — per-fact binary beats a holistic 'most "
+        f"facts found'.\n"
+        f"- **Saturation is honest, not a bug:** faithfulness (~0.98) and the answer-relevancy gate "
+        f"(100% pass) sit near the ceiling because the system genuinely doesn't hallucinate and stays "
+        f"on-topic; the binary judge treats answer-relevancy as a gate, so it shows `—` on the 0-1 axes. "
+        f"Recall is the metric that varies and carries the signal.\n"
     )
 
     # Follow-up note (numbers above are the original-facts snapshot; do not edit the tables by hand).

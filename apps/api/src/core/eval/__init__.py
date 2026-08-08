@@ -1,29 +1,39 @@
-"""RAG evaluation pipeline — custom LLM-as-judge scoring."""
+"""RAG evaluation pipeline — binary/decomposed LLM-as-judge scoring."""
 
-from src.core.eval.judge import (
-    JudgeResult,
+from src.core.eval.binary_judge import (
+    GATE_METRIC,
+    HEADLINE_METRIC,
+    SCORED_METRICS,
+    AtomVerdict,
+    BinaryJudgeResult,
+    GateResult,
     MetricScore,
-    judge_all,
-    judge_answer_relevancy,
-    judge_combined,
-    judge_contextual_precision,
-    judge_contextual_recall,
-    judge_contextual_relevancy,
+    average_precision,
+    judge_all_binary,
     judge_faithfulness,
+    judge_gate,
+    judge_recall,
+    judge_relevancy_precision,
 )
+from src.core.eval.judge import JudgeParseError
 from src.core.eval.report import compute_aggregates, print_summary, save_json_report
 from src.core.eval.runner import EvalRunner, EvalTestResult
 
 __all__ = [
+    "SCORED_METRICS",
+    "GATE_METRIC",
+    "HEADLINE_METRIC",
+    "AtomVerdict",
     "MetricScore",
-    "JudgeResult",
-    "judge_contextual_relevancy",
-    "judge_contextual_recall",
-    "judge_contextual_precision",
-    "judge_answer_relevancy",
+    "GateResult",
+    "BinaryJudgeResult",
+    "average_precision",
+    "judge_recall",
+    "judge_relevancy_precision",
     "judge_faithfulness",
-    "judge_combined",
-    "judge_all",
+    "judge_gate",
+    "judge_all_binary",
+    "JudgeParseError",
     "EvalRunner",
     "EvalTestResult",
     "compute_aggregates",

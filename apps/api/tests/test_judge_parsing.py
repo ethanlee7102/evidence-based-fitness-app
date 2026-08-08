@@ -1,13 +1,14 @@
-"""Offline unit tests for the LLM-as-judge parsing/dispatch logic.
+"""Offline unit tests for the judge TRANSPORT layer (`src/core/eval/judge.py`).
 
-These exercise the pure, deterministic pieces of `src/core/eval/judge.py` — no
-API keys, no network. They are the regression tests for behaviour the project
-relied on but had only ever "unit-verified" by hand:
+These exercise the pure, deterministic plumbing shared by every judge call — no
+API keys, no network:
 
 - the 429+5xx retry classifier (incl. Anthropic's 529 overloaded),
 - the markdown-fence-stripping JSON extractor,
-- single + combined judge-response parsing and their JudgeParseError signals,
-- the claude-* / gemini-* provider dispatch in _generate_with_retry.
+- the claude-* / gemini-* provider dispatch in `_generate_with_retry`.
+
+The metric-specific parsing (per-fact / per-chunk / per-claim bijection, AP, the
+error-not-synthesize behaviour) is tested in `test_binary_judge_parsing.py`.
 
 Intentionally NOT marked `eval` — they must run in CI under `pytest -m "not eval"`.
 """
@@ -18,14 +19,9 @@ import pytest
 
 from src.core.eval.judge import (
     JudgeParseError,
-    JudgeResult,
-    MetricScore,
     _extract_json_block,
     _generate_with_retry,
     _is_retryable_error,
-    _parse_combined_response,
-    _parse_single_score,
-    extract_score,
 )
 
 # --- _is_retryable_error -----------------------------------------------------
@@ -74,131 +70,6 @@ def test_extract_json_block_grabs_object_amid_prose():
 def test_extract_json_block_raises_when_absent():
     with pytest.raises(JudgeParseError):
         _extract_json_block("no json here at all")
-
-
-# --- _parse_single_score -----------------------------------------------------
-
-
-def test_parse_single_score_clean_json():
-    ms = _parse_single_score('{"score": 5, "reasoning": "great"}')
-    assert ms.score == 5
-    assert ms.reasoning == "great"
-    assert ms.extra == {}
-
-
-def test_parse_single_score_keeps_extra_fields():
-    ms = _parse_single_score(
-        '{"score": 4, "reasoning": "r", "fact_coverage": {"f1": "supported"}}'
-    )
-    assert ms.score == 4
-    assert ms.extra == {"fact_coverage": {"f1": "supported"}}
-
-
-def test_parse_single_score_regex_fallback_when_score_out_of_range():
-    # JSON parses but score is invalid (9) -> falls through to 'Score: X' regex.
-    ms = _parse_single_score('{"score": 9}\nScore: 3')
-    assert ms.score == 3
-
-
-def test_parse_single_score_regex_fallback_no_json():
-    ms = _parse_single_score("I'd rate this. Score: 2")
-    assert ms.score == 2
-
-
-def test_parse_single_score_raises_when_unparseable():
-    with pytest.raises(JudgeParseError):
-        _parse_single_score("totally unparseable, no score anywhere")
-
-
-# --- _parse_combined_response ------------------------------------------------
-
-
-def _full_combined_json() -> str:
-    return (
-        "{"
-        '"contextual_relevancy": {"score": 5, "reasoning": "a"},'
-        '"contextual_recall": {"score": 4, "reasoning": "b"},'
-        '"contextual_precision": {"score": 3, "reasoning": "c"},'
-        '"answer_relevancy": {"score": 5, "reasoning": "d"},'
-        '"faithfulness": {"score": 4, "reasoning": "e", "unsupported_claims": []}'
-        "}"
-    )
-
-
-def test_parse_combined_response_full():
-    result = _parse_combined_response(_full_combined_json())
-    assert isinstance(result, JudgeResult)
-    assert result.contextual_relevancy.score == 5
-    assert result.contextual_recall.score == 4
-    assert result.contextual_precision.score == 3
-    assert result.answer_relevancy.score == 5
-    assert result.faithfulness.score == 4
-
-
-def test_parse_combined_response_missing_key_degrades_only_that_metric():
-    # An omitted key resolves to {} (still a dict) -> defaults to score 3, not a crash.
-    partial = (
-        "{"
-        '"contextual_relevancy": {"score": 5, "reasoning": "a"},'
-        '"contextual_recall": {"score": 4, "reasoning": "b"},'
-        '"contextual_precision": {"score": 2, "reasoning": "c"},'
-        '"answer_relevancy": {"score": 5, "reasoning": "d"}'
-        # faithfulness omitted
-        "}"
-    )
-    result = _parse_combined_response(partial)
-    assert result.contextual_relevancy.score == 5  # other metrics untouched
-    assert result.faithfulness.score == 3  # degraded, not a crash
-
-
-def test_parse_combined_response_non_dict_metric_degrades_to_3():
-    # A metric whose value isn't a dict hits the explicit "Missing {key}" branch.
-    raw = (
-        "{"
-        '"contextual_relevancy": {"score": 5, "reasoning": "a"},'
-        '"contextual_recall": {"score": 4, "reasoning": "b"},'
-        '"contextual_precision": {"score": 3, "reasoning": "c"},'
-        '"answer_relevancy": {"score": 5, "reasoning": "d"},'
-        '"faithfulness": "not a dict"'
-        "}"
-    )
-    result = _parse_combined_response(raw)
-    assert result.faithfulness.score == 3
-    assert "Missing faithfulness" in result.faithfulness.reasoning
-
-
-def test_parse_combined_response_clamps_out_of_range_score():
-    raw = (
-        "{"
-        '"contextual_relevancy": {"score": 99, "reasoning": "a"},'
-        '"contextual_recall": {"score": 4, "reasoning": "b"},'
-        '"contextual_precision": {"score": 3, "reasoning": "c"},'
-        '"answer_relevancy": {"score": 5, "reasoning": "d"},'
-        '"faithfulness": {"score": 4, "reasoning": "e"}'
-        "}"
-    )
-    result = _parse_combined_response(raw)
-    assert result.contextual_relevancy.score == 5  # clamped to max
-
-
-def test_parse_combined_response_raises_when_no_json():
-    with pytest.raises(JudgeParseError):
-        _parse_combined_response("the model refused and wrote prose only")
-
-
-# --- extract_score (non-raising wrapper) -------------------------------------
-
-
-def test_extract_score_success():
-    score, reasoning, extra = extract_score('{"score": 5, "reasoning": "ok"}')
-    assert score == 5
-    assert reasoning == "ok"
-
-
-def test_extract_score_falls_back_to_3():
-    score, reasoning, _ = extract_score("garbage with no score")
-    assert score == 3
-    assert "failed" in reasoning.lower()
 
 
 # --- provider dispatch in _generate_with_retry -------------------------------
@@ -268,10 +139,3 @@ def test_dispatch_defaults_none_to_gemini(monkeypatch):
     assert out == "gemini-response"
     assert calls["anthropic"] == 0
     assert calls["gemini"] == 1
-
-
-def test_metricscore_is_constructible():
-    """Smoke check that the dataclass import path is intact."""
-    ms = MetricScore(score=3, reasoning="x")
-    assert ms.score == 3
-    assert ms.extra == {}
