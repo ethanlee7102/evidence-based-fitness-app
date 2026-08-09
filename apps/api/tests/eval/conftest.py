@@ -23,23 +23,31 @@ def test_dataset():
 
 
 @pytest.fixture(scope="session")
-def eval_results(test_dataset):
-    """Run the evaluation and cache results for the session.
+def eval_results():
+    """Run the binary judge over the frozen canonical fixture and cache results.
 
-    This is expensive (API calls), so it runs once per pytest session.
+    Scores the SAME frozen RAG outputs as the shipped baseline (RAG side
+    deterministic via `fixture_map`; the judge runs live), so the threshold
+    assertions are reproducible rather than gated on live retrieval variance.
+    Expensive (live judge API calls) — runs once per session, eval-marked only.
     """
     import asyncio
+    import json
 
+    from src.core.eval.fixtures import current_fixture_path
     from src.core.eval.report import compute_aggregates
     from src.core.eval.runner import EvalRunner
+
+    with open(current_fixture_path()) as f:
+        cases = json.load(f)["cases"]
 
     runner = EvalRunner(
         min_delay=7.0,
         verbose=True,
-        combined=True,  # Use combined mode for faster test runs
         inter_call_delay=5.0,
+        fixture_map={c["id"]: c for c in cases},
     )
 
-    report = asyncio.run(runner.run(test_dataset))
+    report = asyncio.run(runner.run(cases))
     report = compute_aggregates(report)
     return report

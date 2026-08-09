@@ -3,15 +3,16 @@
 Usage:
     cd apps/api
 
-    # Full run (separate judges, default)
+    # Full run (binary judge, live RAG)
     python -m scripts.evaluate_rag
 
-    # Combined judge mode (faster, 1 call per test case)
-    python -m scripts.evaluate_rag --combined
+    # Score the frozen canonical fixture (no live RAG — the reproducible baseline)
+    python -m scripts.evaluate_rag \
+        --from-fixture results/rag_outputs_fixture_sgnorm015_full.json \
+        --output results/run1_binary_baseline.json
 
     # Dry run (print expected call count, don't execute)
     python -m scripts.evaluate_rag --dry-run
-    python -m scripts.evaluate_rag --combined --dry-run
 
     # Specific test cases
     python -m scripts.evaluate_rag --ids HYP-001 NUT-001
@@ -67,11 +68,6 @@ def parse_args() -> argparse.Namespace:
         help="Run only specific test case IDs (e.g., --ids HYP-001 NUT-001)",
     )
     parser.add_argument(
-        "--combined",
-        action="store_true",
-        help="Use combined judge mode (1 call per test case, faster)",
-    )
-    parser.add_argument(
         "--metrics",
         choices=["retrieval", "generation"],
         help="Only run specific metric group (retrieval=contextual_*, generation=answer+faithfulness)",
@@ -93,6 +89,13 @@ def parse_args() -> argparse.Namespace:
         "--output",
         type=str,
         help="Save JSON report to file (e.g., results/eval_001.json)",
+    )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Judge up to N cases concurrently (bounded by a semaphore; 429/5xx "
+        "backoff handles rate limits). Default 1 = sequential. Use ~4 on paid tier.",
     )
     parser.add_argument(
         "--verbose",
@@ -144,8 +147,13 @@ def load_fixture(path: str, ids: list[str] | None = None) -> list[dict]:
     return cases
 
 
+# Binary judge = 4 LLM calls per scored case: recall, relevancy+precision (shared),
+# faithfulness, answer-relevancy gate.
+JUDGE_CALLS_PER_CASE = 4
+
+
 def print_dry_run(
-    dataset: list[dict], combined: bool, judge_model: str | None, from_fixture: bool = False
+    dataset: list[dict], judge_model: str | None, from_fixture: bool = False
 ) -> None:
     """Print expected call counts without executing."""
     n = len(dataset)
@@ -154,22 +162,17 @@ def print_dry_run(
     # Fixture mode skips live rag_query, so no RAG calls — judge calls only.
     rag_calls = 0 if from_fixture else n
 
-    if combined:
-        gemini_calls = rag_calls + scored_count  # RAG calls + judge calls
-        mode = "combined"
-    else:
-        gemini_calls = rag_calls + (scored_count * 5)
-        mode = "separate"
-
+    gemini_calls = rag_calls + (scored_count * JUDGE_CALLS_PER_CASE)
     voyage_calls = 0 if from_fixture else n  # 1 embedding per live RAG query
     pct = (gemini_calls / 250) * 100
-    est_time = (n * 37 / 60) if not combined else (n * 12 / 60)
+    est_time = n * 30 / 60
 
-    print("\nDRY RUN — Phase 8 RAG Evaluation")
+    print("\nDRY RUN — Binary RAG Evaluation")
     source = f"fixture ({n} cases)" if from_fixture else f"{DEFAULT_DATASET.name} ({n} cases)"
     print(f"  Source: {source}, {oos_count} out-of-scope")
-    print(f"  Mode: {mode}{' (from fixture — no RAG calls)' if from_fixture else ''}")
+    print(f"  Mode: binary{' (from fixture — no RAG calls)' if from_fixture else ''}")
     print(f"  Judge model: {judge_model or config.LLM_MODEL}")
+    print(f"  Judge calls/scored case: {JUDGE_CALLS_PER_CASE} ({scored_count} scored cases)")
     print(f"  Expected Gemini calls: {gemini_calls} (of 250 RPD limit = {pct:.0f}%)")
     print(f"  Expected Voyage calls: {voyage_calls}")
     print(f"  Estimated duration: ~{est_time:.0f} min\n")
@@ -194,18 +197,18 @@ async def main() -> None:
 
     # Dry run
     if args.dry_run:
-        print_dry_run(dataset, args.combined, args.judge_model, from_fixture=bool(args.from_fixture))
+        print_dry_run(dataset, args.judge_model, from_fixture=bool(args.from_fixture))
         return
 
     # Run evaluation
     runner = EvalRunner(
         min_delay=7.0,
         verbose=args.verbose,
-        combined=args.combined,
         inter_call_delay=5.0,
         judge_model=args.judge_model,
         metrics=args.metrics,
         fixture_map=fixture_map,
+        concurrency=args.concurrency,
     )
 
     report = await runner.run(dataset)

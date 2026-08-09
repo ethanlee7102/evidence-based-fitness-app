@@ -2145,7 +2145,8 @@
       "expected_facts": [
         "Power training produces modest improvements in physical function compared to traditional strength training in older adults",
         "Power declines faster than strength with aging, making power training particularly relevant for older populations",
-        "Both training types improve strength, but power training may better preserve the ability to generate force rapidly"
+        "Both power and traditional strength training improve strength",
+        "Power training may better preserve the ability to generate force rapidly"
       ],
       "difficulty": "medium",
       "tags": [
@@ -2270,7 +2271,8 @@
       "category": "strength",
       "expected_facts": [
         "Weightlifting, traditional RT, and plyometrics all improve strength, power, and speed but with different magnitudes",
-        "Weightlifting and plyometrics produce similar improvements in sprint speed and jump performance, with plyometrics potentially more effective only over longer sprint distances",
+        "Weightlifting and plyometrics produce similar improvements in sprint speed and jump performance",
+        "Plyometrics may be more effective than weightlifting only over longer sprint distances",
         "Weightlifting may offer advantages for velocity and speed-strength qualities due to the high load and high-velocity nature of the movements"
       ],
       "difficulty": "medium",
@@ -3772,7 +3774,8 @@
       "category": "nutrition",
       "expected_facts": [
         "Distributing protein evenly across meals (e.g., 0.4-0.55 g/kg per meal) may optimize MPS stimulation throughout the day",
-        "Earlier research suggested ~20-25g per meal maximized MPS, but more recent evidence suggests the body can use more",
+        "Earlier research suggested ~20-25g protein per meal maximized MPS",
+        "More recent evidence suggests the body can use more than ~20-25g per meal for MPS",
         "There is a per-meal ceiling for MPS stimulation, beyond which excess amino acids are oxidized",
         "Practical recommendation is 0.4-0.55 g/kg bodyweight per meal across at least 4 meals"
       ],
@@ -4405,7 +4408,8 @@
       "expected_facts": [
         "Iron deficiency impairs oxygen transport (hemoglobin) and energy metabolism, reducing aerobic capacity and endurance",
         "Female athletes are at higher risk due to menstrual blood losses, with prevalence of iron deficiency reported at 40-50%+",
-        "Oral iron supplementation can improve serum ferritin levels, with greatest benefit when baseline ferritin is very low (\u226412 \u03bcg/L)"
+        "Oral iron supplementation can improve serum ferritin levels",
+        "The benefit of iron supplementation is greatest when baseline ferritin is very low (\u226412 \u03bcg/L)"
       ],
       "difficulty": "medium",
       "tags": [
@@ -4694,7 +4698,8 @@
       "expected_facts": [
         "Overtraining syndrome involves prolonged performance decrements that persist despite adequate rest",
         "Hormonal disruptions (blunted GH, ACTH responses) are associated with overtraining",
-        "Normal training fatigue resolves within days, while OTS can take weeks to months to recover from"
+        "Normal training fatigue resolves within days",
+        "Overtraining syndrome (OTS) can take weeks to months to recover from"
       ],
       "difficulty": "medium",
       "tags": [
@@ -5814,7 +5819,8 @@
       "question": "Do you need to eat in a caloric surplus to build muscle, or can you gain muscle at maintenance or in a deficit?",
       "category": "body-composition",
       "expected_facts": [
-        "An energy surplus can enhance gains in fat-free mass, but is not always necessary for hypertrophy",
+        "An energy surplus can enhance gains in fat-free mass",
+        "An energy surplus is not always necessary for hypertrophy",
         "Untrained individuals and those with higher body fat can gain muscle in a deficit or at maintenance",
         "Trained individuals may require a modest surplus for optimal muscle growth, though body recomposition is possible"
       ],
@@ -6816,7 +6822,7 @@
       "category": "mobility",
       "expected_facts": [
         "Post-exercise stretching has limited evidence for reducing delayed-onset muscle soreness",
-        "Stretching after exercise may provide small improvements in flexibility",
+        "Post-exercise stretching does not significantly improve flexibility when used as a standalone recovery intervention",
         "Post-exercise stretching does not appear to significantly accelerate muscle recovery or restore performance"
       ],
       "difficulty": "easy",
@@ -7319,7 +7325,8 @@
       "question": "Do men and women respond differently to resistance training in terms of muscle growth, fatigue, and recovery?",
       "category": "general",
       "expected_facts": [
-        "Men gain more absolute muscle mass, but relative muscle size increases are generally similar between sexes",
+        "Men gain more absolute muscle mass than women",
+        "Relative muscle size increases are generally similar between sexes",
         "Acute neuromuscular fatigue and muscle damage may be greater in males than females following resistance exercise",
         "Sex-based differences in muscle fiber type composition exist, with males having larger type II fibers"
       ],
@@ -7448,7 +7455,8 @@
       "expected_facts": [
         "Current evidence shows trivial or negligible effects of menstrual cycle phase on strength performance",
         "There is no strong basis for periodizing resistance training around menstrual cycle phases",
-        "Perceived performance may vary across the cycle, but objective measures show minimal differences"
+        "Perceived performance may vary across the menstrual cycle",
+        "Objective performance measures show minimal differences across the cycle"
       ],
       "difficulty": "medium",
       "tags": [
@@ -9697,7 +9705,7 @@
       "category": "programming",
       "expected_facts": [
         "Multi-joint (compound) exercises can produce similar overall strength gains as single-joint (isolation) exercises",
-        "Adding isolation exercises may be necessary for targeting specific muscles that compound movements underload",
+        "Adding isolation (single-joint) exercises to a compound-based program showed no additional benefit for the size or strength of the targeted muscle at equal training volume",
         "Compound exercises are more time-efficient as they recruit multiple muscle groups simultaneously"
       ],
       "difficulty": "easy",
@@ -10072,7 +10080,7 @@
       "category": "programming",
       "expected_facts": [
         "Block periodization uses sequential mesocycles with concentrated training loads directed at specific abilities",
-        "Typical phases include accumulation (higher volume, lower intensity), transmutation (sport-specific), and realization (peaking)",
+        "Typical block periodization phases are accumulation, transmutation, and realization",
         "Training status may influence the magnitude of adaptations from block periodization"
       ],
       "difficulty": "hard",
@@ -10820,7 +10828,8 @@
       "category": "general",
       "expected_facts": [
         "Exercise increases BDNF which promotes neuroplasticity and neurogenesis",
-        "A single bout of exercise causes a transient cortisol increase, while regular training reduces resting cortisol",
+        "A single bout of exercise causes a transient cortisol increase",
+        "Regular training reduces resting cortisol",
         "Physical activity enhances cerebral blood flow, neurotransmitter regulation, and gray matter volume",
         "Exercise modulates the HPA axis and endocrine stress response"
       ],
@@ -11950,7 +11959,8 @@
       "question": "What are the recommended protocols for blood flow restriction training \u2014 pressure, sets, reps, and frequency?",
       "category": "hypertrophy",
       "expected_facts": [
-        "Cuff pressure is typically set at 40-80% of limb occlusion pressure, with wider cuffs requiring lower pressures",
+        "Cuff pressure is typically set at 40-80% of limb occlusion pressure",
+        "Wider cuffs require lower pressures",
         "A common rep scheme is 30-15-15-15 at 20-40% 1RM with 30-60 second rest between sets",
         "2-3 BFR sessions per week are generally recommended"
       ],
@@ -12075,8 +12085,8 @@
       "category": "hypertrophy",
       "expected_facts": [
         "BFR training is generally safe when applied by trained professionals with no major adverse events reported in clinical trials",
-        "Common minor side effects include tingling, numbness, delayed onset muscle soreness, and transient discomfort",
-        "Contraindications include history of deep vein thrombosis, peripheral vascular disease, uncontrolled hypertension, and blood clotting disorders"
+        "BFR training can cause minor, transient side effects such as tingling or numbness",
+        "BFR is contraindicated in vascular and clotting conditions such as deep vein thrombosis or uncontrolled hypertension"
       ],
       "difficulty": "medium",
       "tags": [
