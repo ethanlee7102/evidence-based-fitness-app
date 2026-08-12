@@ -1,8 +1,8 @@
-# Flame Fitness
+# Evidence-Based Fitness App
 
-[![CI](https://github.com/ethanlee7102/Gym-App-V2/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanlee7102/Gym-App-V2/actions/workflows/ci.yml)
+[![CI](https://github.com/ethanlee7102/evidence-based-fitness-app/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanlee7102/evidence-based-fitness-app/actions/workflows/ci.yml)
 
-Flame Fitness is a full-stack workout app with an exercise-science research assistant built into it. The assistant answers training and nutrition questions from a library of 195 peer-reviewed papers and cites a source for every claim. Most of the engineering went into evaluation: building a way to measure whether the answers are actually correct, and then checking that the measurement itself could be trusted.
+A full-stack fitness app with an exercise-science research assistant built in. The assistant answers training and nutrition questions from a library of 195 peer-reviewed papers and cites a source for every claim. Most of the engineering went into evaluation: building a way to measure whether the answers are actually correct, and then checking that the measurement itself could be trusted.
 
 On the current corpus the system retrieves 79% of the facts a question expects (its weakest metric), scores 0.90 overall across five metrics, and refuses correctly on every out-of-scope question. To check that my eval was not just agreeing with itself, I ran it against Ragas, the industry-standard implementation. The two tools land within about one percent of each other on fact coverage.
 
