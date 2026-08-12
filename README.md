@@ -6,7 +6,7 @@ Flame Fitness is a full-stack workout app with an exercise-science research assi
 
 On the current corpus the system retrieves 79% of the facts a question expects (its weakest metric), scores 0.90 overall across five metrics, and refuses correctly on every out-of-scope question. To check that my eval was not just agreeing with itself, I ran it against Ragas, the industry-standard implementation. The two tools land within about one percent of each other on fact coverage.
 
-## What makes this more than a tutorial RAG
+## Highlights
 
 - A real evaluation harness, not just a pipeline that runs. Five metrics computed from binary judgments (per-fact recall, per-claim faithfulness) over 100 test cases and 323 facts I checked by hand against the source papers.
 - The eval is cross-validated. It runs against Ragas and against a second judge model (Claude), so the scores are not one model grading its own work.
