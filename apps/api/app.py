@@ -1,4 +1,3 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,9 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import api_router
 from src.core import anthropic_provider, embedding_provider, llm_provider, reranker
-
-# Enable debug logging
-logging.basicConfig(level=logging.DEBUG)
 
 
 @asynccontextmanager
