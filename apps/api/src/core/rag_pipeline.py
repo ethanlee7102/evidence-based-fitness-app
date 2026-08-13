@@ -101,7 +101,12 @@ async def _rewrite_query(
     rewritten = await generate(
         prompt=REWRITE_PROMPT.format(history=history_text, query=query),
         temperature=0.0,  # Deterministic rewrite
-        max_tokens=256,
+        # Query rewriting is mechanical, not a reasoning task. Disable Gemini 2.5
+        # thinking (which would otherwise spend most of max_tokens on hidden
+        # thinking tokens and truncate the rewrite mid-sentence — dropping terms
+        # like "sleep" and silently corrupting retrieval on multi-turn follow-ups).
+        max_tokens=512,
+        thinking_budget=0,
     )
     rewritten = rewritten.strip()
 

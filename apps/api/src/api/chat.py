@@ -92,7 +92,13 @@ async def _generate_title(
             f"Answer preview: {answer_preview[:300]}\n\n"
             f"Return ONLY the title, nothing else."
         )
-        raw_title = await generate(prompt=prompt, temperature=0.7, max_tokens=40)
+        # Titling is a mechanical call. Disable Gemini 2.5 thinking — otherwise
+        # thinking tokens consume the tiny max_tokens budget before any title text
+        # is produced, yielding a mid-word fragment or an empty string (which leaves
+        # the session stuck on its "New Chat" default).
+        raw_title = await generate(
+            prompt=prompt, temperature=0.7, max_tokens=64, thinking_budget=0
+        )
         title = _clean_title(raw_title)
         if title:
             chat.update_session_title(session_id, title)
