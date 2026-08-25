@@ -12,6 +12,32 @@ class Config:
     # Supabase
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_SECRET_KEY: str = os.getenv("SUPABASE_SECRET_KEY", "")
+    # Anon/publishable key - used to build per-request, RLS-scoped user clients
+    # (the service key would bypass RLS). Public value; same as the frontend's.
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+
+    # CORS - comma-separated allowed origins. Localhost for dev; set to the
+    # deployed frontend origin in prod. allow_credentials=True forbids "*".
+    CORS_ALLOWED_ORIGINS: str = os.getenv(
+        "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173"
+    )
+
+    # Public-demo abuse controls (see src/api/chat.py).
+    DEMO_DAILY_CHAT_CEILING: int = int(os.getenv("DEMO_DAILY_CHAT_CEILING", "500"))
+    # Optional: this user id is exempt from the global daily ceiling so owner
+    # testing doesn't consume the public demo's budget. Empty = no exemption.
+    OWNER_USER_ID: str = os.getenv("OWNER_USER_ID", "")
+    # Per-IP cap (slowapi window). 40/day = a generous single-visitor demo budget;
+    # the global ceiling above is the cross-IP backstop.
+    DEMO_CHAT_RATE: str = os.getenv("DEMO_CHAT_RATE", "40/day")
+
+    @staticmethod
+    def cors_origins() -> list[str]:
+        return [
+            o.strip()
+            for o in Config.CORS_ALLOWED_ORIGINS.split(",")
+            if o.strip()
+        ]
 
     # Embedding (Voyage AI)
     VOYAGE_API_KEY: str = os.getenv("VOYAGE_API_KEY", "")
@@ -26,6 +52,18 @@ class Config:
 
     # Anthropic (eval cross-validation judge only — lazy, never required at startup)
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+
+    # JWT verification (local ES256 via Supabase JWKS - replaces the per-request
+    # network call to supabase.auth.get_user). Derived from SUPABASE_URL; the
+    # rstrip guards against a trailing slash producing a mismatched `iss` (= 401).
+    _SUPABASE_BASE: str = SUPABASE_URL.rstrip("/")
+    SUPABASE_JWT_ISSUER: str = f"{_SUPABASE_BASE}/auth/v1" if _SUPABASE_BASE else ""
+    SUPABASE_JWKS_URL: str = (
+        f"{_SUPABASE_BASE}/auth/v1/.well-known/jwks.json" if _SUPABASE_BASE else ""
+    )
+    SUPABASE_JWT_AUD: str = "authenticated"
+    SUPABASE_JWKS_TIMEOUT: float = float(os.getenv("SUPABASE_JWKS_TIMEOUT", "5.0"))
+    JWT_LEEWAY: int = int(os.getenv("JWT_LEEWAY", "30"))  # seconds, clock-skew tolerance
 
     # RAG pipeline
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "800"))

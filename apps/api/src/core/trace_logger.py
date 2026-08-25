@@ -8,7 +8,7 @@ import asyncio
 import logging
 from typing import Optional
 
-from src.db import get_supabase
+from src.db import get_admin_supabase
 from src.schema.rag import ChunkResponse
 
 logger = logging.getLogger(__name__)
@@ -83,7 +83,9 @@ async def _insert_trace(
         if message_id:
             trace_data["message_id"] = message_id
 
-        get_supabase().table("rag_traces").insert(trace_data).execute()
+        # System logging, fire-and-forget: uses the admin client (no request token
+        # in this background task; RLS insert policy would otherwise need the JWT).
+        get_admin_supabase().table("rag_traces").insert(trace_data).execute()
         logger.debug(f"Trace logged for message {message_id}")
 
     except Exception as e:

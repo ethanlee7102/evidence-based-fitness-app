@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,10 +7,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import api_router
 from src.core import anthropic_provider, embedding_provider, llm_provider, reranker
+from src.utils import auth
+from src.utils.config import config
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Pre-warm the JWKS cache so the first authenticated request doesn't pay the
+    # blocking key fetch on the event loop. Best-effort: if it fails, verification
+    # falls back to a lazy fetch on first use.
+    try:
+        await asyncio.to_thread(auth.get_jwks_client().get_signing_keys)
+    except Exception as e:
+        logger.warning(f"JWKS pre-warm failed (will fetch lazily): {e}")
     yield
     # Clean up shared httpx clients on shutdown
     await embedding_provider.client.aclose()
@@ -26,10 +39,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-    ],
+    allow_origins=config.cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

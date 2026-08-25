@@ -10,8 +10,11 @@ python-dotenv>=1.0.0
 # HTTP client
 httpx>=0.27.0
 
-# Auth
-python-jose[cryptography]>=3.3.0
+# Auth - local ES256 JWT verification against Supabase's JWKS
+pyjwt[crypto]>=2.8.0
+
+# Rate limiting (public-demo abuse control - per-IP throttle on the chat endpoint)
+limits>=3.0
 
 # RAG - PDF processing & chunking
 docling>=2.0.0

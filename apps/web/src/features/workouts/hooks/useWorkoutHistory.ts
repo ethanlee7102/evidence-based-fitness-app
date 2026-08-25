@@ -75,7 +75,10 @@ export function useWorkoutHistory() {
   )
 
   const loadWorkouts = useCallback(async () => {
-    if (!token) return
+    if (!token) {
+      setIsLoading(false)
+      return
+    }
     try {
       setIsLoading(true)
       setError(null)

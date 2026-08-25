@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from src.db import get_supabase
+from src.db import get_user_supabase
 from src.schema.rag import ChatMessage
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 class ChatService:
     """Manages chat sessions and messages in Supabase."""
 
-    def __init__(self):
-        self.supabase = get_supabase()
+    def __init__(self, token: str):
+        # RLS-scoped to the caller's JWT (see src/db.get_user_supabase).
+        self.supabase = get_user_supabase(token)
 
     # --- Sessions ---
 
@@ -44,15 +45,18 @@ class ChatService:
 
     def get_session(self, session_id: str, user_id: str) -> Optional[dict[str, Any]]:
         """Get a single session by ID, scoped to user."""
+        # limit(1) rather than maybe_single(): the latter returns None on 0 rows in
+        # this supabase-py version, so `.data` then AttributeErrors (500) instead of
+        # letting the caller 404 on an unknown/foreign session.
         response = (
             self.supabase.table("chat_sessions")
             .select("*")
             .eq("id", session_id)
             .eq("user_id", user_id)
-            .maybe_single()
+            .limit(1)
             .execute()
         )
-        return response.data
+        return response.data[0] if response.data else None
 
     def delete_session(self, session_id: str, user_id: str) -> bool:
         """Delete a session (FK cascade deletes messages). Returns True if deleted."""

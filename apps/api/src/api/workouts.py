@@ -23,20 +23,16 @@ from src.schema.workout import (
     WorkoutSummaryResponse,
 )
 from src.service.workout_service import WorkoutService
-from src.utils.auth import get_current_user
+from src.utils.auth import get_current_token, get_current_user
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
-_workout_service: WorkoutService | None = None
-
-
-def _get_service() -> WorkoutService:
-    global _workout_service
-    if _workout_service is None:
-        _workout_service = WorkoutService()
-    return _workout_service
+def _get_service(token: str) -> WorkoutService:
+    # Per-request, RLS-scoped to the caller. No singleton: each request's token
+    # scopes the DB client so Postgres RLS enforces isolation.
+    return WorkoutService(token)
 
 
 def _format_exercise(ex: dict) -> dict:
@@ -122,9 +118,10 @@ def _format_workout_response(workout: dict) -> dict:
 # --- Muscle Groups ---
 
 @router.get("/muscle-groups", response_model=list[MuscleGroupResponse])
-async def get_muscle_groups(user_id: str = Depends(get_current_user)):
+async def get_muscle_groups(user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get all muscle groups (for filters)."""
-    svc = _get_service()
+    svc = _get_service(token)
     return svc.get_muscle_groups()
 
 
@@ -136,9 +133,10 @@ async def search_exercises(
     equipment: Optional[str] = None,
     muscle_category: Optional[str] = None,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Search exercise library."""
-    svc = _get_service()
+    svc = _get_service(token)
     results = svc.search_exercises(user_id, q=q, equipment=equipment, muscle_category=muscle_category)
     return [_format_exercise(ex) for ex in results]
 
@@ -147,17 +145,19 @@ async def search_exercises(
 async def get_recent_exercises(
     limit: int = Query(10, ge=1, le=50),
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Get recently used exercises from completed workouts."""
-    svc = _get_service()
+    svc = _get_service(token)
     results = svc.get_recent_exercises(user_id, limit=limit)
     return [_format_exercise(ex) for ex in results]
 
 
 @router.get("/exercises/{exercise_id}", response_model=ExerciseResponse)
-async def get_exercise(exercise_id: str, user_id: str = Depends(get_current_user)):
+async def get_exercise(exercise_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get exercise with muscle groups."""
-    svc = _get_service()
+    svc = _get_service(token)
     ex = svc.get_exercise(exercise_id, user_id)
     if not ex:
         raise HTTPException(status_code=404, detail="Exercise not found")
@@ -168,9 +168,10 @@ async def get_exercise(exercise_id: str, user_id: str = Depends(get_current_user
 async def create_exercise(
     body: CreateExerciseRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Create a custom exercise."""
-    svc = _get_service()
+    svc = _get_service(token)
     ex = svc.create_exercise(
         user_id=user_id,
         name=body.name,
@@ -192,9 +193,10 @@ async def create_exercise(
 async def get_exercise_stats(
     exercise_id: str,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Get user's stats for a specific exercise (recent sets + volume history)."""
-    svc = _get_service()
+    svc = _get_service(token)
     return svc.get_exercise_stats(user_id, exercise_id)
 
 
@@ -202,18 +204,20 @@ async def get_exercise_stats(
 async def get_previous_sets(
     exercise_id: str,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Get PREV column data — sets from last completed workout with this exercise."""
-    svc = _get_service()
+    svc = _get_service(token)
     return svc.get_previous_sets(user_id, exercise_id)
 
 
 # --- Workouts ---
 
 @router.post("", response_model=WorkoutResponse)
-async def start_workout(user_id: str = Depends(get_current_user)):
+async def start_workout(user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Start a new workout."""
-    svc = _get_service()
+    svc = _get_service(token)
     workout = svc.start_workout(user_id)
     return {**workout, "exercises": []}
 
@@ -227,9 +231,10 @@ async def list_workouts(
     min_rating: Optional[int] = Query(None, ge=1, le=5),
     exercise_id: Optional[str] = Query(None),
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """List workout history (paginated, with optional filters)."""
-    svc = _get_service()
+    svc = _get_service(token)
     return svc.list_workouts(
         user_id,
         limit=limit,
@@ -242,9 +247,10 @@ async def list_workouts(
 
 
 @router.get("/in-progress", response_model=Optional[WorkoutResponse])
-async def get_in_progress_workout(user_id: str = Depends(get_current_user)):
+async def get_in_progress_workout(user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get current in-progress workout (if any)."""
-    svc = _get_service()
+    svc = _get_service(token)
     workout = svc.get_in_progress_workout(user_id)
     if not workout:
         return None
@@ -256,9 +262,10 @@ async def get_in_progress_workout(user_id: str = Depends(get_current_user)):
 
 
 @router.get("/{workout_id}", response_model=WorkoutResponse)
-async def get_workout(workout_id: str, user_id: str = Depends(get_current_user)):
+async def get_workout(workout_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get full workout detail."""
-    svc = _get_service()
+    svc = _get_service(token)
     workout = svc.get_workout(workout_id, user_id)
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -270,9 +277,10 @@ async def finish_workout(
     workout_id: str,
     body: FinishWorkoutRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Finish a workout (set completed_at, duration, optional rating/body_weight)."""
-    svc = _get_service()
+    svc = _get_service(token)
     result = svc.finish_workout(
         workout_id, user_id,
         rating=body.rating,
@@ -288,9 +296,10 @@ async def finish_workout(
 
 
 @router.delete("/{workout_id}")
-async def delete_workout(workout_id: str, user_id: str = Depends(get_current_user)):
+async def delete_workout(workout_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Delete a workout."""
-    svc = _get_service()
+    svc = _get_service(token)
     deleted = svc.delete_workout(workout_id, user_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -304,9 +313,10 @@ async def add_exercise_to_workout(
     workout_id: str,
     body: AddExerciseRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Add an exercise to a workout."""
-    svc = _get_service()
+    svc = _get_service(token)
     result = svc.add_exercise_to_workout(
         workout_id, user_id, body.exercise_id, body.sort_order
     )
@@ -333,9 +343,10 @@ async def remove_exercise_from_workout(
     workout_id: str,
     workout_exercise_id: str,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Remove an exercise from a workout."""
-    svc = _get_service()
+    svc = _get_service(token)
     deleted = svc.remove_exercise_from_workout(workout_id, workout_exercise_id, user_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Not found")
@@ -347,9 +358,10 @@ async def reorder_exercises(
     workout_id: str,
     body: ReorderExercisesRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Reorder exercises in a workout."""
-    svc = _get_service()
+    svc = _get_service(token)
     success = svc.reorder_exercises(workout_id, user_id, [item.model_dump() for item in body.order])
     if not success:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -362,9 +374,10 @@ async def update_workout_exercise(
     workout_exercise_id: str,
     body: UpdateWorkoutExerciseRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Update a workout exercise (rest timer, notes)."""
-    svc = _get_service()
+    svc = _get_service(token)
     updates = body.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -382,9 +395,10 @@ async def add_set(
     workout_exercise_id: str,
     body: CreateSetRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Add a set to a workout exercise."""
-    svc = _get_service()
+    svc = _get_service(token)
     result = svc.add_set(
         workout_id, workout_exercise_id, user_id,
         set_number=body.set_number,
@@ -403,9 +417,10 @@ async def update_set(
     set_id: str,
     body: UpdateSetRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Update a set (weight, reps, checkmark, etc.)."""
-    svc = _get_service()
+    svc = _get_service(token)
     updates = body.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -421,9 +436,10 @@ async def delete_set(
     workout_id: str,
     set_id: str,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Delete a set."""
-    svc = _get_service()
+    svc = _get_service(token)
     deleted = svc.delete_set(workout_id, set_id, user_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Set not found")

@@ -154,7 +154,10 @@ class StreamingRAGResult:
 class ChatMessageRequest(BaseModel):
     """POST body for /chat/message endpoint."""
 
-    message: str = Field(..., min_length=1, max_length=10000)
+    # Capped for the public demo: prompt cost scales with input length, so a
+    # smaller ceiling bounds per-request spend (history is separately capped to
+    # the last 10 messages).
+    message: str = Field(..., min_length=1, max_length=2000)
     session_id: Optional[str] = None
     category: Optional[Category] = None
 

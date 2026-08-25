@@ -1,8 +1,8 @@
 """Workout logging service.
 
 Handles CRUD for workouts, workout_exercises, workout_sets, exercises,
-and muscle_groups. Uses service_role Supabase client (bypasses RLS) —
-enforces user_id in every query.
+and muscle_groups. Uses a per-request JWT-scoped client so Postgres RLS
+enforces access; still filters by user_id in queries as defense in depth.
 """
 
 import logging
@@ -10,7 +10,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from src.db import get_supabase
+from src.db import get_user_supabase
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,9 @@ def _sanitize_filter(value: str) -> str:
 class WorkoutService:
     """Manages workout logging data in Supabase."""
 
-    def __init__(self):
-        self.supabase = get_supabase()
+    def __init__(self, token: str):
+        # RLS-scoped to the caller's JWT (see src/db.get_user_supabase).
+        self.supabase = get_user_supabase(token)
 
     # --- Muscle Groups ---
 
@@ -167,7 +168,8 @@ class WorkoutService:
                 ")"
             )
             .eq("id", workout_id)
-            .eq("user_id", user_id)
+            # No user_id filter: RLS scopes to own rows + demo workouts for guests
+            # (migration 017). Registered users still see only their own.
         )
         if not workout:
             return None
@@ -219,7 +221,7 @@ class WorkoutService:
             .select(
                 "*, workout_exercises(id, exercises(name), workout_sets(weight_kg, reps, completed))"
             )
-            .eq("user_id", user_id)
+            # No user_id filter: RLS scopes to own + demo (guest). See migration 017.
         )
 
         if date_from:
@@ -523,7 +525,7 @@ class WorkoutService:
                 "workout_sets(set_number, weight_kg, reps)"
             )
             .eq("exercise_id", exercise_id)
-            .eq("workouts.user_id", user_id)
+            # No workouts.user_id filter: RLS scopes to own + demo (guest, mig 017).
             .not_.is_("workouts.completed_at", "null")
             .order("workouts(started_at)", desc=True)
             .limit(1)
@@ -580,7 +582,7 @@ class WorkoutService:
                 "workouts!inner(started_at, completed_at, user_id), "
                 "exercises(*, exercise_muscles(muscle_group_id, activation_level, muscle_groups(name, category)))"
             )
-            .eq("workouts.user_id", user_id)
+            # No workouts.user_id filter: RLS scopes to own + demo (guest, mig 017).
             .not_.is_("workouts.completed_at", "null")
             .order("workouts(started_at)", desc=True)
             .limit(limit * 5)
@@ -620,7 +622,7 @@ class WorkoutService:
                 "workout_sets(weight_kg, reps, rpe, set_type, completed, completed_at)"
             )
             .eq("exercise_id", exercise_id)
-            .eq("workouts.user_id", user_id)
+            # No workouts.user_id filter: RLS scopes to own + demo (guest, mig 017).
             .not_.is_("workouts.completed_at", "null")
             .order("workouts(started_at)", desc=True)
             .execute()

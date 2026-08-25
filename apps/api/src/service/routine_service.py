@@ -2,14 +2,15 @@
 
 Handles CRUD for routines, routine_exercises, routine_sets,
 plus starting workouts from routines and saving workouts as routines.
-Uses service_role Supabase client — enforces user_id in every query.
+Uses a per-request JWT-scoped client so Postgres RLS enforces access; still
+filters by user_id in queries as defense in depth.
 """
 
 import logging
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from src.db import get_supabase
+from src.db import get_user_supabase
 from src.service.workout_service import WorkoutService, _single
 
 logger = logging.getLogger(__name__)
@@ -18,9 +19,12 @@ logger = logging.getLogger(__name__)
 class RoutineService:
     """Manages workout routine templates in Supabase."""
 
-    def __init__(self):
-        self.supabase = get_supabase()
-        self.workout_service = WorkoutService()
+    def __init__(self, token: str):
+        # RLS-scoped to the caller's JWT (see src/db.get_user_supabase).
+        self.supabase = get_user_supabase(token)
+        # Pass the same token so the inner service's writes/reads are RLS-scoped
+        # to the caller (not an un-scoped/admin client).
+        self.workout_service = WorkoutService(token)
 
     # --- List ---
 

@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean
   signUp: (email: string, password: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
+  signInAsGuest: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -19,6 +20,12 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
+}
+
+/** True when the current session is an anonymous (guest demo) user. */
+export function useIsGuest() {
+  const { user } = useAuth()
+  return user?.is_anonymous === true
 }
 
 export function useAuthProvider() {
@@ -59,10 +66,15 @@ export function useAuthProvider() {
     if (error) throw error
   }
 
+  const signInAsGuest = async () => {
+    const { error } = await supabase.auth.signInAnonymously()
+    if (error) throw error
+  }
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
 
-  return { user, session, loading, signUp, signIn, signOut }
+  return { user, session, loading, signUp, signIn, signInAsGuest, signOut }
 }
