@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { NAV_ITEMS } from '../types'
-import { useAuth } from '../../auth/hooks'
+import { useAuth, useIsGuest } from '../../auth/hooks'
 
 interface SidebarProps {
   className?: string
@@ -9,7 +9,14 @@ interface SidebarProps {
 
 export function Sidebar({ className = '' }: SidebarProps) {
   const { signOut } = useAuth()
+  const isGuest = useIsGuest()
   const navigate = useNavigate()
+
+  // Analysis is a v2 (workout-data) surface with no content yet - hide it for
+  // guests so the demo has no visible dead ends.
+  const navItems = isGuest
+    ? NAV_ITEMS.filter((item) => item.path !== '/dashboard/analysis')
+    : NAV_ITEMS
 
   const handleSignOut = async () => {
     await signOut()
@@ -26,7 +33,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
 
       <nav className="flex-1 px-4">
         <ul className="space-y-1">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <li key={item.path}>
               <NavLink
                 to={item.path}
@@ -53,7 +60,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
           className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
         >
           <LogOut className="w-5 h-5" />
-          <span>Sign Out</span>
+          <span>{isGuest ? 'Exit Demo' : 'Sign Out'}</span>
         </button>
       </div>
     </aside>
