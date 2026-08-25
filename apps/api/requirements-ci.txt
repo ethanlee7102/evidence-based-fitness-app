@@ -16,3 +16,8 @@ pytest-asyncio==0.23.7
 httpx
 python-dotenv
 pydantic  # imported via src/schema/rag.py in the eval package import chain
+# tests/test_auth_jwt.py imports src/utils/auth.py, whose chain needs fastapi + pyjwt.
+fastapi>=0.111.0
+pyjwt[crypto]>=2.8.0
+limits>=3.0  # tests/test_ratelimit.py (per-IP throttle)
+supabase>=2.5.0  # tests/test_client_wiring.py exercises db.py + service constructors

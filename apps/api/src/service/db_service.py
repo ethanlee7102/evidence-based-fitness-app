@@ -1,26 +1,29 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from src.db import get_supabase
+from src.db import get_user_supabase
 from src.schema.profile import OnboardingRequest
 
 
 class DBService:
     """Handles database operations."""
 
-    def __init__(self):
-        self.supabase = get_supabase()
+    def __init__(self, token: str):
+        # RLS-scoped to the caller's JWT (see src/db.get_user_supabase).
+        self.supabase = get_user_supabase(token)
 
     def get_profile(self, user_id: str) -> Optional[dict[str, Any]]:
         """Get a user's profile by ID."""
+        # limit(1) rather than single(): single() raises on 0 rows (500), whereas a
+        # missing profile should surface as None -> 404 at the route.
         response = (
             self.supabase.table("profiles")
             .select("*")
             .eq("id", user_id)
-            .single()
+            .limit(1)
             .execute()
         )
-        return response.data if response.data else None
+        return response.data[0] if response.data else None
 
     def complete_onboarding(
         self, user_id: str, data: OnboardingRequest

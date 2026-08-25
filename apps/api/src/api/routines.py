@@ -13,20 +13,15 @@ from src.schema.routine import (
 )
 from src.schema.workout import WorkoutResponse
 from src.service.routine_service import RoutineService
-from src.utils.auth import get_current_user
+from src.utils.auth import get_current_token, get_current_user
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/routines", tags=["routines"])
 
-_routine_service: RoutineService | None = None
-
-
-def _get_service() -> RoutineService:
-    global _routine_service
-    if _routine_service is None:
-        _routine_service = RoutineService()
-    return _routine_service
+def _get_service(token: str) -> RoutineService:
+    # Per-request, RLS-scoped to the caller (no singleton).
+    return RoutineService(token)
 
 
 def _format_routine_response(routine: dict) -> dict:
@@ -73,9 +68,10 @@ def _format_routine_response(routine: dict) -> dict:
 # --- CRUD ---
 
 @router.get("", response_model=list[RoutineSummaryResponse])
-async def list_routines(user_id: str = Depends(get_current_user)):
+async def list_routines(user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """List all user's routines (summaries)."""
-    svc = _get_service()
+    svc = _get_service(token)
     return svc.list_routines(user_id)
 
 
@@ -83,9 +79,10 @@ async def list_routines(user_id: str = Depends(get_current_user)):
 async def create_routine(
     body: SaveRoutineFullRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Create a routine with exercises and sets."""
-    svc = _get_service()
+    svc = _get_service(token)
     routine = svc.create_routine_full(
         user_id,
         name=body.name,
@@ -95,9 +92,10 @@ async def create_routine(
 
 
 @router.get("/{routine_id}", response_model=RoutineResponse)
-async def get_routine(routine_id: str, user_id: str = Depends(get_current_user)):
+async def get_routine(routine_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get full routine detail."""
-    svc = _get_service()
+    svc = _get_service(token)
     routine = svc.get_routine(routine_id, user_id)
     if not routine:
         raise HTTPException(status_code=404, detail="Routine not found")
@@ -109,9 +107,10 @@ async def update_routine(
     routine_id: str,
     body: SaveRoutineFullRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Update a routine (full replacement)."""
-    svc = _get_service()
+    svc = _get_service(token)
     routine = svc.update_routine_full(
         routine_id,
         user_id,
@@ -124,9 +123,10 @@ async def update_routine(
 
 
 @router.delete("/{routine_id}")
-async def delete_routine(routine_id: str, user_id: str = Depends(get_current_user)):
+async def delete_routine(routine_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Delete a routine."""
-    svc = _get_service()
+    svc = _get_service(token)
     deleted = svc.delete_routine(routine_id, user_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Routine not found")
@@ -136,9 +136,10 @@ async def delete_routine(routine_id: str, user_id: str = Depends(get_current_use
 # --- Duplicate ---
 
 @router.post("/{routine_id}/duplicate", response_model=RoutineResponse)
-async def duplicate_routine(routine_id: str, user_id: str = Depends(get_current_user)):
+async def duplicate_routine(routine_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Clone a routine."""
-    svc = _get_service()
+    svc = _get_service(token)
     routine = svc.duplicate_routine(routine_id, user_id)
     if not routine:
         raise HTTPException(status_code=404, detail="Routine not found")
@@ -151,9 +152,10 @@ async def duplicate_routine(routine_id: str, user_id: str = Depends(get_current_
 async def start_workout_from_routine(
     routine_id: str,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Create a workout pre-populated from a routine."""
-    svc = _get_service()
+    svc = _get_service(token)
     workout = svc.start_workout_from_routine(routine_id, user_id)
     if not workout:
         raise HTTPException(status_code=404, detail="Routine not found")
@@ -167,9 +169,10 @@ async def save_workout_as_routine(
     workout_id: str,
     body: SaveAsRoutineRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Save a completed workout as a routine template."""
-    svc = _get_service()
+    svc = _get_service(token)
     routine = svc.save_workout_as_routine(workout_id, user_id, body.name)
     if not routine:
         raise HTTPException(status_code=404, detail="Workout not found or has no completed sets")

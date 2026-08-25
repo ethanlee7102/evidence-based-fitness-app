@@ -11,12 +11,13 @@ import re
 import time
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from src.core.llm_provider import generate
 from src.core.rag_pipeline import rag_query_stream
 from src.core.trace_logger import log_trace
+from src.db import get_admin_supabase
 from src.schema.rag import (
     ChatMessageRequest,
     CitationPayload,
@@ -24,7 +25,9 @@ from src.schema.rag import (
     SessionResponse,
 )
 from src.service.chat_service import ChatService
-from src.utils.auth import get_current_user
+from src.utils.auth import get_current_token, get_current_user
+from src.utils.config import config
+from src.utils.ratelimit import chat_rate_ok
 
 logger = logging.getLogger(__name__)
 
@@ -112,15 +115,17 @@ async def _generate_title(
 
 @router.post("/message")
 async def send_message(
+    request: Request,
     body: ChatMessageRequest,
     user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token),
 ):
     """Main SSE streaming endpoint.
 
     Creates session if needed, retrieves relevant chunks, streams LLM response,
     saves messages, logs trace, and generates title — all in one request.
     """
-    chat = ChatService()
+    chat = ChatService(token)
     session_id = body.session_id
     is_new_session = False
 
@@ -134,6 +139,30 @@ async def send_message(
         session = chat.get_session(session_id, user_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
+
+    # Abuse controls, applied after the session is resolved (a bad session
+    # shouldn't consume a unit) and before any paid retrieval/generation. The
+    # OWNER account skips BOTH so personal testing doesn't eat the demo budget.
+    #   1. Per-IP throttle (best-effort; X-Forwarded-For, in-memory).
+    #   2. Global daily ceiling - the hard, un-bypassable cost cap. One unit
+    #      covers this request's embed + rerank + generation (+ optional rewrite/
+    #      title). Uses the admin client: the counter table is service-role-only.
+    if user_id != config.OWNER_USER_ID:
+        if not chat_rate_ok(request):
+            raise HTTPException(
+                status_code=429,
+                detail="You've reached the demo message limit for your connection. Please try again later.",
+            )
+        allowed = (
+            get_admin_supabase()
+            .rpc("bump_daily_chat_usage", {"p_limit": config.DEMO_DAILY_CHAT_CEILING})
+            .execute()
+        )
+        if not allowed.data:
+            raise HTTPException(
+                status_code=429,
+                detail="The demo has reached today's usage limit. Please try again tomorrow.",
+            )
 
     # 2. Get history BEFORE saving user message (so current message isn't in history)
     history = None
@@ -249,16 +278,18 @@ async def send_message(
 
 
 @router.get("/sessions", response_model=list[SessionResponse])
-async def list_sessions(user_id: str = Depends(get_current_user)):
+async def list_sessions(user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """List all chat sessions for the current user, newest first."""
-    chat = ChatService()
+    chat = ChatService(token)
     return chat.get_sessions(user_id)
 
 
 @router.get("/sessions/{session_id}", response_model=SessionResponse)
-async def get_session(session_id: str, user_id: str = Depends(get_current_user)):
+async def get_session(session_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get a single chat session."""
-    chat = ChatService()
+    chat = ChatService(token)
     session = chat.get_session(session_id, user_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -266,9 +297,10 @@ async def get_session(session_id: str, user_id: str = Depends(get_current_user))
 
 
 @router.get("/sessions/{session_id}/messages", response_model=list[MessageResponse])
-async def get_messages(session_id: str, user_id: str = Depends(get_current_user)):
+async def get_messages(session_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Get all messages for a session, oldest first."""
-    chat = ChatService()
+    chat = ChatService(token)
     # Verify session exists and belongs to user
     session = chat.get_session(session_id, user_id)
     if not session:
@@ -277,9 +309,10 @@ async def get_messages(session_id: str, user_id: str = Depends(get_current_user)
 
 
 @router.delete("/sessions/{session_id}")
-async def delete_session(session_id: str, user_id: str = Depends(get_current_user)):
+async def delete_session(session_id: str, user_id: str = Depends(get_current_user),
+    token: str = Depends(get_current_token)):
     """Delete a chat session and all its messages (FK cascade)."""
-    chat = ChatService()
+    chat = ChatService(token)
     deleted = chat.delete_session(session_id, user_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Session not found")

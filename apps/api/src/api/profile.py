@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.schema.profile import OnboardingRequest, ProfileResponse
 from src.service.db_service import DBService
-from src.utils.auth import get_current_user
+from src.utils.auth import get_current_token, get_current_user
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
 
-def get_db_service() -> DBService:
-    return DBService()
+def get_db_service(token: str = Depends(get_current_token)) -> DBService:
+    return DBService(token)
 
 
 @router.get("/me", response_model=ProfileResponse)
