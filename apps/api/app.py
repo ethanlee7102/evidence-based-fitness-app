@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     # blocking key fetch on the event loop. Best-effort: if it fails, verification
     # falls back to a lazy fetch on first use.
     try:
-        await asyncio.to_thread(auth.jwks_client.get_signing_keys)
+        await asyncio.to_thread(auth.get_jwks_client().get_signing_keys)
     except Exception as e:
         logger.warning(f"JWKS pre-warm failed (will fetch lazily): {e}")
     yield

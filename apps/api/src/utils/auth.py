@@ -30,11 +30,25 @@ security = HTTPBearer()
 # Module-level JWKS client: caches the signing keys (refetched on its own lifespan)
 # so steady-state verification is a pure local crypto op. Pre-warmed in app.py's
 # lifespan startup so the first authenticated request doesn't pay the cold fetch.
-jwks_client = PyJWKClient(
-    config.SUPABASE_JWKS_URL,
-    cache_keys=True,
-    timeout=config.SUPABASE_JWKS_TIMEOUT,
-)
+#
+# Built lazily on first use, not at import: PyJWKClient validates the URL in its
+# constructor, so instantiating at import would crash any environment without
+# SUPABASE_URL set (e.g. CI, which imports this module to collect tests but never
+# reaches Supabase). Tests inject a fake by setting this global before verifying;
+# a non-None value short-circuits construction.
+jwks_client: PyJWKClient | None = None
+
+
+def get_jwks_client() -> PyJWKClient:
+    """Return the shared JWKS client, constructing it on first use."""
+    global jwks_client
+    if jwks_client is None:
+        jwks_client = PyJWKClient(
+            config.SUPABASE_JWKS_URL,
+            cache_keys=True,
+            timeout=config.SUPABASE_JWKS_TIMEOUT,
+        )
+    return jwks_client
 
 
 def _verify_token(token: str) -> dict:
@@ -48,7 +62,7 @@ def _verify_token(token: str) -> dict:
             outage, distinguished from a bad token so valid users aren't 401'd out.
     """
     try:
-        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        signing_key = get_jwks_client().get_signing_key_from_jwt(token)
     except PyJWKClientConnectionError as e:
         logger.error(f"JWKS unreachable: {type(e).__name__}: {e}")
         raise HTTPException(status_code=503, detail="Auth temporarily unavailable")
